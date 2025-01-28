@@ -1,0 +1,16 @@
+{
+   "chatbot_name": "MediBot",
+   "company": {
+     "name": "Meds4You",
+     "address": "123 Company St, City, Country",
+     "email": "support@yourcompany.com",
+     "phone": "+1234567890"
+   },
+   "contact_details": {
+     "customer_care": {
+       "email": "care@yourcompany.com",
+       "phone": "+0987654321"
+     }
+   }
+ }
+ 
