@@ -1,15 +1,25 @@
-import { Schema , model } from "mongoose";
+import mongoose from "mongoose";
 
-const productSchema = new Schema({
-    name: { type: String, required: true },
-    image: { type: String }, // URL for product image
-    description: { type: String, required: true },
-    type: { type: String, required: true },
-    brand: { type: String }, // URL for brand image
-    category: { type: String, required: true }, // Category of the product
-    price: { type: Number, required: true, min: 0  },
-    discount: { type: Number,min: 0 },
-    createdBy: { type: Schema.Types.ObjectId, ref: "User", default: null }
-}, { timestamps: true });
+const productSchema = new mongoose.Schema({
+  drugName: { type: String, required: true, trim: true, index: true }, // Drug Name
+  imageUrl: { type: String, trim: true }, // Image URL
+  size: { type: String, trim: true }, // Strip/Bottle size
+  manufacturer: { type: String, required: true, trim: true, index: true }, // Manufacturer
+  category: { type: String, trim: true }, // ✅ Added category
+  price: { type: Number, required: true, default: 0 }, // ✅ Ensure price is required
+  salt: { type: String, required: true, trim: true }, // Salt Composition
+  mrp: { type: Number, required: true, default: 0 }, // MRP
+  margin: { type: Number, default: 0 }, // Margin
+  alternateMedicines: [
+    {
+      name: { type: String, trim: true },
+      manufacturer: { type: String, trim: true },
+      manufacturerUrl: { type: String, trim: true },
+      price: { type: Number, default: 0 },
+    }
+  ],
+  createdAt: { type: Date, default: Date.now },
+});
 
-export default model("Product", productSchema);
+const Product = mongoose.model("Product", productSchema);
+export default Product;

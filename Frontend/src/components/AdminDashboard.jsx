@@ -2,29 +2,32 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
 import { useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
-  const [activeSection, setActiveSection] = useState("manageProducts"); // Default section
+  const [activeSection, setActiveSection] = useState("manageProducts");
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [loadingOrders, setLoadingOrders] = useState(true);
 
+  const [alternateProducts, setAlternateProducts] = useState([
+    { name: "", manufacturer: "", manufacturerUrl: "", price: 0 },
+  ]);
+
   const navigate = useNavigate();
 
-  // Fetch products and orders from the backend
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const productResponse = await axios.get("/api/products/", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-
-        // console.log("Fetched products:", productResponse.data);
+        const productResponse = await axios.get(
+          "http://localhost:5000/api/products/",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
 
         setProducts(
           Array.isArray(productResponse.data) ? productResponse.data : []
@@ -45,13 +48,16 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const orderResponse = await axios.get("/api/admin/orders", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
+        const orderResponse = await axios.get(
+          "http://localhost:5000/api/admin/orders",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
 
-        // console.log("Fetched Orders:", orderResponse.data);
+        console.log("Fetched Orders:", orderResponse.data);
 
         setOrders(orderResponse.data || []); // Update state with the fetched data
         setLoadingOrders(false);
@@ -65,61 +71,112 @@ const AdminDashboard = () => {
     };
 
     fetchOrders();
-  }, []); // Empty dependency array to run only once on mount
+  }, []);
 
   const handleLogout = () => {
-    // Clear authentication data from localStorage
     localStorage.removeItem("token");
-
-    // Redirect to login page
     navigate("/login");
   };
 
-  // Function to create a new product
+  const handleChangeAlternateProduct = (index, field, value) => {
+    const updatedAlternates = [...alternateProducts];
+    updatedAlternates[index][field] = value;
+    setAlternateProducts(updatedAlternates);
+  };
+
+  const addAlternateProduct = () => {
+    setAlternateProducts([
+      ...alternateProducts,
+      { name: "", manufacturer: "", manufacturerUrl: "", price: 0 },
+    ]);
+  };
+
+  const removeAlternateProduct = (index) => {
+    const updatedAlternates = alternateProducts.filter((_, i) => i !== index);
+    setAlternateProducts(updatedAlternates);
+  };
+
+  const validatePositiveNumber = (value) => {
+    const num = parseFloat(value);
+    return num > 0 && !isNaN(num);
+  };
+
+  const resetForm = () => {
+    // Reset the fields for the main product form
+    setAlternateProducts([
+      { name: "", manufacturer: "", manufacturerUrl: "", price: 0 },
+    ]);
+
+    // Reset the general medicine fields
+    document.getElementById("productForm").reset();
+  };
+
   const createProduct = async (newProduct) => {
+    const { price, mrp, margin } = newProduct;
+
+    // Validation: Ensure price, mrp, and margin are positive numbers
+    if (
+      !validatePositiveNumber(price) ||
+      !validatePositiveNumber(mrp) ||
+      (margin && !validatePositiveNumber(margin))
+    ) {
+      toast.error("Price, MRP, and Margin must be positive numbers.");
+      return;
+    }
+
     try {
-      // Ensure the product data is correctly formatted
       const formattedProduct = {
-        name: newProduct.name,
-        image: newProduct.image,
-        description: newProduct.description,
-        type: newProduct.type,
-        brand: newProduct.brand,
-        category: newProduct.category,
-        price: parseFloat(newProduct.price), // Ensure price is a number
-        discount: newProduct.discount ? parseFloat(newProduct.discount) : 0, // Handle discount if provided
+        drugName: newProduct.drugName.trim(),
+        size: newProduct.size.trim(),
+        imageUrl: newProduct.imageUrl.trim(),
+        manufacturer: newProduct.manufacturer.trim(),
+        category: newProduct.category.trim(),
+        price: parseFloat(newProduct.price),
+        salt: newProduct.salt.trim(),
+        mrp: parseFloat(newProduct.mrp),
+        margin: newProduct.margin
+          ? parseFloat(newProduct.margin)
+          : newProduct.mrp - newProduct.price,
+        alternateMedicines: alternateProducts.map((alt) => ({
+          name: alt.name.trim(),
+          manufacturer: alt.manufacturer.trim(),
+          manufacturerUrl: alt.manufacturerUrl.trim(),
+          price: parseFloat(alt.price),
+        })),
       };
 
       console.log("Sending product data:", formattedProduct);
 
       const response = await axios.post(
-        "/api/admin/products",
+        "http://localhost:5000/api/products/createProduct",
         formattedProduct,
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
       );
 
       setProducts((prevProducts) => [...prevProducts, response.data]);
-
       toast.success("Product created successfully!", {
         position: "top-center",
       });
-      // alert("Product created successfully!");
+
+      // Reset the form after successful product creation
+      resetForm();
     } catch (error) {
       console.error(
         "Error creating product:",
         error.response ? error.response.data : error.message
       );
-      alert("Error creating product");
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to create product. Please try again."
+      );
     }
   };
 
   const deleteProduct = async (id) => {
     try {
-      await axios.delete(`/api/admin/products/${id}`, {
+      await axios.delete(`http://localhost:5000/api/admin/products/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -164,31 +221,14 @@ const AdminDashboard = () => {
     }
   };
 
-  // const deleteOrder = async (id) => {
-  //   try {
-  //     await axios.delete(`http://localhost:5000/api/admin/orders/`, {
-  //       headers: {
-  //         Authorization: `Bearer ${localStorage.getItem("token")}`,
-  //       },
-  //     });
-  //     setOrders((prevOrders) => prevOrders.filter((order) => order._id !== id));
-  //   } catch (error) {
-  //     console.error("Error deleting order:", error);
-  //   }
-  // };
-
-  // console.log("Active Section:", activeSection);
   return (
-    <div className="flex h-screen">
-      {/* Sidebar */}
-      <aside className="w-64 bg-gray-800 text-white flex-shrink-0">
-        <div className="p-4">
-          <h2 className="text-xl font-bold">Admin Dashboard</h2>
-        </div>
-        <nav className="flex flex-col p-4">
+    <div className="flex h-screen bg-gray-50">
+      <aside className="w-64 bg-gray-800 text-white p-6">
+        <h2 className="text-2xl font-semibold">Admin Dashboard</h2>
+        <nav className="mt-8">
           <button
             onClick={() => setActiveSection("createProduct")}
-            className={`mb-2 text-left px-4 py-2 rounded ${
+            className={`w-full mb-4 py-2 rounded-md font-medium text-white ${
               activeSection === "createProduct"
                 ? "bg-gray-700"
                 : "hover:bg-gray-700"
@@ -198,7 +238,7 @@ const AdminDashboard = () => {
           </button>
           <button
             onClick={() => setActiveSection("manageProducts")}
-            className={`mb-2 text-left px-4 py-2 rounded ${
+            className={`w-full mb-4 px-4 py-2 rounded-md font-medium text-white ${
               activeSection === "manageProducts"
                 ? "bg-gray-700"
                 : "hover:bg-gray-700"
@@ -211,7 +251,7 @@ const AdminDashboard = () => {
               // console.log("Setting active section to manageOrders");
               setActiveSection("manageOrders");
             }}
-            className={`mb-2 text-left px-4 py-2 rounded ${
+            className={`w-full mb-4 px-4 py-2 rounded-md font-medium text-white ${
               activeSection === "manageOrders"
                 ? "bg-gray-700"
                 : "hover:bg-gray-700"
@@ -219,168 +259,199 @@ const AdminDashboard = () => {
           >
             Manage Orders
           </button>
-
           <button
             onClick={handleLogout}
-            className="mt-4 text-red-500 hover:text-red-700 text-left px-4 py-2 rounded"
+            className="w-full mt-4 px-4 py-2 rounded-md font-medium text-red-500 hover:text-red-700"
           >
             Logout
           </button>
         </nav>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 p-6 overflow-auto">
-        {/* Create Product Section */}
+      <main className="flex-1 p-6 overflow-auto bg-white">
         {activeSection === "createProduct" && (
-          <div>
-            <h1 className="text-2xl font-bold mb-6">Create Product</h1>
+          <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8">
+            <h1 className="text-3xl font-bold mb-6 text-center">
+              Create Product
+            </h1>
             <form
+              id="productForm"
               onSubmit={(e) => {
                 e.preventDefault();
                 const formData = new FormData(e.target);
                 const newProduct = Object.fromEntries(formData.entries());
-
-                // Convert numerical fields
-                newProduct.price = parseFloat(newProduct.price);
-                newProduct.discount = parseFloat(newProduct.discount);
-
-                // Optional: Validate URLs (image and brand)
-                const urlPattern = new RegExp(
-                  "^(https?:\\/\\/)?" + // protocol
-                    "((([a-zA-Z0-9\\-\\.]+)\\.([a-zA-Z]{2,5}))|" + // domain name
-                    "localhost)" + // localhost
-                    "(\\:[0-9]{1,5})?" + // port
-                    "(\\/.*)?$" // path
-                );
-
-                if (!urlPattern.test(newProduct.image)) {
-                  alert("Please enter a valid Image URL.");
-                  return;
-                }
-
-                if (!urlPattern.test(newProduct.brand)) {
-                  alert("Please enter a valid Brand Logo URL.");
-                  return;
-                }
-
                 createProduct(newProduct);
-                e.target.reset();
               }}
-              className="grid grid-cols-1 md:grid-cols-2 gap-6"
+              className="grid grid-cols-1 lg:grid-cols-2 gap-6"
             >
-              {/* Product Name */}
-              <div>
-                <label className="block mb-1 font-semibold">Product Name</label>
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold">General Medicine</h3>
+                <label className="block font-medium">Drug Name</label>
                 <input
                   type="text"
-                  name="name"
-                  placeholder="Thyroxine 12.5mcg"
+                  name="drugName"
                   required
-                  className="w-full p-2 border rounded"
+                  className="w-full p-3 border rounded-lg"
                 />
-              </div>
-
-              {/* Price */}
-              <div>
-                <label className="block mb-1 font-semibold">Price ($)</label>
-                <input
-                  type="number"
-                  name="price"
-                  placeholder="82.9"
-                  step="0.01"
-                  required
-                  className="w-full p-2 border rounded"
-                />
-              </div>
-
-              {/* Discount */}
-              <div>
-                <label className="block mb-1 font-semibold">Discount (%)</label>
-                <input
-                  type="number"
-                  name="discount"
-                  placeholder="50"
-                  step="0.01"
-                  required
-                  className="w-full p-2 border rounded"
-                />
-              </div>
-
-              {/* Image URL */}
-              <div>
-                <label className="block mb-1 font-semibold">Image URL</label>
-                <input
-                  type="url"
-                  name="image"
-                  placeholder="https://example.com/image.jpg"
-                  required
-                  className="w-full p-2 border rounded"
-                />
-              </div>
-
-              {/* Brand Logo URL */}
-              <div>
-                <label className="block mb-1 font-semibold">
-                  Brand Logo URL
-                </label>
-                <input
-                  type="url"
-                  name="brand"
-                  placeholder="https://example.com/brand-logo.webp"
-                  required
-                  className="w-full p-2 border rounded"
-                />
-              </div>
-
-              {/* Type */}
-              <div>
-                <label className="block mb-1 font-semibold">Type</label>
+                <label className="block font-medium">ImageUrl</label>
                 <input
                   type="text"
-                  name="type"
-                  placeholder="Tab 100s"
+                  name="imageUrl"
                   required
-                  className="w-full p-2 border rounded"
+                  className="w-full p-3 border rounded-lg"
                 />
-              </div>
 
-              {/* Category */}
-              <div className="md:col-span-2">
-                <label className="block mb-1 font-semibold">Category</label>
+                <label className="block font-medium">Size</label>
+                <input
+                  type="text"
+                  name="size"
+                  required
+                  className="w-full p-3 border rounded-lg"
+                />
+
+                <label className="block font-medium">Manufacturer</label>
+                <input
+                  type="text"
+                  name="manufacturer"
+                  required
+                  className="w-full p-3 border rounded-lg"
+                />
+
+                <label className="block font-medium">Category</label>
                 <input
                   type="text"
                   name="category"
-                  placeholder="Bottle of 100 tablets"
                   required
-                  className="w-full p-2 border rounded"
+                  className="w-full p-3 border rounded-lg"
+                />
+
+                <label className="block font-medium">Price</label>
+                <input
+                  type="number"
+                  name="price"
+                  required
+                  min="0.01"
+                  step="0.01"
+                  className="w-full p-3 border rounded-lg"
+                />
+
+                <label className="block font-medium">Salt</label>
+                <input
+                  type="text"
+                  name="salt"
+                  required
+                  className="w-full p-3 border rounded-lg"
+                />
+
+                <label className="block font-medium">MRP</label>
+                <input
+                  type="number"
+                  name="mrp"
+                  required
+                  min="0.01"
+                  step="0.01"
+                  className="w-full p-3 border rounded-lg"
+                />
+
+                <label className="block font-medium">Margin</label>
+                <input
+                  type="number"
+                  name="margin"
+                  min="0.01"
+                  step="0.01"
+                  className="w-full p-3 border rounded-lg"
                 />
               </div>
 
-              {/* Description */}
-              <div className="md:col-span-2">
-                <label className="block mb-1 font-semibold">Description</label>
-                <textarea
-                  name="description"
-                  placeholder="Thiroace 12.5mcg"
-                  required
-                  className="w-full p-2 border rounded h-24"
-                ></textarea>
-              </div>
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold">Alternate Medicines</h3>
+                {alternateProducts.map((alt, index) => (
+                  <div key={index} className="space-y-2 p-4 border rounded-lg">
+                    <label className="block font-medium">Name</label>
+                    <input
+                      type="text"
+                      value={alt.name}
+                      onChange={(e) =>
+                        handleChangeAlternateProduct(
+                          index,
+                          "name",
+                          e.target.value
+                        )
+                      }
+                      className="w-full p-2 border rounded-lg"
+                    />
+                    <label className="block font-medium">Manufacturer</label>
+                    <input
+                      type="text"
+                      value={alt.manufacturer}
+                      onChange={(e) =>
+                        handleChangeAlternateProduct(
+                          index,
+                          "manufacturer",
+                          e.target.value
+                        )
+                      }
+                      className="w-full p-2 border rounded-lg"
+                    />
+                    <label className="block font-medium">
+                      Manufacturer URL
+                    </label>
+                    <input
+                      type="text"
+                      value={alt.manufacturerUrl}
+                      onChange={(e) =>
+                        handleChangeAlternateProduct(
+                          index,
+                          "manufacturerUrl",
+                          e.target.value
+                        )
+                      }
+                      className="w-full p-2 border rounded-lg"
+                    />
+                    <label className="block font-medium">Price</label>
+                    <input
+                      type="number"
+                      value={alt.price || ""}
+                      min="0.01"
+                      step="0.01"
+                      onChange={(e) =>
+                        handleChangeAlternateProduct(
+                          index,
+                          "price",
+                          e.target.value
+                        )
+                      }
+                      className="w-full p-2 border rounded-lg"
+                    />
 
-              {/* Submit Button */}
-              <div className="md:col-span-2">
+                    {/* Remove Button */}
+                    <button
+                      type="button"
+                      onClick={() => removeAlternateProduct(index)}
+                      className="text-red-500 text-lg font-semibold hover:text-red-700"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
                 <button
-                  type="submit"
-                  className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+                  type="button"
+                  onClick={addAlternateProduct}
+                  className="w-full p-2 bg-blue-600 text-white rounded-lg"
                 >
-                  Create Product
+                  Add Alternate Medicine
                 </button>
               </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 mt-6 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Create Product
+              </button>
             </form>
           </div>
         )}
-
         {/* Manage Products Section */}
         {activeSection === "manageProducts" && (
           <div>
@@ -395,9 +466,14 @@ const AdminDashboard = () => {
                   <thead>
                     <tr>
                       <th className="py-2 px-4 border-b">Image</th>
-                      <th className="py-2 px-4 border-b">Name</th>
-                      <th className="py-2 px-4 border-b">Price ($)</th>
-                      <th className="py-2 px-4 border-b">Discount (%)</th>
+                      <th className="py-2 px-4 border-b">Drug Name</th>
+                      <th className="py-2 px-4 border-b">Manufacturer</th>
+                      <th className="py-2 px-4 border-b">Category</th>
+                      <th className="py-2 px-4 border-b">MRP (₹)</th>
+                      <th className="py-2 px-4 border-b">Selling Price (₹)</th>
+                      <th className="py-2 px-4 border-b">Margin (₹)</th>
+                      <th className="py-2 px-4 border-b">Salt Composition</th>
+                      <th className="py-2 px-4 border-b">Alternatives</th>
                       <th className="py-2 px-4 border-b">Actions</th>
                     </tr>
                   </thead>
@@ -406,17 +482,64 @@ const AdminDashboard = () => {
                       <tr key={product._id} className="text-center">
                         <td className="py-2 px-4 border-b">
                           <img
-                            src={product.image}
-                            alt={product.name}
+                            src={product.imageUrl || "default-image.jpg"}
+                            alt={product.drugName}
                             className="w-16 h-16 object-cover mx-auto"
                           />
                         </td>
-                        <td className="py-2 px-4 border-b">{product.name}</td>
+                        <td className="py-2 px-4 border-b">
+                          {product.drugName}
+                        </td>
+                        <td className="py-2 px-4 border-b">
+                          {product.manufacturer}
+                        </td>
+                        <td className="py-2 px-4 border-b">
+                          {product.category}
+                        </td>
+                        <td className="py-2 px-4 border-b">
+                          {product.mrp.toFixed(2)}
+                        </td>
                         <td className="py-2 px-4 border-b">
                           {product.price.toFixed(2)}
                         </td>
                         <td className="py-2 px-4 border-b">
-                          {product.discount}%
+                          {product.margin.toFixed(2)}
+                        </td>
+                        <td className="py-2 px-4 border-b">{product.salt}</td>
+                        <td className="py-2 px-4 border-b">
+                          {product.alternateMedicines.length > 0 ? (
+                            <ul className="text-left">
+                              {product.alternateMedicines.map((alt, index) => (
+                                <li key={index} className="border-b py-2">
+                                  <div className="flex items-center space-x-2">
+                                    <div>
+                                      <p className="font-semibold">
+                                        {alt.name}
+                                      </p>
+                                      <p className="text-sm text-gray-500">
+                                        {alt.manufacturer}
+                                      </p>
+                                      <a
+                                        href={alt.manufacturerUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-500 text-xs"
+                                      >
+                                        {alt.manufacturerUrl}
+                                      </a>
+                                      <p className="text-xs text-green-600">
+                                        Price: ${alt.price.toFixed(2)}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <span className="text-gray-400">
+                              No Alternatives
+                            </span>
+                          )}
                         </td>
                         <td className="py-2 px-4 border-b">
                           <button

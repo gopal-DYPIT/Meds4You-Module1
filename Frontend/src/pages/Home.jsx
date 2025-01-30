@@ -187,6 +187,78 @@ const Home = () => {
           </a>
         </section>
 
+        {/* {Medicine Chronic Categories} */}
+        <section style={{ padding: "30px 0", backgroundColor: "#FFF7F5" }}>
+          <h2
+            style={{
+              fontSize: "24px",
+              fontWeight: "bold",
+              textAlign: "left",
+              marginBottom: "20px",
+            }}
+          >
+            👍Highlighted Categories:
+          </h2>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", // Adjusts number of columns dynamically
+              gap: "20px", // Space between grid items
+              justifyItems: "center", // Centers items horizontally
+              alignItems: "start", // Aligns items at the top
+            }}
+          >
+            {[
+              {
+                title: "Heart Health",
+                image:
+                  "https://files.oaiusercontent.com/file-SLM2QSZw97FRQQ195pYkC3?se=2024-12-30T03%3A28%3A27Z&sp=r&sv=2024-08-04&sr=b&rscc=max-age%3D604800%2C%20immutable%2C%20private&rscd=attachment%3B%20filename%3Df69f7fe3-6b2e-4f5b-af51-fb8121464098.webp&sig=999qfyDV51sek4A0JMEPB4bTu6d3vUQnPfI%2BO08Ytew%3D",
+              },
+              {
+                title: "Diabetes Management",
+                image:
+                  "https://files.oaiusercontent.com/file-2fmzR7R5cH5mCBL6ALrP3v?se=2024-12-30T03%3A28%3A40Z&sp=r&sv=2024-08-04&sr=b&rscc=max-age%3D604800%2C%20immutable%2C%20private&rscd=attachment%3B%20filename%3D85ced114-a728-44d1-9a8c-b3c4306c90ef.webp&sig=hJtQFERnFwwk8XmuniGg6VX8RB8ZDW9EDUeopg57VRE%3D",
+              },
+              {
+                title: "Pain Relief",
+                image:
+                  "https://cdn-platinumrx.azureedge.net/platinumrx-assets/category-heart-care1.png?w=384&q=80",
+              },
+              {
+                title: "Vitamins & Supplements",
+                image:
+                  "https://cdn-platinumrx.azureedge.net/platinumrx-assets/category-joints-and-muscle1.png?w=384&q=80",
+              },
+            ].map((category, index) => (
+              <div
+                key={index}
+                style={{
+                  textAlign: "center",
+                  maxWidth: "200px", // Ensures consistent size for items
+                }}
+              >
+                <img
+                  src={category.image}
+                  alt={category.title}
+                  style={{
+                    width: "100%", // Makes image fill the container
+                    height: "auto", // Maintains aspect ratio
+                    objectFit: "cover", // Ensures the image does not get distorted
+                    borderRadius: "5px", // Adds rounded corners
+                    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)", // Optional shadow
+                  }}
+                />
+                <p
+                  style={{ marginTop: "10px", fontWeight: "bold", color: "#333" }}
+                >
+                  {category.title}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+
         {/* Customer Testimonials Section */}
         <section className="py-0" id="happy-customers">
           <h2 className="text-left text-2xl font-bold mb-6 text-black-800">
