@@ -83,15 +83,17 @@ const CheckoutPage = () => {
         setError("Failed to place order");
         console.error("Failed to place order:", err);
       });
-  };
+  }; 
 
   // Calculate the total price of the cart and format it to 2 decimal places
   const calculateTotal = () => {
-    const total = cart.reduce((total, item) => {
-      return total + (item?.productId?.price || 0) * (item?.quantity || 0);
-    }, 0);
-    return total.toFixed(2); // Format to 2 decimal places
+    return cart.reduce((total, item) => {
+      // Use the first alternate medicine's price, if available
+      const alternatePrice = item?.productId?.alternateMedicines?.[0]?.price || item?.productId?.price;
+      return total + alternatePrice * (item?.quantity || 0);
+    }, 0).toFixed(2);
   };
+  
 
   const totalAmount = calculateTotal();
 

@@ -101,7 +101,7 @@ const CartPage = () => {
               item?.productId?.alternateMedicines?.[0] || null;
 
             return (
-              <div
+              <div 
                 key={index}
                 className="flex items-center border p-4 rounded-md"
               >

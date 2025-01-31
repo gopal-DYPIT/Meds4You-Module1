@@ -5,6 +5,51 @@ import { authorizeRoles } from "../middlewares/authMiddleware.js";
 
 const router = express.Router(); 
  
+// router.post("/create", authorizeRoles("user"), async (req, res) => {
+//   const { address } = req.body;
+//   if (!address) {
+//     return res.status(400).json({ error: "Address is required" });
+//   }
+//   try {
+//     const userId = req.user.id;
+//     const cart = await Cart.findOne({ userId }).populate("items.productId");
+//     if (!cart) {
+//       return res.status(404).json({ error: "Cart not found" });
+//     }
+
+//     if (!cart.items.length) {
+//       return res.status(400).json({ error: "Your cart is empty" });
+//     }
+
+//     const totalAmount = cart.items.reduce(
+//       (total, item) => total + item.productId.price * item.quantity,
+//       0
+//     );
+
+//     const order = new Order({
+//       userId,
+//       items: cart.items.map((item) => ({
+//         productId: item.productId._id,
+//         quantity: item.quantity,
+//         price: item.productId.price,
+//       })),
+//       totalAmount,
+//     });
+
+//     await order.save();
+
+//     // cart.items = [];
+//     // await cart.save();
+//     console.log("Order created successfully:", order);
+//     res.status(200).json({ orderId: order._id, totalAmount });
+//   } catch (err) {
+//     console.error("Error creating order:", err);
+//     res
+//       .status(500)
+//       .json({ error: "Failed to create order", details: err.message });
+//   }
+// });
+
 router.post("/create", authorizeRoles("user"), async (req, res) => {
   const { address } = req.body;
   if (!address) {
@@ -21,25 +66,40 @@ router.post("/create", authorizeRoles("user"), async (req, res) => {
       return res.status(400).json({ error: "Your cart is empty" });
     }
 
-    const totalAmount = cart.items.reduce(
-      (total, item) => total + item.productId.price * item.quantity,
-      0
-    );
+    const totalAmount = cart.items.reduce((total, item) => {
+      // Check if the product has alternate medicines
+      const alternateMedicine = item.productId.alternateMedicines && item.productId.alternateMedicines.length > 0
+        ? item.productId.alternateMedicines[0]  // Use the first alternate medicine
+        : item.productId;
+
+      // Calculate price based on alternate medicine if available
+      const price = alternateMedicine.price || item.productId.price;
+      return total + price * item.quantity;
+    }, 0);
 
     const order = new Order({
       userId,
-      items: cart.items.map((item) => ({
-        productId: item.productId._id,
-        quantity: item.quantity,
-        price: item.productId.price,
-      })),
+      items: cart.items.map((item) => {
+        // Check if the product has alternate medicines
+        const alternateMedicine = item.productId.alternateMedicines && item.productId.alternateMedicines.length > 0
+          ? item.productId.alternateMedicines[0]  // Use the first alternate medicine
+          : item.productId;
+
+        return {
+          productId: alternateMedicine._id || item.productId._id,
+          quantity: item.quantity,
+          price: alternateMedicine.price || item.productId.price,
+        };
+      }),
       totalAmount,
     });
 
     await order.save();
 
+    // Optionally clear the cart after order is created
     // cart.items = [];
     // await cart.save();
+    
     console.log("Order created successfully:", order);
     res.status(200).json({ orderId: order._id, totalAmount });
   } catch (err) {
