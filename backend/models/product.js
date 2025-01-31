@@ -10,14 +10,14 @@ const productSchema = new mongoose.Schema({
   salt: { type: String, required: true, trim: true }, // Salt Composition
   mrp: { type: Number, required: true, default: 0 }, // MRP
   margin: { type: Number, default: 0 }, // Margin
-  alternateMedicines: [
-    {
-      name: { type: String, trim: true },
-      manufacturer: { type: String, trim: true },
-      manufacturerUrl: { type: String, trim: true },
-      price: { type: Number, default: 0 },
-    }
-  ],
+    alternateMedicines: [
+      {
+        name: { type: String, trim: true },
+        manufacturer: { type: String, trim: true },
+        manufacturerUrl: { type: String, trim: true },
+        price: { type: Number, default: 0 },
+      }
+    ],
   createdAt: { type: Date, default: Date.now },
 });
 
