@@ -21,7 +21,7 @@ const AdminDashboard = () => {
     const fetchData = async () => {
       try {
         const productResponse = await axios.get(
-          "http://localhost:5000/api/products/",
+          `${import.meta.env.VITE_BACKEND_URL}/api/products/`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -49,7 +49,7 @@ const AdminDashboard = () => {
     const fetchOrders = async () => {
       try {
         const orderResponse = await axios.get(
-          "http://localhost:5000/api/admin/orders",
+          `${import.meta.env.VITE_BACKEND_URL}/api/admin/orders`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -148,7 +148,7 @@ const AdminDashboard = () => {
       console.log("Sending product data:", formattedProduct);
 
       const response = await axios.post(
-        "http://localhost:5000/api/products/createProduct",
+        `${import.meta.env.VITE_BACKEND_URL}/api/products/createProduct`,
         formattedProduct,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -176,7 +176,7 @@ const AdminDashboard = () => {
 
   const deleteProduct = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/admin/products/${id}`, {
+      await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/admin/products/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -195,7 +195,7 @@ const AdminDashboard = () => {
   const updateOrderStatus = async (orderId, status, paymentStatus) => {
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/admin/orders/${orderId}/status`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/admin/orders/${orderId}/status`,
         { orderStatus: status, paymentStatus },
         {
           headers: {

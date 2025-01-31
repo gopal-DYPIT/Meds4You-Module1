@@ -20,7 +20,7 @@ const CheckoutPage = () => {
     if (token) {
       // Fetch the cart if a token exists
       axios
-        .get(`http://localhost:5000/api/cart/`, {
+        .get(`${import.meta.env.VITE_BACKEND_URL}/api/cart/`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -35,7 +35,7 @@ const CheckoutPage = () => {
 
       // Fetch user's addresses
       axios
-        .get(`http://localhost:5000/api/users/addresses`, {
+        .get(`${import.meta.env.VITE_BACKEND_URL}/api/users/addresses`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -67,7 +67,7 @@ const CheckoutPage = () => {
 
     axios
       .post(
-        "http://localhost:5000/api/orders/create",
+        `${import.meta.env.VITE_BACKEND_URL}/api/orders/create`,
         { address: selectedAddress }, // Send required data in the body
         {
           headers: {

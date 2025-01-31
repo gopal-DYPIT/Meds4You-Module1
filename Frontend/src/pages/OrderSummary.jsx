@@ -11,7 +11,7 @@ const OrderSummary = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/orders/latest", {
+      .get(`${import.meta.env.VITE_BACKEND_URL}/api/orders/latest`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {

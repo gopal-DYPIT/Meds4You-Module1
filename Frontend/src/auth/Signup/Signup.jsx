@@ -39,8 +39,8 @@ function Signup() {
 
     const { address, ...signupData } = formData; // Exclude address from signup request
 
-    try {
-      const response = await fetch("http://localhost:5000/api/auth/register", {
+    try {    
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -18,7 +18,7 @@ const CartPage = () => {
   useEffect(() => {
     if (token) {
       axios
-        .get(`http://localhost:5000/api/cart/`, {
+        .get(`${import.meta.env.VITE_BACKEND_URL}/api/cart/`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
@@ -40,7 +40,7 @@ const CartPage = () => {
   const handleDelete = (productId) => {
     if (token) {
       axios
-        .delete(`http://localhost:5000/api/cart/remove`, {
+        .delete(`${import.meta.env.VITE_BACKEND_URL}/api/cart/remove`, {
           data: { userId: token, productId },
           headers: {
             Authorization: `Bearer ${token}`,
@@ -61,7 +61,7 @@ const CartPage = () => {
     if (token) {
       axios
         .put(
-          `http://localhost:5000/api/cart/update`,
+          `${import.meta.env.VITE_BACKEND_URL}/api/cart/update`,
           { userId: token, productId, quantity },
           {
             headers: {

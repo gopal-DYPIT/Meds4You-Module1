@@ -35,7 +35,7 @@
         }
 
         try {
-          const response = await axios.get("http://localhost:5000/api/users/profile", {
+          const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/users/profile`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           setUser(response.data);
@@ -72,7 +72,7 @@
       };
 
       try {
-        const response = await axios.post("http://localhost:5000/api/users/address", {
+        const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/users/address`, {
           userId: user._id, // Assuming user._id is available
           address: addressData
         }, {
@@ -100,7 +100,7 @@
     const handleDeleteAddress = async (addressId) => {
       try {
         const response = await axios.delete(
-          `http://localhost:5000/api/users/address/${addressId}`,
+          `${import.meta.env.VITE_BACKEND_URL}/api/users/address/${addressId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setAddresses(response.data); // Update the addresses list
@@ -113,7 +113,7 @@
     const handleSetPrimaryAddress = async (addressId) => {
       try {
         const response = await axios.put(
-          `http://localhost:5000/api/users/address/${addressId}`,
+          `${import.meta.env.VITE_BACKEND_URL}/api/users/address/${addressId}`,
           {},
           { headers: { Authorization: `Bearer ${token}` } }
         );

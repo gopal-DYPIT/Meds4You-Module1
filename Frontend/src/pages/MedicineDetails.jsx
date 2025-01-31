@@ -21,7 +21,7 @@ const MedicineDetails = () => {
 
     // Fetch medicine details
     axios
-      .get(`http://localhost:5000/api/products/${id}`)
+      .get(`${import.meta.env.VITE_BACKEND_URL}/api/products/${id}`)
       .then((response) => {
         setMedicine(response.data);
       })
@@ -59,7 +59,7 @@ const MedicineDetails = () => {
     try {
       // Send a request to add the product to the cart with the Authorization header
       await axios.post(
-        "http://localhost:5000/api/cart/add",
+        `${import.meta.env.VITE_BACKEND_URL}/api/cart/add`,
         {
           userId: user.uid, // User ID from Firebase
           productId: medicine._id, // Product ID from medicine details

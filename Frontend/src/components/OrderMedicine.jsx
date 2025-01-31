@@ -37,7 +37,7 @@ const OrderMedicine = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/prescriptions/upload", // Adjust URL
+        `${import.meta.env.VITE_BACKEND_URL}/api/prescriptions/upload`, // Adjust URL
         formData,
         {
           headers: {

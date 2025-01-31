@@ -17,7 +17,7 @@ const JoinAsStorePartner = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:5000/api/partner", formData);
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/partner`, formData);
       toast.success("Form submitted successfully!",{
         position: "top-center",
         autoClose: 3000,

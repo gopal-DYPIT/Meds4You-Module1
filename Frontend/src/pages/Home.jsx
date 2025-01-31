@@ -47,7 +47,7 @@ const Home = () => {
       setUser({ token });
     }
 
-    axios.get("http://localhost:5000/api/products", {
+    axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/products`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -71,7 +71,7 @@ const Home = () => {
 
     try {
       await axios.post(
-        "http://localhost:5000/api/cart/add",
+        `${import.meta.env.VITE_BACKEND_URL}/api/cart/add`,
         {
           userId: user.token,
           productId: productId,

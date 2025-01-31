@@ -45,7 +45,7 @@ function Navbar() {
   const fetchSearchResults = async () => {
     try {
       dispatch(setLoading(true));
-      const response = await axios.get(`http://localhost:5000/api/products?search=${searchQuery}`);
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/products?search=${searchQuery}`);
       dispatch(setSearchResults(response.data));
     } catch (error) {
       console.error('Search error:', error);
