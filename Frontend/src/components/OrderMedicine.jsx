@@ -72,7 +72,7 @@ const OrderMedicine = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br bg-gray-100 px-4 sm:px-6 lg:px-8">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br bg-[#FFF0F5]  px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-lg space-y-6 p-8 bg-white shadow-xl rounded-lg">
         <h1 className="text-3xl font-bold text-gray-800 text-center">
           Order Medicine by Prescription

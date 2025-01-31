@@ -63,7 +63,7 @@ function Signup() {
   };
 
   return (
-    <div className="flex justify-center pt-10 items-center min-h-screen bg-[#f3f4f6]">
+    <div className="flex justify-center pt-10 items-center min-h-screen bg-[#FFF0F5] ">
       <div className="w-full sm:w-auto bg-white p-8 rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">Sign Up</h2>
         <form onSubmit={handleSubmit}>
@@ -165,7 +165,7 @@ function Signup() {
           {/* Sign Up Button */}
           <button
             type="submit"
-            className="w-full py-3 bg-indigo-400 text-white font-bold rounded-md hover:bg-indigo-500 transition"
+            className="w-full py-3 bg-[#FF007F] text-white font-bold rounded-md hover:bg-[#E60072] transition"
           >
             Sign Up
           </button>

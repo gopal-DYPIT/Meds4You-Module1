@@ -8,9 +8,9 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 
 const cardStyle = {
-  margin: "5rem auto",
+  margin: "6rem auto",
   fontFamily: "Poppins, sans-serif",
-  maxWidth: "1200px",
+  maxWidth: "1400px",
 };
 
 const wholeCardStyle = {
@@ -20,12 +20,12 @@ const wholeCardStyle = {
   width: "350px",
   borderRadius: "10px",
   boxShadow:
-    "rgba(228, 76, 76, 0.1) 0px 4px 10px, rgba(230, 64, 64, 0.1) 3px 8px 10px, rgba(236, 40, 59, 0.1) 0px 16px 56px",
+    "rgba(228, 76, 76, 0.1) 0px 1px 1px, rgba(230, 64, 64, 0.1) 1px 1px 10px, rgba(236, 40, 59, 0.1) 0px 1px 15px",
 };
 
 const topStyle = {
   color: "white",
-  backgroundColor: "rgba(255, 0, 0, 0.72)",
+  backgroundColor: "#d9327a",
   fontSize: "1rem",
   textAlign: "center",
   borderRadius: "10px 10px 0 0",
@@ -55,7 +55,8 @@ const rightStyle = {
 };
 
 const btnStyle = {
-  backgroundColor: "red",
+  backgroundColor: "#64c3ef",
+  // hover: "pointer",
   color: "white",
   padding: "2px",
   border: "none",
@@ -95,7 +96,7 @@ const MedicineCarousel = ({ products, addToCart }) => {
         spaceBetween={20}
         slidesPerView={3}
         loop={true}
-        style={{ padding: "10px 0" }}
+        style={{ padding: "10px 0", paddingBottom: "40px" }}
         onSwiper={(swiper) => setSwiperInstance(swiper)}
       >
         {products.map((product) => (
@@ -127,7 +128,10 @@ const MedicineCarousel = ({ products, addToCart }) => {
                     <div
                       key={index}
                       onClick={() =>
-                        setSelectedVariant({ ...selectedVariant, [product._id]: index })
+                        setSelectedVariant({
+                          ...selectedVariant,
+                          [product._id]: index,
+                        })
                       }
                     >
                       <img
@@ -141,8 +145,10 @@ const MedicineCarousel = ({ products, addToCart }) => {
                     </div>
                   ))}
                   <button
-                    style={btnStyle}
-                    onClick={() => handleAddToCart(product._id, selectedVariant[product._id])}
+                    className="bg-[#419ec8] hover:bg-[#63b1e2] text-white px-4 py-2 border-none h-10 w-36 text-lg rounded-lg opacity-60 transition duration-300"
+                    onClick={() =>
+                      handleAddToCart(product._id, selectedVariant[product._id])
+                    }
                   >
                     Add to Cart
                   </button>

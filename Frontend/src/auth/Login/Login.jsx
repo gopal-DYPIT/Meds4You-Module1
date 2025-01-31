@@ -66,7 +66,7 @@ const Login = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-[#f3f4f6]">
+    <div className="flex justify-center items-center min-h-screen bg-[#FFF0F5] ">
       <div className="w-full sm:w-[500px] md:w-[600px] lg:w-[500px] h-[350px] bg-white p-10 rounded-lg shadow-xl">
         <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">
           Login
@@ -100,7 +100,7 @@ const Login = () => {
 
           <button
             type="submit"
-            className="w-full py-3 bg-indigo-400 text-white font-bold rounded-md hover:bg-indigo-500 transition"
+            className="w-full py-3 bg-[#FF007F] text-white font-bold rounded-md hover:bg-[#E60072] transition"
           >
             Login
           </button>
