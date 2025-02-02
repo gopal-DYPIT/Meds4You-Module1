@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.post('/add', authorizeRoles('user'), async (req, res) => {
   let { productId, quantity } = req.body;
-  console.log(productId, quantity);
+  // console.log(productId, quantity);
   quantity = parseInt(quantity);
 
   try {

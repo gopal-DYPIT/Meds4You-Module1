@@ -265,7 +265,7 @@ const AdminDashboard = () => {
         }
       );
       setSelectedOrderDetails(orderResponse.data); // Set the selected order details
-      console.log("Selected Order Details:", orderResponse.data);
+      // console.log("Selected Order Details:", orderResponse.data);
     } catch (error) {
       console.error("Error fetching order details:", error);
     }
@@ -697,7 +697,7 @@ const AdminDashboard = () => {
                 <h2 className="text-2xl font-semibold">Order Details</h2>
                 <div className="border-t-2 mt-4">
                   <h3 className="text-xl">User Information</h3>
-                  <div>{console.log("selectedOrderDetails",selectedOrderDetails)}</div>
+                  {/* <div>{console.log("selectedOrderDetails",selectedOrderDetails)}</div> */}
                   <p>Name: {selectedOrderDetails.userId}</p>
                   {selectedOrderDetails.userId.addresses &&
                   selectedOrderDetails.userId.addresses.length > 0 ? (

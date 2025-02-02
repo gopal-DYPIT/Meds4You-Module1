@@ -12,7 +12,7 @@ router.get("/admin/orders", authorizeRoles("admin"), async (req, res) => {
       .populate("items.productId", "drugName price imageUrl manufacturer") // Populate product info in items
       .exec();
 
-    console.log("Orders fetched for admin:", JSON.stringify(orders, null, 2));
+    // console.log("Orders fetched for admin:", JSON.stringify(orders, null, 2));
     res.status(200).json(orders);
   } catch (error) {
     console.error("Error fetching orders:", error);
@@ -31,7 +31,7 @@ router.get("/admin/orders/:orderId", authorizeRoles("admin"), async (req, res) =
       return res.status(404).json({ error: "Order not found" });
     }
 
-    console.log("Order fetched for admin:", JSON.stringify(order, null, 2));
+    // console.log("Order fetched for admin:", JSON.stringify(order, null, 2));
     res.status(200).json(order);
   } catch (error) {
     console.error("Error fetching order:", error);
@@ -91,7 +91,7 @@ router.post("/create", authorizeRoles("user"), async (req, res) => {
     // cart.items = [];
     // await cart.save();
 
-    console.log("Order created successfully:", order);
+    // console.log("Order created successfully:", order);
     res.status(200).json({ orderId: order._id, totalAmount });
   } catch (err) {
     console.error("Error creating order:", err);
@@ -160,7 +160,7 @@ router.put(
   "/orders/:orderId/status",
   authorizeRoles("admin"),
   async (req, res) => {
-    console.log("req.body", req.body);
+    // console.log("req.body", req.body);
 
     const { orderStatus, paymentStatus } = req.body;
     const { orderId } = req.params;
