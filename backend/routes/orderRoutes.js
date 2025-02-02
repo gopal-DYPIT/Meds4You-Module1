@@ -3,52 +3,42 @@ import Order from "../models/order.js";
 import Cart from "../models/cart.js";
 import { authorizeRoles } from "../middlewares/authMiddleware.js";
 
-const router = express.Router(); 
- 
-// router.post("/create", authorizeRoles("user"), async (req, res) => {
-//   const { address } = req.body;
-//   if (!address) {
-//     return res.status(400).json({ error: "Address is required" });
-//   }
-//   try {
-//     const userId = req.user.id;
-//     const cart = await Cart.findOne({ userId }).populate("items.productId");
-//     if (!cart) {
-//       return res.status(404).json({ error: "Cart not found" });
-//     }
+const router = express.Router();
 
-//     if (!cart.items.length) {
-//       return res.status(400).json({ error: "Your cart is empty" });
-//     }
+router.get("/admin/orders", authorizeRoles("admin"), async (req, res) => {
+  try {
+    const orders = await Order.find() // Use find() to get all orders
+      .populate("userId", "name phoneNumber addresses") // Populate user info
+      .populate("items.productId", "drugName price imageUrl manufacturer") // Populate product info in items
+      .exec();
 
-//     const totalAmount = cart.items.reduce(
-//       (total, item) => total + item.productId.price * item.quantity,
-//       0
-//     );
+    console.log("Orders fetched for admin:", JSON.stringify(orders, null, 2));
+    res.status(200).json(orders);
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    res.status(500).json({ error: "Failed to fetch orders" });
+  }
+});
+router.get("/admin/orders/:orderId", authorizeRoles("admin"), async (req, res) => {
+  try {
+    const { orderId } = req.params; // Get orderId from the request parameters
+    const order = await Order.findById(orderId)
+      .populate("userId", "name phoneNumber addresses")
+      .populate("items.productId", "drugName price imageUrl manufacturer")
+      .exec();
 
-//     const order = new Order({
-//       userId,
-//       items: cart.items.map((item) => ({
-//         productId: item.productId._id,
-//         quantity: item.quantity,
-//         price: item.productId.price,
-//       })),
-//       totalAmount,
-//     });
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
 
-//     await order.save();
+    console.log("Order fetched for admin:", JSON.stringify(order, null, 2));
+    res.status(200).json(order);
+  } catch (error) {
+    console.error("Error fetching order:", error);
+    res.status(500).json({ error: "Failed to fetch order" });
+  }
+});
 
-//     // cart.items = [];
-//     // await cart.save();
-//     console.log("Order created successfully:", order);
-//     res.status(200).json({ orderId: order._id, totalAmount });
-//   } catch (err) {
-//     console.error("Error creating order:", err);
-//     res
-//       .status(500)
-//       .json({ error: "Failed to create order", details: err.message });
-//   }
-// });
 
 router.post("/create", authorizeRoles("user"), async (req, res) => {
   const { address } = req.body;
@@ -57,7 +47,7 @@ router.post("/create", authorizeRoles("user"), async (req, res) => {
   }
   try {
     const userId = req.user.id;
-    const cart = await Cart.findOne({ userId }).populate("items.productId");
+    const cart = await Cart.findOne({ userId }).populate("items.productId"); // Populate productId in cart items
     if (!cart) {
       return res.status(404).json({ error: "Cart not found" });
     }
@@ -67,12 +57,12 @@ router.post("/create", authorizeRoles("user"), async (req, res) => {
     }
 
     const totalAmount = cart.items.reduce((total, item) => {
-      // Check if the product has alternate medicines
-      const alternateMedicine = item.productId.alternateMedicines && item.productId.alternateMedicines.length > 0
-        ? item.productId.alternateMedicines[0]  // Use the first alternate medicine
-        : item.productId;
+      const alternateMedicine =
+        item.productId.alternateMedicines &&
+        item.productId.alternateMedicines.length > 0
+          ? item.productId.alternateMedicines[0]
+          : item.productId;
 
-      // Calculate price based on alternate medicine if available
       const price = alternateMedicine.price || item.productId.price;
       return total + price * item.quantity;
     }, 0);
@@ -80,10 +70,11 @@ router.post("/create", authorizeRoles("user"), async (req, res) => {
     const order = new Order({
       userId,
       items: cart.items.map((item) => {
-        // Check if the product has alternate medicines
-        const alternateMedicine = item.productId.alternateMedicines && item.productId.alternateMedicines.length > 0
-          ? item.productId.alternateMedicines[0]  // Use the first alternate medicine
-          : item.productId;
+        const alternateMedicine =
+          item.productId.alternateMedicines &&
+          item.productId.alternateMedicines.length > 0
+            ? item.productId.alternateMedicines[0]
+            : item.productId;
 
         return {
           productId: alternateMedicine._id || item.productId._id,
@@ -99,7 +90,7 @@ router.post("/create", authorizeRoles("user"), async (req, res) => {
     // Optionally clear the cart after order is created
     // cart.items = [];
     // await cart.save();
-    
+
     console.log("Order created successfully:", order);
     res.status(200).json({ orderId: order._id, totalAmount });
   } catch (err) {
@@ -143,23 +134,21 @@ router.post(
 
 router.get("/latest", authorizeRoles("user"), async (req, res) => {
   try {
-    // Ensure the user is authenticated and req.user contains the user object
     if (!req.user || !req.user.id) {
       return res.status(400).json({ error: "User not authenticated" });
     }
 
     const userId = req.user.id;
-    
-    const latestOrder = await Order.findOne({ userId })
-      .sort({ createdAt: -1 }) // Sort by creation date, descending
-      .populate("items"); // You can populate order items if you need more info, remove if unnecessary
 
-    // Check if the latest order exists
+    const latestOrder = await Order.findOne({ userId })
+      .sort({ createdAt: -1 })
+      .populate("userId", "name phoneNumber addresses")
+      .populate("items.productId" , "drugName price imageUrl manufacturer")
+      .exec();
+
     if (!latestOrder) {
       return res.status(404).json({ error: "No orders found" });
     }
-
-    // Return the latest order details
     res.status(200).json(latestOrder);
   } catch (err) {
     console.error("Error fetching latest order:", err);
@@ -167,48 +156,66 @@ router.get("/latest", authorizeRoles("user"), async (req, res) => {
   }
 });
 
-router.put("/orders/:orderId/status", authorizeRoles("admin"), async (req, res) => {
-  console.log("req.body", req.body);
+router.put(
+  "/orders/:orderId/status",
+  authorizeRoles("admin"),
+  async (req, res) => {
+    console.log("req.body", req.body);
 
-  const { orderStatus, paymentStatus } = req.body;
-  const { orderId } = req.params;
-  const adminId = req.user.id; // Assuming req.user is set from auth middleware
+    const { orderStatus, paymentStatus } = req.body;
+    const { orderId } = req.params;
+    const adminId = req.user.id; // Assuming req.user is set from auth middleware
 
-  try {
-    const order = await Order.findById(orderId);
-    if (!order) {
-      return res.status(404).json({ error: "Order not found" });
+    try {
+      const order = await Order.findById(orderId);
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+
+      // Validate order status
+      const validOrderStatuses = [
+        "pending",
+        "on_hold",
+        "processing",
+        "confirmed",
+        "shipped",
+        "out_for_delivery",
+        "delivered",
+        "cancelled",
+        "returned",
+        "failed",
+      ];
+      const validPaymentStatuses = [
+        "pending",
+        "failed",
+        "paid",
+        "refunded",
+        "chargeback",
+      ];
+
+      if (orderStatus && !validOrderStatuses.includes(orderStatus)) {
+        return res.status(400).json({ error: "Invalid order status" });
+      }
+
+      if (paymentStatus && !validPaymentStatuses.includes(paymentStatus)) {
+        return res.status(400).json({ error: "Invalid payment status" });
+      }
+
+      // Update status and admin tracking
+      order.orderStatus = orderStatus || order.orderStatus;
+      order.paymentStatus = paymentStatus || order.paymentStatus;
+      order.updatedBy = adminId;
+
+      await order.save();
+
+      res
+        .status(200)
+        .json({ message: "Order status updated successfully", order });
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      res.status(500).json({ error: "Failed to update order status" });
     }
-
-    // Validate order status
-    const validOrderStatuses = [
-      "pending", "on_hold", "processing", "confirmed",
-      "shipped", "out_for_delivery", "delivered", 
-      "cancelled", "returned", "failed"
-    ];
-    const validPaymentStatuses = ["pending", "failed", "paid", "refunded", "chargeback"];
-
-    if (orderStatus && !validOrderStatuses.includes(orderStatus)) {
-      return res.status(400).json({ error: "Invalid order status" });
-    }
-
-    if (paymentStatus && !validPaymentStatuses.includes(paymentStatus)) {
-      return res.status(400).json({ error: "Invalid payment status" });
-    }
-
-    // Update status and admin tracking
-    order.orderStatus = orderStatus || order.orderStatus;
-    order.paymentStatus = paymentStatus || order.paymentStatus;
-    order.updatedBy = adminId; 
-
-    await order.save();
-
-    res.status(200).json({ message: "Order status updated successfully", order });
-  } catch (error) {
-    console.error("Error updating order status:", error);
-    res.status(500).json({ error: "Failed to update order status" });
   }
-});
-
+);
 
 export default router;

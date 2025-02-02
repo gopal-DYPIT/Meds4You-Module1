@@ -140,13 +140,13 @@ const Home = () => {
         <section
           style={{
             position: "fixed",
-            bottom: "16px",
+            bottom: "20px",
             right: "16px",
             zIndex: 1000,
           }}
         >
           <a
-            href="https://wa.me/918459708577?text=Hello%20there!"
+            href="https://wa.me/918484883367?text=Hello%20there!"
             target="_blank"
             rel="noopener noreferrer"
             style={{
@@ -174,6 +174,7 @@ const Home = () => {
                 width: "24px",
                 height: "24px",
                 marginRight: "8px",
+                
               }}
             />
             <span

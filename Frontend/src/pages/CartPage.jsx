@@ -22,7 +22,7 @@ const CartPage = () => {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
-          console.log("Cart API Response:", response.data);
+          // console.log("Cart API Response:", response.data);
           setCart(response.data.items); // No need to filter, as backend returns only alternate medicines
           setLoading(false);
         })
@@ -97,6 +97,8 @@ const CartPage = () => {
         <div className="space-y-4">
           {cart.map((item, index) => {
             // Extract alternate medicine details (if available)
+            const product = item?.productId;
+            console.log(product);
             const alternateMedicine =
               item?.productId?.alternateMedicines?.[0] || null;
 

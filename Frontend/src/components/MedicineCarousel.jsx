@@ -45,26 +45,37 @@ const leftRightCommonStyle = {
   justifyContent: "space-around",
   width: "50%",
   padding: "5px",
-  paddingLeft: "15px",
+  paddingLeft: "20px",
+  gap: "2px",
 };
 
 const rightStyle = {
-  ...leftRightCommonStyle,
+  display: "flex",
+  flexDirection: "column",
+  width: "50%",
+  padding: "5px",
   backgroundColor: "rgb(246, 255, 243)",
   borderRadius: "0 0 10px 0",
+  paddingRight: "15px",
+  paddingBottom: "15px",
+  overflow: "hidden",
+  alignItems: "center",
+  justifyContent: "space-between", // Keeps Add to Cart button at bottom
 };
 
-const btnStyle = {
-  backgroundColor: "#64c3ef",
-  // hover: "pointer",
-  color: "white",
-  padding: "2px",
-  border: "none",
-  height: "40px",
-  width: "150px",
-  fontSize: "1rem",
-  borderRadius: "10px",
-  opacity: "0.6",
+const recommendedContainerStyle = {
+  maxHeight: "220px", // Prevents overflow
+  // overflowY: "auto", // Enables scrolling
+  width: "100%",
+};
+
+const alternateMedicineStyle = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  marginBottom: "15px", // Adjusted margin
+  textAlign: "center",
 };
 
 const MedicineCarousel = ({ products, addToCart }) => {
@@ -107,7 +118,7 @@ const MedicineCarousel = ({ products, addToCart }) => {
             onMouseLeave={() => swiperInstance?.autoplay.start()} // Resume autoplay when leaving
           >
             <div style={wholeCardStyle}>
-              <div style={topStyle}>{product.drugName}</div>
+              <div style={topStyle}>{product.salt}</div>
               <div style={mainStyle}>
                 <div style={leftRightCommonStyle}>
                   <b>Regular</b>
@@ -117,35 +128,37 @@ const MedicineCarousel = ({ products, addToCart }) => {
                     style={{ height: "80px", width: "100px" }}
                   />
                   <b>{product.drugName}</b>
-                  <p>{product.manufacturer}</p>
-                  <p>{product.category}</p>
+                  <p style={{ marginBottom: "8px", lineHeight: "1.5" }}>{product.manufacturer}</p>
+                  <p style={{ marginBottom: "4px", lineHeight: "1.2" }}>{product.category}</p>
                   <p>MRP: ₹{product.mrp}</p>
-                  <b style={{ color: "rgb(12, 159, 12)" }}>₹{product.price}</b>
                 </div>
-                <div style={rightStyle}>
+                <div style={rightStyle} className="mt-3">
                   <b>Recommended</b>
-                  {product.alternateMedicines?.map((alt, index) => (
-                    <div
-                      key={index}
-                      onClick={() =>
-                        setSelectedVariant({
-                          ...selectedVariant,
-                          [product._id]: index,
-                        })
-                      }
-                    >
-                      <img
-                        src={alt.manufacturerUrl || "default-image.jpg"}
-                        alt="Tablet"
-                        style={{ height: "80px", width: "100px" }}
-                      />
-                      <b>{alt.name}</b>
-                      <p>{alt.manufacturer}</p>
-                      <b style={{ color: "rgb(12, 159, 12)" }}>₹{alt.price}</b>
-                    </div>
-                  ))}
+                  <div style={recommendedContainerStyle}>
+                    {product.alternateMedicines?.map((alt, index) => (
+                      <div
+                        key={index}
+                        onClick={() =>
+                          setSelectedVariant({
+                            ...selectedVariant,
+                            [product._id]: index,
+                          })
+                        }
+                        style={alternateMedicineStyle}
+                      >
+                        <img
+                          src={alt.manufacturerUrl || "default-image.jpg"}
+                          alt="Tablet"
+                          style={{ height: "100px", width: "100px" }}
+                        />
+                        <div className="pt-4 font-bold">{alt.name}</div>
+                        <div className="pt-4 font-roboto text-xl">{alt.manufacturer}</div>
+                        <div className="font-bold text-2xl" style={{ color: "rgb(12, 159, 12)" }}>₹{alt.price}</div>
+                      </div>
+                    ))}
+                  </div>
                   <button
-                    className="bg-[#419ec8] hover:bg-[#63b1e2] text-white px-4 py-2 border-none h-10 w-36 text-lg rounded-lg opacity-60 transition duration-300"
+                    className="bg-[#419ec8] hover:bg-[#3b9075] text-white px-4 py-2 border-none h-10 w-36 text-lg rounded-lg opacity-60 transition duration-300"
                     onClick={() =>
                       handleAddToCart(product._id, selectedVariant[product._id])
                     }

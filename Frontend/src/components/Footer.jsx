@@ -8,11 +8,9 @@ const Footer = () => {
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-semibold text-gray-800">Meds4you</h1>
-            <p className="text-gray-600 text-sm">
-              Afforis Health Technologies Pvt. Ltd.
-            </p>
+            <h2 className="text-gray-600 text-lg pt-4 pl-1">Mediforge LTD</h2>
           </div>
-          <div className="flex flex-col space-y-4">
+          {/* <div className="flex flex-col space-y-4">
             <a
               // href="https://apps.apple.com/in/app/platinumrx/id6477701930"
               target="_blank"
@@ -35,7 +33,7 @@ const Footer = () => {
                 className="h-12 w-auto"
               />
             </a>
-          </div>
+          </div> */}
         </div>
 
         {/* Middle Section - Company Links */}
@@ -82,9 +80,9 @@ const Footer = () => {
           <h3 className="text-xl font-semibold text-gray-800 mb-4">
             Contact Us
           </h3>
-          <p className="text-gray-600 text-sm">support@meds4you.com</p>
-          <p className="text-gray-600 text-sm">1800-123-4567</p>
-          <p className="text-gray-600 text-sm">Available 24/7</p>
+          <h2 className="text-gray-600 text-sm">support@meds4you.com</h2>
+          <h2 className="text-gray-600 text-sm font-semibold pt-3">+91 8484883367</h2>
+          <h2 className="text-gray-600 text-sm pt-3">Available 24/7</h2>
         </div>
 
         {/* Social Media Section - Proper Alignment */}

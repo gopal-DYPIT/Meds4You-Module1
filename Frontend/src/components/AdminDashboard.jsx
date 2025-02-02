@@ -4,21 +4,34 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 
+// ✅ Redux Imports for Auth State Management
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../redux/slice/authSlice";
+
 const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState("manageProducts");
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [loadingOrders, setLoadingOrders] = useState(true);
+  const dispatch = useDispatch();
 
   const [alternateProducts, setAlternateProducts] = useState([
     { name: "", manufacturer: "", manufacturerUrl: "", price: 0 },
   ]);
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const [authState, setAuthState] = useState(isAuthenticated);
+
+  useEffect(() => {
+    setAuthState(isAuthenticated);
+  }, [isAuthenticated]);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!authState) return;
       try {
         const productResponse = await axios.get(
           `${import.meta.env.VITE_BACKEND_URL}/api/products/`,
@@ -43,10 +56,11 @@ const AdminDashboard = () => {
     };
 
     fetchData();
-  }, []);
+  }, [authState]);
 
   useEffect(() => {
     const fetchOrders = async () => {
+      if (!authState) return;
       try {
         const orderResponse = await axios.get(
           `${import.meta.env.VITE_BACKEND_URL}/api/admin/orders`,
@@ -57,7 +71,7 @@ const AdminDashboard = () => {
           }
         );
 
-        console.log("Fetched Orders:", orderResponse.data);
+        // console.log("Fetched Orders:", orderResponse.data);
 
         setOrders(orderResponse.data || []); // Update state with the fetched data
         setLoadingOrders(false);
@@ -71,11 +85,24 @@ const AdminDashboard = () => {
     };
 
     fetchOrders();
-  }, []);
+  }, [authState]);
+
+  useEffect(() => {
+    const syncLogout = (event) => {
+      if (event.key === "token" && !event.newValue) {
+        dispatch(logout());
+        navigate("/login");
+      }
+    };
+
+    window.addEventListener("storage", syncLogout);
+    return () => window.removeEventListener("storage", syncLogout);
+  }, [dispatch, navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
+    dispatch(logout()); // ✅ Update Redux auth state
+    setAuthState(false); // ✅ Force component to recognize logout
+    navigate("/login"); // ✅ Redirect after logout
   };
 
   const handleChangeAlternateProduct = (index, field, value) => {
@@ -145,7 +172,7 @@ const AdminDashboard = () => {
         })),
       };
 
-      console.log("Sending product data:", formattedProduct);
+      // console.log("Sending product data:", formattedProduct);
 
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/products/createProduct`,
@@ -176,11 +203,14 @@ const AdminDashboard = () => {
 
   const deleteProduct = async (id) => {
     try {
-      await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/admin/products/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      await axios.delete(
+        `${import.meta.env.VITE_BACKEND_URL}/api/admin/products/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
       setProducts((prevProducts) =>
         prevProducts.filter((product) => product._id !== id)
       );
@@ -195,7 +225,9 @@ const AdminDashboard = () => {
   const updateOrderStatus = async (orderId, status, paymentStatus) => {
     try {
       const response = await axios.put(
-        `${import.meta.env.VITE_BACKEND_URL}/api/admin/orders/${orderId}/status`,
+        `${
+          import.meta.env.VITE_BACKEND_URL
+        }/api/admin/orders/${orderId}/status`,
         { orderStatus: status, paymentStatus },
         {
           headers: {
@@ -218,6 +250,24 @@ const AdminDashboard = () => {
         "Error updating order status:",
         error.response?.data || error.message
       );
+    }
+  };
+
+  const handleOrderClick = async (order) => {
+    try {
+      // Fetch additional details for the selected order (including user and product details)
+      const orderResponse = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/api/admin/orders/${order._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      setSelectedOrderDetails(orderResponse.data); // Set the selected order details
+      console.log("Selected Order Details:", orderResponse.data);
+    } catch (error) {
+      console.error("Error fetching order details:", error);
     }
   };
 
@@ -579,7 +629,11 @@ const AdminDashboard = () => {
                   </thead>
                   <tbody>
                     {orders.map((order) => (
-                      <tr key={order._id}>
+                      <tr
+                        key={order._id}
+                        onClick={() => handleOrderClick(order)}
+                        className="cursor-pointer hover:bg-gray-100"
+                      >
                         <td className="py-2 px-6 border-b">{order._id}</td>
                         <td className="py-2 px-10 border-b">
                           <select
@@ -636,6 +690,50 @@ const AdminDashboard = () => {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+            {selectedOrderDetails && (
+              <div className="mt-8">
+                <h2 className="text-2xl font-semibold">Order Details</h2>
+                <div className="border-t-2 mt-4">
+                  <h3 className="text-xl">User Information</h3>
+                  <div>{console.log("selectedOrderDetails",selectedOrderDetails)}</div>
+                  <p>Name: {selectedOrderDetails.userId}</p>
+                  {selectedOrderDetails.userId.addresses &&
+                  selectedOrderDetails.userId.addresses.length > 0 ? (
+                    <>
+                      <p>
+                        Address:{" "}
+                        {selectedOrderDetails.userId.addresses[0]?.street}
+                      </p>
+                      <p>
+                        City: {selectedOrderDetails.userId.addresses[0]?.city}
+                      </p>
+                      <p>
+                        Country:{" "}
+                        {selectedOrderDetails.userId.addresses[0]?.country}
+                      </p>
+                    </>
+                  ) : (
+                    <p>No address available</p>
+                  )}
+
+                  <h3 className="text-xl mt-4">Order Items</h3>
+                  {selectedOrderDetails.items.map((item, index) => (
+                    <div key={index} className="border-t py-2">
+                      <p>
+                        Product:{" "}
+                        {item.productId
+                          ? item.productId.drugName
+                          : "No product name"}
+                      </p>
+                      <p>
+                        Price: ₹{item.price ? item.price.toFixed(2) : "N/A"}
+                      </p>
+                      <p>Quantity: {item.quantity ? item.quantity : "N/A"}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>

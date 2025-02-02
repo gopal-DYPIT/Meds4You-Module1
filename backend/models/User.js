@@ -4,7 +4,7 @@ import { Schema, model } from "mongoose";
 const userSchema = new Schema({
     email: { type: String, required: true },  // Ensure email is unique or indexed if necessary
     password: { type: String, required: true }, // Make sure to hash this password before saving
-    name: { type: String, required: true },
+    name: { type: String, required: true, ref: "User" }, // Name of the user
     phoneNumber: { type: String, required: true }, // Phone number should be unique if that's your use case
     // storePartnerReferenceId: { type: String, ref: "StorePartner" }, 
     // earnings: { type: Number, default: 0 },

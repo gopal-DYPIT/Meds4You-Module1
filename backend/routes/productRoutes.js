@@ -27,6 +27,26 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/products/search", async (req, res) => {
+  const { q } = req.query;
+  if (!q) return res.json([]);
+
+  try {
+    const results = await Product.find({
+      $or: [
+        { drugName: { $regex: q, $options: "i" } },
+        { manufacturer: { $regex: q, $options: "i" } },
+        { salt: { $regex: q, $options: "i" } },
+        { "alternateMedicines.name": { $regex: q, $options: "i" } }, // ✅ Search in alternate medicines
+      ],
+    }).limit(10);
+
+    res.json(results);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
 // Fetch a single product by ID and its alternate products
 router.get("/:id", async (req, res) => {
   try {
@@ -35,15 +55,22 @@ router.get("/:id", async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    // Find alternate products with the same salt
+    // If the product has predefined alternateMedicines, return them
+    if (product.alternateMedicines && product.alternateMedicines.length > 0) {
+      return res.json(product);
+    }
+
+    // Otherwise, find alternate products with the same salt
     const alternates = await Product.find({
       salt: product.salt,
       _id: { $ne: product._id }, // Exclude the current product
     }).select("drugName manufacturer price mrp");
 
-    product.alternateMedicines = alternates; // ✅ Match schema field
+    // Attach found alternates to the response
+    const updatedProduct = product.toObject();
+    updatedProduct.alternateMedicines = alternates;
 
-    res.json(product);
+    res.json(updatedProduct);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -51,7 +78,7 @@ router.get("/:id", async (req, res) => {
 
 
 // Add a new product
-router.post("/createProduct",authenticateToken, async (req, res) => {
+router.post("/createProduct", authenticateToken, async (req, res) => {
   try {
     const {
       drugName,
@@ -81,7 +108,7 @@ router.post("/createProduct",authenticateToken, async (req, res) => {
       price,
       salt,
       mrp,
-      margin: margin || (mrp - price), // Auto-calculate margin if not provided
+      margin: margin || mrp - price, // Auto-calculate margin if not provided
       alternateMedicines: alternateMedicines || [], // Ensure it's an array
     });
 
@@ -92,6 +119,5 @@ router.post("/createProduct",authenticateToken, async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
-
 
 export default router;
