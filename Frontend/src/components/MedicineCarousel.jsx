@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination, Autoplay } from "swiper/modules";
+import { Pagination, Autoplay, Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -11,6 +11,7 @@ const cardStyle = {
   margin: "6rem auto",
   fontFamily: "Poppins, sans-serif",
   maxWidth: "1400px",
+  position: "relative",
 };
 
 const wholeCardStyle = {
@@ -77,6 +78,35 @@ const alternateMedicineStyle = {
   marginBottom: "15px", // Adjusted margin
   textAlign: "center",
 };
+const arrowStyle = {
+  position: "absolute",
+  top: "50%",
+  transform: "translateY(-50%)",
+  zIndex: 10,
+  cursor: "pointer",
+  background: "rgba(0, 0, 0, 0.5)",
+  color: "white",
+  border: "none",
+  borderRadius: "50%",
+  width: "40px",
+  height: "40px",
+  fontSize: "20px",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  transition: "opacity 0.3s ease",
+};
+
+// Adjust the position of the navigation buttons
+const prevArrowStyle = {
+  ...arrowStyle,
+  left: "-70px", // Move further left
+};
+
+const nextArrowStyle = {
+  ...arrowStyle,
+  right: "-70px", // Move further right
+};
 
 const MedicineCarousel = ({ products, addToCart }) => {
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
@@ -101,8 +131,9 @@ const MedicineCarousel = ({ products, addToCart }) => {
   return (
     <div style={cardStyle}>
       <Swiper
-        modules={[Pagination, Autoplay]}
-        pagination={{ clickable: true }}
+        modules={[Pagination, Autoplay, Navigation]}
+        pagination={{ clickable: true, dynamicBullets: true }}
+        navigation={true}
         autoplay={{ delay: 3000, disableOnInteraction: false }}
         spaceBetween={20}
         slidesPerView={3}
@@ -125,11 +156,15 @@ const MedicineCarousel = ({ products, addToCart }) => {
                   <img
                     src={product.imageUrl || "default-image.jpg"}
                     alt="Tablet"
-                    style={{ height: "80px", width: "100px" }}
+                    style={{ height: "40px", width: "100px" }}
                   />
                   <b>{product.drugName}</b>
-                  <p style={{ marginBottom: "8px", lineHeight: "1.5" }}>{product.manufacturer}</p>
-                  <p style={{ marginBottom: "4px", lineHeight: "1.2" }}>{product.category}</p>
+                  <p style={{ marginBottom: "8px", lineHeight: "1.5" }}>
+                    {product.manufacturer}
+                  </p>
+                  <p style={{ marginBottom: "4px", lineHeight: "1.2" }}>
+                    {product.category}
+                  </p>
                   <p>MRP: ₹{product.mrp}</p>
                 </div>
                 <div style={rightStyle} className="mt-3">
@@ -149,11 +184,18 @@ const MedicineCarousel = ({ products, addToCart }) => {
                         <img
                           src={alt.manufacturerUrl || "default-image.jpg"}
                           alt="Tablet"
-                          style={{ height: "100px", width: "100px" }}
+                          style={{ height: "40px", width: "100px" }}
                         />
                         <div className="pt-4 font-bold">{alt.name}</div>
-                        <div className="pt-4 font-roboto text-xl">{alt.manufacturer}</div>
-                        <div className="font-bold text-2xl" style={{ color: "rgb(12, 159, 12)" }}>₹{alt.price}</div>
+                        <div className="pt-4 font-roboto text-xl">
+                          {alt.manufacturer}
+                        </div>
+                        <div
+                          className="font-bold text-2xl"
+                          style={{ color: "rgb(12, 159, 12)" }}
+                        >
+                          ₹{alt.price}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -170,6 +212,14 @@ const MedicineCarousel = ({ products, addToCart }) => {
             </div>
           </SwiperSlide>
         ))}
+        <div
+          className="swiper-button-prev"
+          style={prevArrowStyle}
+        ></div>
+        <div
+          className="swiper-button-next"
+          style={nextArrowStyle}
+        ></div>
       </Swiper>
     </div>
   );

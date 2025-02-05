@@ -13,3 +13,11 @@ html, body {
 * {
     box-sizing: border-box; /* Consistent box-sizing */
 }
+
+.swiper-pagination {
+    @apply mt-6; /* Adjust this margin to move pagination dots down */
+  }
+  
+  .custom-pagination-dot {
+    @apply bg-gray-500 w-2.5 h-2.5 rounded-full mx-1; /* Tailwind styles for dot appearance */
+  }

@@ -93,7 +93,7 @@ const MedicineDetails = () => {
             <img
               src={firstAlternate.manufacturerUrl || "default-image.jpg"}
               alt={firstAlternate.name}
-              className="w-56 h-56 object-cover rounded-lg mt-4 mx-auto"
+              className="w-26 h-26 mb-4 object-cover rounded-lg mt-4 mx-auto"
             />
             <p className="text-xl font-semibold text-gray-800 mt-2">{firstAlternate.name}</p>
             <p className="text-gray-600">Manufacturer: {firstAlternate.manufacturer || "N/A"}</p>
