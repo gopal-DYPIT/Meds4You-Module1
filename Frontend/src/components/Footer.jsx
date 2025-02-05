@@ -80,7 +80,7 @@ const Footer = () => {
           <h3 className="text-xl font-semibold text-gray-800 mb-4">
             Contact Us
           </h3>
-          <h2 className="text-gray-600 text-sm">support@meds4you.com</h2>
+          <h2 className="text-gray-600 text-sm">meds4you01@gmail.com</h2>
           <h2 className="text-gray-600 text-sm font-semibold pt-3">+91 8484883367</h2>
           <h2 className="text-gray-600 text-sm pt-3">Available 24/7</h2>
         </div>

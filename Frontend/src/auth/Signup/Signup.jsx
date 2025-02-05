@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUser, FaEnvelope, FaLock, FaPhone } from "react-icons/fa";
+import { ToastContainer, toast } from "react-toastify"; // Import toast
+import "react-toastify/dist/ReactToastify.css";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
 function Signup() {
   const navigate = useNavigate();
@@ -16,6 +19,12 @@ function Signup() {
     address: "", // Address field included but not used in signup
   });
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const togglePasswordVisibility = () => setShowPassword(!showPassword);
+  const toggleConfirmPasswordVisibility = () => setShowConfirmPassword(!showConfirmPassword);
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -26,19 +35,40 @@ function Signup() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (!formData.termsAccepted) {
-      alert("You must accept the Terms & Conditions");
+      toast.error(
+        "You must accept the Terms & Conditions",
+        { position: "top-center" });
       return;
     }
-
+  
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match!");
+      toast.error(
+        "Passwords do not match!",
+        { position: "top-center" });
       return;
     }
-
-    const { address, ...signupData } = formData; // Exclude address from signup request
-
+  
+    const phoneRegex = /^\d{10}$/;
+    if (!phoneRegex.test(formData.phoneNumber)) {
+      toast.error(
+        "Phone number must be exactly 10 digits.",
+        { position: "top-center" });
+      return;
+    }
+    // Password validation: At least 8 characters, includes a number, uppercase, lowercase, and special character
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(formData.password)) {
+      toast.error(
+        "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.",
+        { position: "top-center" });
+      return;
+    }
+  
+    
+    const { address, ...signupData } = formData;
+  
     try {    
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/register`, {
         method: "POST",
@@ -47,7 +77,7 @@ function Signup() {
         },
         body: JSON.stringify(signupData),
       });
-
+  
       if (response.ok) {
         const data = await response.json();
         console.log("Signup successful:", data);
@@ -55,13 +85,16 @@ function Signup() {
       } else {
         const error = await response.json();
         console.error("Signup error:", error);
-        alert(error.message);
+        toast.error(
+          error.message,
+          { position: "top-center" });
       }
     } catch (error) {
       console.error("Error:", error.message);
     }
   };
-
+  
+  
   return (
     <div className="flex justify-center pt-10 items-center min-h-screen bg-[#FFF0F5] ">
       <div className="w-full sm:w-auto bg-white p-8 rounded-lg shadow-lg">
@@ -111,25 +144,31 @@ function Signup() {
             <div className="relative w-1/2">
               <FaLock className="absolute left-3 top-3 text-gray-500" />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
                 placeholder="Your password"
                 className="w-full pl-10 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
               />
+              <span className="absolute right-3 top-3 cursor-pointer" onClick={togglePasswordVisibility}>
+                {showPassword ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
+              </span>
             </div>
 
             <div className="relative w-1/2">
               <FaLock className="absolute left-3 top-3 text-gray-500" />
               <input
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
                 placeholder="Re-enter password"
                 className="w-full pl-10 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
               />
+               <span className="absolute right-3 top-3 cursor-pointer" onClick={toggleConfirmPasswordVisibility}>
+                {showConfirmPassword ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
+              </span>
             </div>
           </div>
 

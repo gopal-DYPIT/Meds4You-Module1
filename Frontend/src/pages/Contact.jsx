@@ -10,7 +10,7 @@ const ContactUs = () => {
     phoneNumber: "",
     email: "",
     message: "",
-  });
+  }); 
 
   const [isSending, setIsSending] = useState(false);
 
@@ -81,20 +81,20 @@ const ContactUs = () => {
         <div className="w-full md:w-1/2 bg-red-400 text-white p-8">
           <h2 className="text-xl font-bold mb-4">Contact Information</h2>
           <p className="mb-2">
-            📞 <span className="ml-2">1800-123-4567</span>
+            📞 <span className="ml-2 text-base">+91 8484883367</span>
           </p>
           <p className="mb-2">
-            📧 <span className="ml-2">support@meds4you.com</span>
+            📧 <span className="ml-2 text-base">meds4you01@gmail.com</span>
           </p>
-          <p className="mb-4">
+          {/* <p className="mb-4">
             📍
             <span className="ml-2">
               10/8/8, K. no. 10&11, 1st Floor, 25th A Cross, 24th Main Rd,
               Sector 2, HSR Layout, Bengaluru, Karnataka 560102
             </span>
-          </p>
+          </p> */}
           {/* Social Media Links */}
-          <div className="flex space-x-4 mt-4">
+          {/* <div className="flex space-x-4 mt-4">
             <a href="#" className="text-white hover:text-gray-200">
               <i className="fab fa-whatsapp text-2xl"></i>
             </a>
@@ -104,7 +104,7 @@ const ContactUs = () => {
             <a href="#" className="text-white hover:text-gray-200">
               <i className="fas fa-times text-2xl"></i>
             </a>
-          </div>
+          </div> */}
         </div>
 
         {/* Contact Form */}

@@ -5,6 +5,7 @@ import { ToastContainer, toast } from "react-toastify";
 import { FaEnvelope, FaLock } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../../redux/slice/authSlice";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -13,6 +14,9 @@ const Login = () => {
     email: "",
     password: "",
   });
+
+  const [showPassword, setShowPassword] = useState(false);
+  const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -26,13 +30,16 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
 
       const result = await response.json();
 
@@ -43,7 +50,6 @@ const Login = () => {
       // Dispatch login success and store token in localStorage
       dispatch(loginSuccess({ token: result.token }));
       localStorage.setItem("token", result.token);
-
 
       // console.log('Login successful:', result);
       if (result.role === "admin") {
@@ -89,13 +95,23 @@ const Login = () => {
           <div className="mb-4 relative">
             <FaLock className="absolute left-3 top-3 text-gray-500" />
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               name="password"
               value={formData.password}
               onChange={handleInputChange}
               placeholder="Your password"
               className="w-full pl-10 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
             />
+            <span
+              className="absolute right-3 top-3 cursor-pointer"
+              onClick={togglePasswordVisibility}
+            >
+              {showPassword ? (
+                <AiOutlineEyeInvisible size={20} />
+              ) : (
+                <AiOutlineEye size={20} />
+              )}
+            </span>
           </div>
 
           <button
