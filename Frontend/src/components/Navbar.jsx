@@ -77,12 +77,12 @@ function Navbar() {
           <img
             src={companyicon}
             alt="Icon"
-            className="w-16 sm:w-24 h-8 sm:h-10"
+            className="w-20 h-6 sm:w-24 sm:h-10 md:w-32 md:h-16"
           />
         </Link>
 
         {/* 🔹 Search Bar */}
-        <div className="flex-grow mx-8 relative">
+        <div className="flex-grow mx-4 relative">
           {/* Search Bar for Desktop and Mobile */}
           <form
             onSubmit={(e) => {
@@ -91,13 +91,13 @@ function Navbar() {
             }}
             className="flex items-center relative w-full"
           >
-            <input
-              type="text"
-              placeholder="Search your Medicines"
-              value={searchQuery}
-              onChange={(e) => dispatch(setSearchQuery(e.target.value))}
-              className="w-[220px] sm:w-full px-6 py-2 rounded-full border border-gray-300 focus:outline-none focus:border-blue-500 transition-all duration-300 ease-in-out"
-            />
+              <input
+                type="text"
+                placeholder="Search your Medicines"
+                value={searchQuery}
+                onChange={(e) => dispatch(setSearchQuery(e.target.value))}
+                className="w-full px-2 py-2 rounded-full border border-gray-300 focus:outline-none focus:border-blue-500 transition-all duration-300 ease-in-out placeholder:text-sm"
+              />
 
             {searchQuery && (
               <button
@@ -156,7 +156,7 @@ function Navbar() {
         </div>
 
         {/* 🔹 Hamburger for Mobile */}
-        <div className="sm:hidden flex items-center">
+        <div className=" pl-8 sm:hidden flex items-center">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="text-black text-2xl"
