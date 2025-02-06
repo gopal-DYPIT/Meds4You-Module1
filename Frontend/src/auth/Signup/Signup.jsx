@@ -80,7 +80,6 @@ function Signup() {
   
       if (response.ok) {
         const data = await response.json();
-        console.log("Signup successful:", data);
         navigate("/login");
       } else {
         const error = await response.json();
@@ -96,7 +95,7 @@ function Signup() {
   
   
   return (
-    <div className="flex justify-center pt-10 items-center min-h-screen bg-[#FFF0F5] ">
+    <div className="flex justify-center items-center bg-[#FFF0F5] p-4 pt-48 pb-36 sm:p-36 sm:pt-36">
       <div className="w-full sm:w-auto bg-white p-8 rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">Sign Up</h2>
         <form onSubmit={handleSubmit}>
@@ -112,7 +111,7 @@ function Signup() {
               className="w-full pl-10 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
             />
           </div>
-
+  
           {/* Email Input */}
           <div className="mb-4 relative">
             <FaEnvelope className="absolute left-3 top-3 text-gray-500" />
@@ -125,7 +124,7 @@ function Signup() {
               className="w-full pl-10 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
             />
           </div>
-
+  
           {/* Phone Number Input */}
           <div className="mb-4 relative">
             <FaPhone className="absolute left-3 top-3 text-gray-500" />
@@ -138,10 +137,10 @@ function Signup() {
               className="w-full pl-10 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
             />
           </div>
-
+  
           {/* Password & Confirm Password */}
-          <div className="mb-4 flex space-x-2">
-            <div className="relative w-1/2">
+          <div className="mb-4 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-2">
+            <div className="relative w-full sm:w-1/2">
               <FaLock className="absolute left-3 top-3 text-gray-500" />
               <input
                 type={showPassword ? "text" : "password"}
@@ -155,8 +154,8 @@ function Signup() {
                 {showPassword ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
               </span>
             </div>
-
-            <div className="relative w-1/2">
+  
+            <div className="relative w-full sm:w-1/2">
               <FaLock className="absolute left-3 top-3 text-gray-500" />
               <input
                 type={showConfirmPassword ? "text" : "password"}
@@ -166,24 +165,12 @@ function Signup() {
                 placeholder="Re-enter password"
                 className="w-full pl-10 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
               />
-               <span className="absolute right-3 top-3 cursor-pointer" onClick={toggleConfirmPasswordVisibility}>
+              <span className="absolute right-3 top-3 cursor-pointer" onClick={toggleConfirmPasswordVisibility}>
                 {showConfirmPassword ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
               </span>
             </div>
           </div>
-
-          {/* Store Partner Reference ID (Optional) */}
-          {/* <div className="mb-4 relative">
-            <input
-              type="text"
-              name="storePartnerReferenceId"
-              value={formData.storePartnerReferenceId}
-              onChange={handleInputChange}
-              placeholder="Store Partner Reference ID (Optional)"
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-            />
-          </div> */}
-
+  
           {/* Terms & Conditions Checkbox */}
           <div className="mb-4 flex items-center">
             <input
@@ -200,7 +187,7 @@ function Signup() {
               </a>
             </label>
           </div>
-
+  
           {/* Sign Up Button */}
           <button
             type="submit"
@@ -209,7 +196,7 @@ function Signup() {
             Sign Up
           </button>
         </form>
-
+  
         {/* Already have an account */}
         <div className="mt-4 text-center">
           <p className="text-sm text-gray-600">
@@ -227,8 +214,10 @@ function Signup() {
           </p>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
+  
 }
 
 export default Signup;

@@ -15,8 +15,8 @@ const userSchema = new Schema({
         state: { type: String },
         zipCode: { type: String },
         country: { type: String, required: true },
-        isPrimary: { type: Boolean, default: false } // Track the primary address
-      }], 
+        isPrimary: { type: Boolean, default: false }
+      }]
     // bdeId: { type: Schema.Types.ObjectId, required: true, ref: "BDE" }  
 }, { timestamps: true });  // Automatically adds createdAt and updatedAt timestamps
 

@@ -36,7 +36,6 @@ const ContactUs = () => {
       )
       .then(
         (result) => {
-          console.log(result.text);
           toast.success("Message sent successfully!",{
             position: "top-center",
             autoClose: 3000,
@@ -56,7 +55,6 @@ const ContactUs = () => {
           }); // Reset form
         },
         (error) => {
-          console.log(error.text);
           toast.error("Failed to send message. Please try again.",{
             position: "top-center",
             autoClose: 3000,

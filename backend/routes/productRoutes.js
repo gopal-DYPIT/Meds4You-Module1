@@ -3,29 +3,50 @@ import Product from "../models/product.js";
 import { authenticateToken } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
-
-// Fetch all products with search functionality
 router.get("/", async (req, res) => {
   try {
-    const { search } = req.query;
+    const { search, category } = req.query;
     let query = {};
 
     if (search) {
-      query = {
-        $or: [
-          { drugName: { $regex: search, $options: "i" } },
-          { manufacturer: { $regex: search, $options: "i" } },
-          { salt: { $regex: search, $options: "i" } },
-        ],
-      };
+      query.$or = [
+        { drugName: { $regex: search, $options: "i" } },
+        { manufacturer: { $regex: search, $options: "i" } },
+        { salt: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    if (category) {
+      query.category = category; // ✅ Filtering by category here
     }
 
     const products = await Product.find(query);
     res.json(products);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ message: "Error fetching products", error: err.message });
   }
 });
+
+
+// Fetch products by category or return top sellers if no category is provided
+router.get("/category", async (req, res) => {
+  try {
+    const { category } = req.query;
+    let query = {};
+
+    if (category) {
+      query.category = category; // Fetch products of the selected category
+    } else {
+      query = {}; // No category? Return default Top Sellers (Modify this logic as needed)
+    }
+
+    const products = await Product.find(query);
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching category products", error: err.message });
+  }
+});
+
 
 router.get("/products/search", async (req, res) => {
   const { q } = req.query;

@@ -1,4 +1,5 @@
 import express from "express";
+import mongoose from "mongoose";
 import Order from "../models/order.js";
 import Cart from "../models/cart.js";
 import { authorizeRoles } from "../middlewares/authMiddleware.js";
@@ -7,32 +8,94 @@ const router = express.Router();
 
 router.get("/admin/orders", authorizeRoles("admin"), async (req, res) => {
   try {
-    const orders = await Order.find() // Use find() to get all orders
-      .populate("userId", "name phoneNumber addresses") // Populate user info
-      .populate("items.productId", "drugName price imageUrl manufacturer") // Populate product info in items
-      .exec();
+    const orders = await Order.find()
+      .populate("userId", "name phoneNumber addresses")
+      .populate("items.productId", "drugName price imageUrl manufacturer alternateMedicines")
+      .lean(); // Convert to plain objects
 
-    // console.log("Orders fetched for admin:", JSON.stringify(orders, null, 2));
-    res.status(200).json(orders);
+      // console.log("All orders : ", orders)
+
+    // Ensure that productId exists before accessing its properties
+    const formattedOrders = orders.map(order => ({
+      ...order,
+      items: order.items.map(item => {
+        const product = item.productId;
+        
+        // Check if productId exists (could be null or undefined)
+        if (!product) {
+          return { ...item, productId: null, price: 0, name: "Unknown", manufacturer: "Unknown" };
+        }
+
+        // Otherwise, process with alternate medicines if available
+        const alternateMedicine = product?.alternateMedicines?.[0] || product;
+
+        return {
+          ...item,
+          productId: product._id, // Use main product ID reference
+          name: alternateMedicine.name || product.drugName, // Fallback to drugName if no alternate
+          price: alternateMedicine.price || product.price, // Use alternate medicine price if available
+          manufacturer: alternateMedicine.manufacturer || product.manufacturer, // Use alternate manufacturer
+        };
+      }),
+    }));
+
+    // console.log("Formatted orders : ", formattedOrders)
+
+
+    res.status(200).json(formattedOrders);
   } catch (error) {
     console.error("Error fetching orders:", error);
     res.status(500).json({ error: "Failed to fetch orders" });
   }
 });
+
+
 router.get("/admin/orders/:orderId", authorizeRoles("admin"), async (req, res) => {
   try {
-    const { orderId } = req.params; // Get orderId from the request parameters
+    const { orderId } = req.params;
     const order = await Order.findById(orderId)
       .populate("userId", "name phoneNumber addresses")
-      .populate("items.productId", "drugName price imageUrl manufacturer")
-      .exec();
+      .populate("items.productId", "drugName price imageUrl manufacturer alternateMedicines")
+      .lean(); // Converts Mongoose documents to plain JavaScript objects
+
+    // console.log("Particular order : \n", order);
 
     if (!order) {
       return res.status(404).json({ error: "Order not found" });
     }
 
-    // console.log("Order fetched for admin:", JSON.stringify(order, null, 2));
-    res.status(200).json(order);
+    // Format the order with null checks for productId
+    const formattedOrder = {
+      ...order,
+      items: order.items.map(item => {
+        const product = item.productId;
+
+        // Check if productId is null or undefined
+        if (!product) {
+          return {
+            ...item,
+            productId: null,
+            name: "Unknown Product",
+            price: 0,
+            manufacturer: "Unknown Manufacturer",
+          };
+        }
+
+        const alternateMedicine = product?.alternateMedicines?.[0] || product; // Get the first alternate medicine if available
+
+        return {
+          ...item,
+          productId: product._id,
+          name: alternateMedicine.name || product.drugName,
+          price: alternateMedicine.price || product.price,
+          manufacturer: alternateMedicine.manufacturer || product.manufacturer,
+        };
+      }),
+    };
+
+    // console.log("Formatted order : \n", formattedOrder);
+
+    res.status(200).json(formattedOrder);
   } catch (error) {
     console.error("Error fetching order:", error);
     res.status(500).json({ error: "Failed to fetch order" });
@@ -40,66 +103,52 @@ router.get("/admin/orders/:orderId", authorizeRoles("admin"), async (req, res) =
 });
 
 
+
 router.post("/create", authorizeRoles("user"), async (req, res) => {
   const { address } = req.body;
-  if (!address) {
-    return res.status(400).json({ error: "Address is required" });
-  }
+  if (!address) return res.status(400).json({ error: "Address is required" });
+
   try {
     const userId = req.user.id;
-    const cart = await Cart.findOne({ userId }).populate("items.productId"); // Populate productId in cart items
-    if (!cart) {
-      return res.status(404).json({ error: "Cart not found" });
+    const cart = await Cart.findOne({ userId }).populate("items.productId");
+
+    if (!cart || !cart.items.length) {
+      return res.status(404).json({ error: "Cart is empty or not found" });
     }
 
-    if (!cart.items.length) {
-      return res.status(400).json({ error: "Your cart is empty" });
-    }
-
-    const totalAmount = cart.items.reduce((total, item) => {
-      const alternateMedicine =
-        item.productId.alternateMedicines &&
-        item.productId.alternateMedicines.length > 0
-          ? item.productId.alternateMedicines[0]
-          : item.productId;
-
-      const price = alternateMedicine.price || item.productId.price;
-      return total + price * item.quantity;
+    // ✅ Calculate total amount using alternate medicine if available
+    const totalAmount = cart.items.reduce((total, { productId, quantity }) => {
+      const altMedicine = productId.alternateMedicines?.[0] || productId;
+      return total + (altMedicine.price || productId.price) * quantity;
     }, 0);
 
-    const order = new Order({
-      userId,
-      items: cart.items.map((item) => {
-        const alternateMedicine =
-          item.productId.alternateMedicines &&
-          item.productId.alternateMedicines.length > 0
-            ? item.productId.alternateMedicines[0]
-            : item.productId;
-
-        return {
-          productId: alternateMedicine._id || item.productId._id,
-          quantity: item.quantity,
-          price: alternateMedicine.price || item.productId.price,
-        };
-      }),
-      totalAmount,
+    // ✅ Prepare order items (Fixed `ObjectId` error)
+    const orderItems = cart.items.map(({ productId, quantity }) => {
+      const altMedicine = productId.alternateMedicines?.[0] || productId;
+      return {
+        productId: new mongoose.Types.ObjectId(productId._id), // ✅ Fixed syntax
+        quantity,
+        price: altMedicine.price || productId.price,
+        name: altMedicine.name || productId.drugName,
+        manufacturer: altMedicine.manufacturer || productId.manufacturer,
+      };
     });
 
-    await order.save();
+    // ✅ Create and save order
+    const order = await Order.create({ userId, items: orderItems, totalAmount });
+    // console.log("Order created:", order);
 
-    // Optionally clear the cart after order is created
-    // cart.items = [];
-    // await cart.save();
+    // ✅ Clear the cart after order creation
+    await Cart.updateOne({ userId }, { $set: { items: [] } });
 
-    // console.log("Order created successfully:", order);
     res.status(200).json({ orderId: order._id, totalAmount });
-  } catch (err) {
-    console.error("Error creating order:", err);
-    res
-      .status(500)
-      .json({ error: "Failed to create order", details: err.message });
+  } catch (error) {
+    console.error("Error creating order:", error);
+    res.status(500).json({ error: "Failed to create order", details: error.message });
   }
 });
+
+
 
 router.post(
   "/payment-success",

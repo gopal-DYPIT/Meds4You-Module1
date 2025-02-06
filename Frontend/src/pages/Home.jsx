@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import MedicineCarousel from "../components/MedicineCarousel";
+import CategoryFilter from "../components/CategoryFilter";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -13,6 +14,7 @@ import "swiper/css/pagination";
 const Home = () => {
   const [products, setProducts] = useState([]);
   const [user, setUser] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState("Diabetes");
 
   const testimonials = [
     {
@@ -51,11 +53,14 @@ const Home = () => {
       setUser({ token });
     }
 
+    // If no category is selected, fetch "Top Sellers", otherwise fetch category-based products
+    const categoryQuery = selectedCategory
+      ? `?category=${selectedCategory}`
+      : "";
+
     axios
-      .get(`${import.meta.env.VITE_BACKEND_URL}/api/products`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      .get(`${import.meta.env.VITE_BACKEND_URL}/api/products${categoryQuery}`, {
+        headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
         setProducts(response.data);
@@ -63,7 +68,7 @@ const Home = () => {
       .catch((err) => {
         console.error("Error fetching products:", err);
       });
-  }, []);
+  }, [selectedCategory]); // Fetch products whenever category changes
 
   const addToCart = async (productId) => {
     if (!user) {
@@ -93,7 +98,6 @@ const Home = () => {
         autoClose: 3000,
       });
     } catch (err) {
-      console.log("Failed to add to cart:", err.response || err);
       toast.error("Failed to Add to Cart. Please try again.", {
         position: "top-center",
         autoClose: 3000,
@@ -111,8 +115,15 @@ const Home = () => {
           </h1>
         </div>
 
+        <div className="flex justify-start ml-4 sm:ml-11 mt-4 sm:mb-[4px]  sm:mt-[4px]">
+          <CategoryFilter
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+          />
+        </div>
+
         {/* Medicine Carousel */}
-        <div className="px-0 sm:px-8 mt-[-3rem] mb-0 sm:mb-8 sm:mt-[-3rem] ">
+        <div className="px-0 sm:px-8 mt-[-6rem] mb-0 sm:mb-8 sm:mt-[-6rem] ">
           <MedicineCarousel products={products} addToCart={addToCart} />
         </div>
 
@@ -129,7 +140,7 @@ const Home = () => {
         </div>
 
         {/* WhatsApp Floating Button */}
-        <section className="fixed bottom-4 right-2 sm:right-4 z-50">
+        <section className="fixed bottom-14 right-2 sm:right-4 z-50">
           <a
             href="https://wa.me/918484883367?text=Hello%20there!"
             target="_blank"
@@ -149,7 +160,7 @@ const Home = () => {
 
         {/* Testimonials Section */}
         <section className="py-8 sm:py-12" id="happy-customers">
-          <h2 className="text-left text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-black-800">
+          <h2 className="text-center sm:text-left text-lg sm:text-2xl font-bold mb-4 sm:mb-6 text-black-800">
             💬 Hear from Our Happy Customers
           </h2>
 
@@ -160,7 +171,7 @@ const Home = () => {
               slidesPerView={1}
               autoplay={{ delay: 5000, disableOnInteraction: false }}
               // navigation
-              // pagination={{ clickable: true }}      
+              // pagination={{ clickable: true }}
               modules={[Autoplay, Pagination]}
             >
               {testimonials.map((testimonial, index) => (

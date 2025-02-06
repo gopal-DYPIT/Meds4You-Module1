@@ -22,8 +22,7 @@ const CartPage = () => {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
-          // console.log("Cart API Response:", response.data);
-          setCart(response.data.items); // No need to filter, as backend returns only alternate medicines
+          setCart(response.data.items);
           setLoading(false);
         })
         .catch((err) => {
@@ -88,38 +87,36 @@ const CartPage = () => {
   };
 
   return (
-    <div className="container min-h-screen mx-auto p-24">
-      <h1 className="text-center text-3xl mb-6">Your Cart</h1>
+    <div className="container min-h-screen mx-auto p-4 sm:p-12 mt-24 sm:mt-16"> {/* Adjusted padding for mobile */}
+      <h1 className="text-center text-2xl sm:text-3xl mb-4 sm:mb-6">Your Cart</h1>
       {error && <p className="text-red-500 text-center">{error}</p>}
       {cart.length === 0 ? (
         <p className="text-center text-gray-500">Your cart is empty.</p>
       ) : (
         <div className="space-y-4">
           {cart.map((item, index) => {
-            // Extract alternate medicine details (if available)
             const product = item?.productId;
-            console.log(product);
             const alternateMedicine =
               item?.productId?.alternateMedicines?.[0] || null;
 
             return (
               <div 
                 key={index}
-                className="flex items-center border p-4 rounded-md"
-              >
+                className="flex flex-col sm:flex-row items-center border p-4 rounded-md"
+              > {/* Changed to column layout on mobile */}
                 <img
                   src={alternateMedicine?.manufacturerUrl || "placeholder.jpg"}
                   alt={alternateMedicine?.name || "Unnamed product"}
-                  className="w-26 h-16 object-cover rounded mr-4"
+                  className="w-32 h-10 object-cover rounded mb-4 sm:mb-0 sm:mr-4" /* Added margin for spacing */
                 />
-                <div className="flex-1">
+                <div className="flex-1 text-center sm:text-left"> {/* Center text on mobile */}
                   <h2 className="font-bold text-lg">
                     {alternateMedicine?.name || "Unknown Product"}
                   </h2>
                   <p className="text-blue-600 font-semibold">
                     Price: Rs.{alternateMedicine?.price || "N/A"}
                   </p>
-                  <div className="flex items-center mt-2">
+                  <div className="flex justify-center sm:justify-start items-center mt-2">
                     <button
                       onClick={() =>
                         handleQuantityChange(
@@ -147,8 +144,8 @@ const CartPage = () => {
                 </div>
                 <button
                   onClick={() => handleDelete(item.productId._id)}
-                  className="ml-4 bg-red-500 text-white p-2 rounded hover:bg-red-600"
-                >
+                  className="mt-4 sm:mt-0 bg-red-500 text-white p-2 rounded hover:bg-red-600"
+                > {/* Moved delete button below for mobile */}
                   Delete
                 </button>
               </div>
@@ -159,8 +156,8 @@ const CartPage = () => {
       {cart.length > 0 && (
         <button
           onClick={handleCheckout}
-          className="bg-green-500 text-white p-2 rounded mt-6 block mx-auto transition transform duration-300 ease-in-out hover:bg-green-600 hover:scale-105"
-        >
+          className="bg-green-500 text-white p-2 rounded mt-6 w-full sm:w-auto mx-auto block transition transform duration-300 ease-in-out hover:bg-green-600 hover:scale-105"
+        > {/* Made button full width on mobile */}
           Checkout
         </button>
       )}

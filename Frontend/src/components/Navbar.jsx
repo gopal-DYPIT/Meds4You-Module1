@@ -10,26 +10,37 @@ import {
   setLoading,
 } from "../redux/slice/searchSlice";
 import { logout } from "../redux/slice/authSlice";
+import { HiMenu, HiX } from "react-icons/hi";
 
 function Navbar() {
   const [isTyping, setIsTyping] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // For the mobile hamburger menu
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const searchQuery = useSelector((state) => state.search.searchQuery);
   const searchResults = useSelector((state) => state.search.searchResults);
   const loading = useSelector((state) => state.search.loading);
 
-  // ✅ Track auth state and update Navbar dynamically
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const [authState, setAuthState] = useState(isAuthenticated);
 
+  // Close menu when clicking outside
   useEffect(() => {
-    setAuthState(isAuthenticated); // Update when Redux state changes
+    const handleClickOutside = (event) => {
+      if (isMenuOpen && !event.target.closest('.mobile-menu-container')) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isMenuOpen]);
+
+  useEffect(() => {
+    setAuthState(isAuthenticated);
   }, [isAuthenticated]);
 
-  // ✅ Ensure multi-tab logout works
   useEffect(() => {
     const syncLogout = (event) => {
       if (event.key === "token" && event.newValue === null) {
@@ -72,18 +83,15 @@ function Navbar() {
   return (
     <nav className="bg-[#c8f4df] p-4 fixed top-0 left-0 w-full z-50 shadow-md">
       <div className="max-w-[1400px] mx-auto px-4 flex justify-between items-center">
-        {/* 🔹 Logo */}
-        <Link to="/" className="mr-4">
+        <Link to="/">
           <img
             src={companyicon}
             alt="Icon"
-            className="w-20 h-6 sm:w-24 sm:h-10 md:w-32 md:h-16"
+            className="w-20 h-6 sm:w-24 sm:h-10"
           />
         </Link>
 
-        {/* 🔹 Search Bar */}
         <div className="flex-grow mx-4 relative">
-          {/* Search Bar for Desktop and Mobile */}
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -91,13 +99,13 @@ function Navbar() {
             }}
             className="flex items-center relative w-full"
           >
-              <input
-                type="text"
-                placeholder="Search your Medicines"
-                value={searchQuery}
-                onChange={(e) => dispatch(setSearchQuery(e.target.value))}
-                className="w-full px-2 py-2 rounded-full border border-gray-300 focus:outline-none focus:border-blue-500 transition-all duration-300 ease-in-out placeholder:text-sm"
-              />
+            <input
+              type="text"
+              placeholder="Search your Medicines"
+              value={searchQuery}
+              onChange={(e) => dispatch(setSearchQuery(e.target.value))}
+              className="w-full px-8 py-2 rounded-full border border-gray-300 focus:outline-none focus:border-blue-500 transition-all duration-300 ease-in-out placeholder:text-sm sm:placeholder:p-4 sm:placeholder:text-base"
+            />
 
             {searchQuery && (
               <button
@@ -155,71 +163,81 @@ function Navbar() {
           )}
         </div>
 
-        {/* 🔹 Hamburger for Mobile */}
-        <div className=" pl-8 sm:hidden flex items-center">
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="text-black text-2xl"
-          >
-            {isMenuOpen ? "×" : "☰"}
-          </button>
-        </div>
+        {/* Improved Hamburger Menu Button */}
+        <button
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="sm:hidden p-2 rounded-md hover:bg-[#b3dcc7] transition-colors duration-200 focus:outline-none"
+          aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+        >
+          {isMenuOpen ? <HiX className="w-6 h-6" /> : <HiMenu className="w-6 h-6" />}
+        </button>
 
-        {/* 🔹 Mobile Menu */}
-        {isMenuOpen && (
-          <div className="sm:hidden absolute top-full left-0 w-full bg-[#c8f4df] p-4 mt-2 z-50">
-            <div className="flex flex-col items-start space-y-4">
-              <Link
-                to="/infoOrder"
-                className="text-black text-base hover:text-blue-600"
-              >
-                How to order
-              </Link>
-              <Link
-                to="/contact"
-                className="text-black text-base hover:text-blue-600"
-              >
-                Contact
-              </Link>
+        {/* Improved Mobile Menu with Animation */}
+        <div
+          className={`mobile-menu-container sm:hidden fixed top-[4rem] right-0 w-64 h-screen bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
+            isMenuOpen ? "translate-x-0" : "translate-x-full"
+          }`}
+        >
+          <div className="flex flex-col py-4">
+            <Link
+              to="/infoOrder"
+              className="px-6 py-3 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              How to order
+            </Link>
+            <Link
+              to="/contact"
+              className="px-6 py-3 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Contact
+            </Link>
 
-              {authState ? (
-                <>
-                  <Link
-                    to="/profile"
-                    className="text-black text-base hover:text-blue-600"
-                  >
-                    Profile
-                  </Link>
-                  <Link
-                    to="/cart"
-                    className="text-black text-base hover:text-blue-600"
-                  >
+            {authState ? (
+              <>
+                <Link
+                  to="/profile"
+                  className="px-6 py-3 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Profile
+                </Link>
+                <Link
+                  to="/cart"
+                  className="px-6 py-3 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <div className="flex items-center space-x-2">
                     <div className="w-6 h-6 bg-white rounded-full flex justify-center items-center shadow-md">
                       <img className="w-4 h-4" src={cartImage} alt="Cart" />
                     </div>
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/login"
-                    className="text-black text-base hover:text-blue-600"
-                  >
-                    Login
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="text-black text-base hover:text-blue-600"
-                  >
-                    Sign Up
-                  </Link>
-                </>
-              )}
-            </div>
+                    <span>Cart</span>
+                  </div>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="px-6 py-3 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/register"
+                  className="px-6 py-3 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
           </div>
-        )}
+        </div>
 
-        {/* 🔹 Desktop Menu (hidden on mobile) */}
+        {/* Desktop Menu (unchanged) */}
         <div className="hidden sm:flex items-center space-x-6">
           <Link
             to="/infoOrder"
@@ -234,7 +252,6 @@ function Navbar() {
             Contact
           </Link>
 
-          {/* 🔹 Auth Links */}
           {authState ? (
             <>
               <Link

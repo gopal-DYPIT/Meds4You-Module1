@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 
@@ -63,7 +63,7 @@ const AdminDashboard = () => {
       if (!authState) return;
       try {
         const orderResponse = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/admin/orders`,
+          `${import.meta.env.VITE_BACKEND_URL}/api/orders/admin/orders`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -257,15 +257,21 @@ const AdminDashboard = () => {
     try {
       // Fetch additional details for the selected order (including user and product details)
       const orderResponse = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/api/admin/orders/${order._id}`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/orders/admin/orders/${
+          order._id
+        }`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
-      setSelectedOrderDetails(orderResponse.data); // Set the selected order details
-      // console.log("Selected Order Details:", orderResponse.data);
+
+      // Ensure you're using the orderResponse data properly by extracting properties
+      const orderDetails = orderResponse.data;
+
+      setSelectedOrderDetails(orderDetails); // Set the selected order details
+      // console.log("Selected Order Details:", orderDetails);
     } catch (error) {
       console.error("Error fetching order details:", error);
     }
@@ -622,9 +628,9 @@ const AdminDashboard = () => {
                   <thead>
                     <tr>
                       <th className="py-2 pr-6 border-b">Order ID</th>
-                      <th className="py-2 pr-16 border-b">Order Status</th>
+                      <th className="py-2 pr-28 border-b">Order Status</th>
                       <th className="py-2 pr-24 border-b">Payment Status</th>
-                      <th className="py-2 pr-14 border-b">Actions</th>
+                      {/* <th className="py-2 pr-14 border-b">Actions</th> */}
                     </tr>
                   </thead>
                   <tbody>
@@ -672,7 +678,7 @@ const AdminDashboard = () => {
                             <option value="refunded">Refunded</option>
                           </select>
                         </td>
-                        <td className="py-2 px-4 border-b">
+                        {/* <td className="py-2 px-4 border-b">
                           <button
                             onClick={() =>
                               updateOrderStatus(
@@ -685,7 +691,7 @@ const AdminDashboard = () => {
                           >
                             Update
                           </button>
-                        </td>
+                        </td> */}
                       </tr>
                     ))}
                   </tbody>
@@ -697,48 +703,53 @@ const AdminDashboard = () => {
                 <h2 className="text-2xl font-semibold">Order Details</h2>
                 <div className="border-t-2 mt-4">
                   <h3 className="text-xl">User Information</h3>
-                  {/* <div>{console.log("selectedOrderDetails",selectedOrderDetails)}</div> */}
-                  <p>Name: {selectedOrderDetails.userId}</p>
-                  {selectedOrderDetails.userId.addresses &&
-                  selectedOrderDetails.userId.addresses.length > 0 ? (
-                    <>
-                      <p>
-                        Address:{" "}
-                        {selectedOrderDetails.userId.addresses[0]?.street}
-                      </p>
-                      <p>
-                        City: {selectedOrderDetails.userId.addresses[0]?.city}
-                      </p>
-                      <p>
-                        Country:{" "}
-                        {selectedOrderDetails.userId.addresses[0]?.country}
-                      </p>
-                    </>
-                  ) : (
-                    <p>No address available</p>
-                  )}
+                  {/* Displaying user information */}
+                  <p>Name: {selectedOrderDetails.userId?.name}</p>
+                  <p>
+                    Phone Number: {selectedOrderDetails.userId?.phoneNumber}
+                  </p>
 
-                  <h3 className="text-xl mt-4">Order Items</h3>
-                  {selectedOrderDetails.items.map((item, index) => (
-                    <div key={index} className="border-t py-2">
-                      <p>
-                        Product:{" "}
-                        {item.productId
-                          ? item.productId.drugName
-                          : "No product name"}
-                      </p>
-                      <p>
-                        Price: ₹{item.price ? item.price.toFixed(2) : "N/A"}
-                      </p>
-                      <p>Quantity: {item.quantity ? item.quantity : "N/A"}</p>
-                    </div>
-                  ))}
+                  {/* Rendering addresses */}
+                  <div>
+                    <h3>Addresses:</h3>
+                    {selectedOrderDetails.userId?.addresses &&
+                    selectedOrderDetails.userId.addresses.length > 0 ? (
+                      <ul>
+                        {selectedOrderDetails.userId.addresses.map(
+                          (address, index) => (
+                            <li key={index}>
+                              {address.street}, {address.city}, {address.state},{" "}
+                              {address.zipCode}
+                            </li>
+                          )
+                        )}
+                      </ul>
+                    ) : (
+                      <p>No addresses available</p>
+                    )}
+                  </div>
                 </div>
+
+                <h3 className="text-xl mt-4">Order Items</h3>
+                {/* Rendering order items */}
+                {selectedOrderDetails.items.map((item, index) => (
+                  <div key={index} className="border-t py-2">
+                    <p>
+                      Product:{" "}
+                      {item.productId
+                        ? item.name
+                        : "No product name"}
+                    </p>
+                    <p>Price: ₹{item.price ? item.price.toFixed(2) : "N/A"}</p>
+                    <p>Quantity: {item.quantity ? item.quantity : "N/A"}</p>
+                  </div>
+                ))}
               </div>
             )}
           </div>
         )}
       </main>
+      <ToastContainer />
     </div>
   );
 };

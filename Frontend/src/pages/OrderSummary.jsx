@@ -15,7 +15,6 @@ const OrderSummary = () => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-        console.log("Order Response:", response.data);
         setOrder(response.data);
       })
       .catch((err) => {

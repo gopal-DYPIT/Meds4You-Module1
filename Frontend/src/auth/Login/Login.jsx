@@ -1,4 +1,3 @@
-// Login.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
@@ -47,18 +46,15 @@ const Login = () => {
         throw new Error(result.error || "Login failed. Please try again.");
       }
 
-      // Dispatch login success and store token in localStorage
       dispatch(loginSuccess({ token: result.token }));
       localStorage.setItem("token", result.token);
 
-      // console.log('Login successful:', result);
       if (result.role === "admin") {
         navigate("/admin");
       } else {
         navigate("/");
       }
     } catch (error) {
-      console.error("Error:", error.message);
       toast.error(error.message, {
         position: "top-center",
         autoClose: 3000,
@@ -72,13 +68,12 @@ const Login = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-[#FFF0F5] ">
-      <div className="w-full sm:w-[500px] md:w-[600px] lg:w-[500px] h-[350px] bg-white p-10 rounded-lg shadow-xl">
-        <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">
+    <div className="flex justify-center items-center bg-[#FFF0F5] pt-48 pb-36 sm:p-36 sm:pt-48 sm:pb-48"> {/* Removed min-h-screen */}
+      <div className="w-full max-w-sm sm:max-w-md md:max-w-lg bg-white p-6 sm:p-10 rounded-lg shadow-xl"> {/* Adjusted width & padding */}
+        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-4 sm:mb-6 text-gray-800"> {/* Adjusted text size */}
           Login
         </h2>
         <form onSubmit={handleSubmit}>
-          {/* Email Input */}
           <div className="mb-4 relative">
             <FaEnvelope className="absolute left-3 top-3 text-gray-500" />
             <input
@@ -91,7 +86,6 @@ const Login = () => {
             />
           </div>
 
-          {/* Password Input */}
           <div className="mb-4 relative">
             <FaLock className="absolute left-3 top-3 text-gray-500" />
             <input
@@ -123,7 +117,7 @@ const Login = () => {
         </form>
 
         <p className="text-center text-sm text-gray-600 mt-4">
-          Not registered?{" "}
+          Not registered? {" "}
           <button
             onClick={() => navigate("/register")}
             className="text-blue-600 hover:underline"
