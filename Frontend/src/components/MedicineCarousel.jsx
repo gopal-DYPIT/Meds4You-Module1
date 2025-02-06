@@ -119,10 +119,15 @@ const MedicineCarousel = ({ products, addToCart }) => {
         autoplay={{ delay: 5000, disableOnInteraction: false }}
         spaceBetween={20}
         loop={true}
-        // style={{ padding: "0", paddingBottom: "0" }}
-        style={{ paddingBottom: "40px", paddingTop: "-100px" }}
+        touchStartPreventDefault={false} // ✅ Allows better touch gestures on mobile
         onSwiper={(swiper) => setSwiperInstance(swiper)}
+        style={{ paddingBottom: "20px" }}
         breakpoints={{
+          0: {
+            // ✅ Ensures smooth mobile experience
+            slidesPerView: 1,
+            spaceBetween: 10,
+          },
           768: {
             slidesPerView: 1,
             spaceBetween: 20,
@@ -209,25 +214,25 @@ const MedicineCarousel = ({ products, addToCart }) => {
           </SwiperSlide>
         ))}
       </Swiper>
-        <div className="my-swiper relative pb-3.5">
-          <div
-            id="swiper-button-prev"
-            className="absolute top-1/2 transform -translate-y-1/2 flex justify-center items-center w-12 h-12 bg-gray-200 text-gray-800 rounded-full shadow-lg cursor-pointer transition-all ease-in-out duration-200 z-10 left-1/2 sm:left-0 md:left-10 lg:left-20"
-            onClick={handlePrev}
-            style={{ top: "-230px", left: "-16px" }}
-          >
-            <span className="text-2xl">&#10094;</span>
-          </div>
-
-          <div
-            id="swiper-button-next"
-            className="absolute top-1/2 transform -translate-y-1/2 flex justify-center items-center w-12 h-12 bg-gray-200 text-gray-800 rounded-full shadow-lg cursor-pointer transition-all ease-in-out duration-200 z-10 right-1/2 sm:right-0 md:right-10 lg:right-20"
-            onClick={handleNext}
-            style={{ top: "-230px", right: "-16px" }}
-          >
-            <span className="text-2xl">&#10095;</span>
-          </div>
+      <div className="my-swiper relative pb-3.5">
+        <div
+          id="swiper-button-prev"
+          className="hidden sm:flex absolute top-1/2 transform -translate-y-1/2 justify-center items-center w-12 h-12 bg-gray-200 text-gray-800 rounded-full shadow-lg cursor-pointer transition-all ease-in-out duration-200 z-10 left-1/2 sm:left-0 md:left-10 lg:left-20"
+          onClick={handlePrev}
+          style={{ top: "-230px", left: "-16px" }}
+        >
+          <span className="text-2xl">&#10094;</span>
         </div>
+
+        <div
+          id="swiper-button-next"
+          className="hidden sm:flex absolute top-1/2 transform -translate-y-1/2 justify-center items-center w-12 h-12 bg-gray-200 text-gray-800 rounded-full shadow-lg cursor-pointer transition-all ease-in-out duration-200 z-10 right-1/2 sm:right-0 md:right-10 lg:right-20"
+          onClick={handleNext}
+          style={{ top: "-230px", right: "-16px" }}
+        >
+          <span className="text-2xl">&#10095;</span>
+        </div>
+      </div>
     </div>
   );
 };
