@@ -118,17 +118,25 @@ const MedicineCarousel = ({ products, addToCart }) => {
       <Swiper
         modules={[Pagination, Autoplay]}
         pagination={{ clickable: true, dynamicBullets: true }}
-        autoplay={{ delay: 4000, disableOnInteraction: false }}
+        autoplay={{ delay: 5000, disableOnInteraction: false }}
         spaceBetween={20}
         loop={true}
-        freeMode={true}
         grabCursor={true}
+        preventClicks={false}
+        preventClicksPropagation={false}
         touchStartPreventDefault={false} // ✅ Allows better touch gestures on mobile
+        touchMoveStopPropagation={true}
+        touchReleaseOnEdges={true}
+        resistance={false}
         onSwiper={(swiper) => setSwiperInstance(swiper)}
         style={{ paddingBottom: "20px" }}
         breakpoints={{
           0: {
             // ✅ Ensures smooth mobile experience
+            slidesPerView: 1,
+            spaceBetween: 10,
+          },
+          320: {
             slidesPerView: 1,
             spaceBetween: 10,
           },
