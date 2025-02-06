@@ -103,7 +103,7 @@ const Home = () => {
 
   return (
     <div>
-      <div className="mx-auto max-w-7xl mt-16 sm:mt-20 px-4">
+      <div className="mx-auto max-w-7xl mt-20 sm:mt-20 px-4">
         {/* Header Section */}
         <div className="text-center bg-blue-100 py-4 sm:py-16">
           <h1 className="text-2xl sm:text-4xl font-bold mb-0 text-gray-800 sm:mb-2">

@@ -111,14 +111,18 @@ const MedicineCarousel = ({ products, addToCart }) => {
     }
   };
 
+  const isDesktop = window.innerWidth >= 1024;
+
   return (
     <div style={cardStyle}>
       <Swiper
         modules={[Pagination, Autoplay]}
         pagination={{ clickable: true, dynamicBullets: true }}
-        autoplay={{ delay: 5000, disableOnInteraction: false }}
+        autoplay={{ delay: 4000, disableOnInteraction: false }}
         spaceBetween={20}
         loop={true}
+        freeMode={true}
+        grabCursor={true}
         touchStartPreventDefault={false} // ✅ Allows better touch gestures on mobile
         onSwiper={(swiper) => setSwiperInstance(swiper)}
         style={{ paddingBottom: "20px" }}
@@ -146,8 +150,8 @@ const MedicineCarousel = ({ products, addToCart }) => {
           <SwiperSlide
             key={product._id}
             style={{ display: "flex", justifyContent: "center" }}
-            onMouseEnter={() => swiperInstance?.autoplay.stop()} // Stop autoplay when hovering
-            onMouseLeave={() => swiperInstance?.autoplay.start()} // Resume autoplay when leaving
+            onMouseEnter={() => isDesktop && swiperInstance?.autoplay.stop()} // Stop autoplay only on desktop
+            onMouseLeave={() => isDesktop && swiperInstance?.autoplay.start()} // Resume autoplay only on desktop
           >
             <div style={wholeCardStyle}>
               <div style={topStyle}>{product.salt}</div>

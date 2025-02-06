@@ -66,19 +66,15 @@ function Navbar() {
       <div className="max-w-[1400px] mx-auto px-4 flex justify-between items-center">
         {/* Logo */}
         <Link to="/" className="mr-4">
-          <img src={companyicon} alt="Icon" className="w-14 sm:w-18 h-8 sm:h-10" />
+          <img
+            src={companyicon}
+            alt="Icon"
+            className="w-16 sm:w-24 h-8 sm:h-10"
+          />
         </Link>
-
-        {/* Mobile Menu Button */}
-        <button
-          className="sm:hidden text-2xl"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        >
-          {isMobileMenuOpen ? <HiX /> : <HiMenu />}
-        </button>
-
         {/* Search Bar */}
-        <div className="hidden sm:flex flex-grow mx-2 sm:mx-8 relative">
+        {/* Search Bar - Always Visible */}
+        <div className="flex flex-grow mx-2 sm:mx-8 relative w-full sm:w-auto">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -91,9 +87,8 @@ function Navbar() {
               placeholder="Search your Medicines"
               value={searchQuery}
               onChange={(e) => dispatch(setSearchQuery(e.target.value))}
-              className="w-full sm:w-[400px] px-3 py-2 rounded-full border border-gray-300 focus:outline-none focus:border-blue-500 transition-all duration-300 ease-in-out"
+              className="w-[220px] sm:w-[830px] px-6 py-2 rounded-full border border-gray-300 focus:outline-none focus:border-blue-500 transition-all duration-300 ease-in-out"
             />
-
             {searchQuery && (
               <button
                 type="button"
@@ -104,48 +99,43 @@ function Navbar() {
               </button>
             )}
           </form>
-
-          {searchResults.length > 0 && (
-            <div className="absolute top-full left-0 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-lg overflow-y-auto z-50 transition-all ease-in-out duration-300 max-h-[200px]">
-              {searchResults.map((result) => (
-                <div
-                  key={result._id}
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors border-b border-gray-100 last:border-0"
-                  onClick={() => {
-                    dispatch(setSearchResults([]));
-                    dispatch(setSearchQuery(""));
-                    navigate(`/medicine/${result._id}`);
-                  }}
-                >
-                  <span className="text-sm font-semibold text-gray-900">{result.drugName}</span>
-                  <span className="text-xs text-gray-500">{result.category}</span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {loading && (
-            <div className="absolute top-full left-0 mt-2 w-full text-center text-sm text-gray-500">
-              Loading...
-            </div>
-          )}
         </div>
+
+        {/* Mobile Menu Button */}
+        <button
+          className="sm:hidden text-2xl"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+          {isMobileMenuOpen ? <HiX /> : <HiMenu />}
+        </button>
 
         {/* Desktop Navigation */}
         <div className="hidden sm:flex items-center space-x-6">
-          <Link to="/infoOrder" className="text-black text-base hover:text-blue-600">
+          <Link
+            to="/infoOrder"
+            className="text-black text-base hover:text-blue-600"
+          >
             How to order
           </Link>
-          <Link to="/contact" className="text-black text-base hover:text-blue-600">
+          <Link
+            to="/contact"
+            className="text-black text-base hover:text-blue-600"
+          >
             Contact
           </Link>
 
           {authState ? (
             <>
-              <Link to="/profile" className="text-black text-base hover:text-blue-600">
+              <Link
+                to="/profile"
+                className="text-black text-base hover:text-blue-600"
+              >
                 Profile
               </Link>
-              <Link to="/cart" className="text-black text-base hover:text-blue-600">
+              <Link
+                to="/cart"
+                className="text-black text-base hover:text-blue-600"
+              >
                 <div className="w-6 h-6 bg-white rounded-full flex justify-center items-center shadow-md">
                   <img className="w-4 h-4" src={cartImage} alt="Cart" />
                 </div>
@@ -153,10 +143,16 @@ function Navbar() {
             </>
           ) : (
             <>
-              <Link to="/login" className="text-black text-base hover:text-blue-600">
+              <Link
+                to="/login"
+                className="text-black text-base hover:text-blue-600"
+              >
                 Login
               </Link>
-              <Link to="/register" className="text-black text-base hover:text-blue-600">
+              <Link
+                to="/register"
+                className="text-black text-base hover:text-blue-600"
+              >
                 Sign Up
               </Link>
             </>
@@ -167,28 +163,46 @@ function Navbar() {
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="sm:hidden flex flex-col items-center bg-[#c8f4df] py-4 space-y-3">
-          <Link to="/infoOrder" className="text-black text-base hover:text-blue-600">
+          <Link
+            to="/infoOrder"
+            className="text-black text-base hover:text-blue-600"
+          >
             How to order
           </Link>
-          <Link to="/contact" className="text-black text-base hover:text-blue-600">
+          <Link
+            to="/contact"
+            className="text-black text-base hover:text-blue-600"
+          >
             Contact
           </Link>
 
           {authState ? (
             <>
-              <Link to="/profile" className="text-black text-base hover:text-blue-600">
+              <Link
+                to="/profile"
+                className="text-black text-base hover:text-blue-600"
+              >
                 Profile
               </Link>
-              <Link to="/cart" className="text-black text-base hover:text-blue-600">
+              <Link
+                to="/cart"
+                className="text-black text-base hover:text-blue-600"
+              >
                 Cart
               </Link>
             </>
           ) : (
             <>
-              <Link to="/login" className="text-black text-base hover:text-blue-600">
+              <Link
+                to="/login"
+                className="text-black text-base hover:text-blue-600"
+              >
                 Login
               </Link>
-              <Link to="/register" className="text-black text-base hover:text-blue-600">
+              <Link
+                to="/register"
+                className="text-black text-base hover:text-blue-600"
+              >
                 Sign Up
               </Link>
             </>
