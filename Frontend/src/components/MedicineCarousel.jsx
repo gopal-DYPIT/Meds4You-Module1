@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination, Autoplay, Navigation } from "swiper/modules";
+import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -78,35 +78,6 @@ const alternateMedicineStyle = {
   marginBottom: "15px", // Adjusted margin
   textAlign: "center",
 };
-const arrowStyle = {
-  position: "absolute",
-  top: "50%",
-  transform: "translateY(-50%)",
-  zIndex: 10,
-  cursor: "pointer",
-  background: "rgba(0, 0, 0, 0.5)",
-  color: "white",
-  border: "none",
-  borderRadius: "50%",
-  width: "40px",
-  height: "40px",
-  fontSize: "20px",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  transition: "opacity 0.3s ease",
-};
-
-// Adjust the position of the navigation buttons
-const prevArrowStyle = {
-  ...arrowStyle,
-  left: "-70px", // Move further left
-};
-
-const nextArrowStyle = {
-  ...arrowStyle,
-  right: "-70px", // Move further right
-};
 
 const MedicineCarousel = ({ products, addToCart }) => {
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
@@ -128,18 +99,43 @@ const MedicineCarousel = ({ products, addToCart }) => {
     }
   };
 
+  const handleNext = () => {
+    if (swiperInstance) {
+      swiperInstance.slideNext();
+    }
+  };
+
+  const handlePrev = () => {
+    if (swiperInstance) {
+      swiperInstance.slidePrev();
+    }
+  };
+
   return (
     <div style={cardStyle}>
       <Swiper
-        modules={[Pagination, Autoplay, Navigation]}
+        modules={[Pagination, Autoplay]}
         pagination={{ clickable: true, dynamicBullets: true }}
-        navigation={true}
-        autoplay={{ delay: 3000, disableOnInteraction: false }}
+        autoplay={{ delay: 5000, disableOnInteraction: false }}
         spaceBetween={20}
-        slidesPerView={3}
         loop={true}
-        style={{ padding: "10px 0", paddingBottom: "40px" }}
+        // style={{ padding: "0", paddingBottom: "0" }}
+        style={{ paddingBottom: "40px", paddingTop: "-100px" }}
         onSwiper={(swiper) => setSwiperInstance(swiper)}
+        breakpoints={{
+          768: {
+            slidesPerView: 1,
+            spaceBetween: 20,
+          },
+          1024: {
+            slidesPerView: 2,
+            spaceBetween: 20,
+          },
+          1200: {
+            slidesPerView: 3,
+            spaceBetween: 20,
+          },
+        }}
       >
         {products.map((product) => (
           <SwiperSlide
@@ -212,15 +208,26 @@ const MedicineCarousel = ({ products, addToCart }) => {
             </div>
           </SwiperSlide>
         ))}
-        <div
-          className="swiper-button-prev"
-          style={prevArrowStyle}
-        ></div>
-        <div
-          className="swiper-button-next"
-          style={nextArrowStyle}
-        ></div>
       </Swiper>
+        <div className="my-swiper relative pb-3.5">
+          <div
+            id="swiper-button-prev"
+            className="absolute top-1/2 transform -translate-y-1/2 flex justify-center items-center w-12 h-12 bg-gray-200 text-gray-800 rounded-full shadow-lg cursor-pointer transition-all ease-in-out duration-200 z-10 left-1/2 sm:left-0 md:left-10 lg:left-20"
+            onClick={handlePrev}
+            style={{ top: "-230px", left: "-16px" }}
+          >
+            <span className="text-2xl">&#10094;</span>
+          </div>
+
+          <div
+            id="swiper-button-next"
+            className="absolute top-1/2 transform -translate-y-1/2 flex justify-center items-center w-12 h-12 bg-gray-200 text-gray-800 rounded-full shadow-lg cursor-pointer transition-all ease-in-out duration-200 z-10 right-1/2 sm:right-0 md:right-10 lg:right-20"
+            onClick={handleNext}
+            style={{ top: "-230px", right: "-16px" }}
+          >
+            <span className="text-2xl">&#10095;</span>
+          </div>
+        </div>
     </div>
   );
 };

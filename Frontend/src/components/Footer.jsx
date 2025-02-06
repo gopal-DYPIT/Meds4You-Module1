@@ -2,38 +2,14 @@ import React from "react";
 
 const Footer = () => {
   return (
-    <footer className="bg-white py-12 p-24">
-      <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 px-6">
+    <footer className="bg-white py-12 sm:py-24 p-6 sm:p-24">
+      <div className="container mx-auto grid grid-cols-1 sm:grid-cols-4 gap-8 sm:gap-8">
         {/* Left Section - Logo and Apps */}
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-semibold text-gray-800">Meds4you</h1>
             <h2 className="text-gray-600 text-lg pt-4 pl-1">Mediforge LTD</h2>
           </div>
-          {/* <div className="flex flex-col space-y-4">
-            <a
-              // href="https://apps.apple.com/in/app/platinumrx/id6477701930"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <img
-                src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
-                alt="App Store"
-                className="h-12 w-auto"
-              />
-            </a>
-            <a
-              // href="https://play.google.com/store/apps/details?id=in.platinumrx"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <img
-                src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
-                alt="Google Play Store"
-                className="h-12 w-auto"
-              />
-            </a>
-          </div> */}
         </div>
 
         {/* Middle Section - Company Links */}
@@ -81,12 +57,14 @@ const Footer = () => {
             Contact Us
           </h3>
           <h2 className="text-gray-600 text-sm">meds4you01@gmail.com</h2>
-          <h2 className="text-gray-600 text-sm font-semibold pt-3">+91 8484883367</h2>
+          <h2 className="text-gray-600 text-sm font-semibold pt-3">
+            +91 8484883367
+          </h2>
           <h2 className="text-gray-600 text-sm pt-3">Available 24/7</h2>
         </div>
 
         {/* Social Media Section - Proper Alignment */}
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center sm:items-start">
           <h3 className="text-xl font-semibold text-gray-800 mb-4">
             Follow us on
           </h3>
@@ -128,9 +106,9 @@ const Footer = () => {
       </div>
 
       {/* Bottom Text */}
-      <div className="text-center mt-8 text-gray-600 text-sm">
+      <div className="text-center text-gray-600 text-sm pt-16">
         <p>&copy; 2025 Meds4you. All Rights Reserved.</p>
-      </div>
+      </div>  
     </footer>
   );
 };

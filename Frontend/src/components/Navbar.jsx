@@ -10,47 +10,40 @@ import {
   setLoading,
 } from "../redux/slice/searchSlice";
 import { logout } from "../redux/slice/authSlice";
+import { HiMenu, HiX } from "react-icons/hi"; // Mobile menu icons
 
 function Navbar() {
-  const [isTyping, setIsTyping] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const searchQuery = useSelector((state) => state.search.searchQuery);
   const searchResults = useSelector((state) => state.search.searchResults);
   const loading = useSelector((state) => state.search.loading);
-
-  // ✅ Track auth state and update Navbar dynamically
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const [authState, setAuthState] = useState(isAuthenticated);
 
   useEffect(() => {
-    setAuthState(isAuthenticated); // Update when Redux state changes
+    setAuthState(isAuthenticated);
   }, [isAuthenticated]);
 
-  // ✅ Ensure multi-tab logout works
   useEffect(() => {
     const syncLogout = (event) => {
       if (event.key === "token" && event.newValue === null) {
         dispatch(logout());
       }
     };
-
     window.addEventListener("storage", syncLogout);
     return () => window.removeEventListener("storage", syncLogout);
   }, [dispatch]);
 
   useEffect(() => {
     if (searchQuery.trim()) {
-      setIsTyping(true);
       const delayDebounceFn = setTimeout(() => {
         fetchSearchResults();
       }, 300);
-
       return () => clearTimeout(delayDebounceFn);
     } else {
       dispatch(setSearchResults([]));
-      setIsTyping(false);
     }
   }, [searchQuery]);
 
@@ -69,15 +62,23 @@ function Navbar() {
   };
 
   return (
-    <nav className="bg-[#c8f4df] p-4 fixed top-0 left-0 w-full z-50 shadow-md">
+    <nav className="bg-[#c8f4df] p-3 sm:p-4 fixed top-0 left-0 w-full z-50 shadow-md">
       <div className="max-w-[1400px] mx-auto px-4 flex justify-between items-center">
-        {/* 🔹 Logo */}
+        {/* Logo */}
         <Link to="/" className="mr-4">
-          <img src={companyicon} alt="Icon" className="w-18 h-10" />
+          <img src={companyicon} alt="Icon" className="w-14 sm:w-18 h-8 sm:h-10" />
         </Link>
 
-        {/* 🔹 Search Bar */}
-        <div className="flex-grow mx-8 relative">
+        {/* Mobile Menu Button */}
+        <button
+          className="sm:hidden text-2xl"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+          {isMobileMenuOpen ? <HiX /> : <HiMenu />}
+        </button>
+
+        {/* Search Bar */}
+        <div className="hidden sm:flex flex-grow mx-2 sm:mx-8 relative">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -90,7 +91,7 @@ function Navbar() {
               placeholder="Search your Medicines"
               value={searchQuery}
               onChange={(e) => dispatch(setSearchQuery(e.target.value))}
-              className="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:border-blue-500 transition-all duration-300 ease-in-out"
+              className="w-full sm:w-[400px] px-3 py-2 rounded-full border border-gray-300 focus:outline-none focus:border-blue-500 transition-all duration-300 ease-in-out"
             />
 
             {searchQuery && (
@@ -105,107 +106,95 @@ function Navbar() {
           </form>
 
           {searchResults.length > 0 && (
-            <div className="absolute top-full left-0 mt-2 w-[90%] bg-white border border-gray-300 rounded-md shadow-lg overflow-y-auto z-50 transition-all ease-in-out duration-300 max-h-[35vh]">
+            <div className="absolute top-full left-0 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-lg overflow-y-auto z-50 transition-all ease-in-out duration-300 max-h-[200px]">
               {searchResults.map((result) => (
                 <div
                   key={result._id}
-                  className="px-4 py-3 hover:bg-gray-100 cursor-pointer transition-colors border-b border-gray-100 last:border-0"
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors border-b border-gray-100 last:border-0"
                   onClick={() => {
                     dispatch(setSearchResults([]));
                     dispatch(setSearchQuery(""));
                     navigate(`/medicine/${result._id}`);
                   }}
                 >
-                  <div className="flex flex-col">
-                    {/* ✅ General Medicine Name */}
-                    <span className="text-sm font-semibold text-gray-900">
-                      {result.drugName}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {result.category}
-                    </span>
-
-                    {/* ✅ Display Alternate Medicines if available */}
-                    {result.alternateMedicines?.length > 0 && (
-                      <div className="mt-1 text-xs text-gray-600">
-                        <strong>Alternates:</strong>{" "}
-                        {result.alternateMedicines.map((alt, index) => (
-                          <span key={index} className="text-gray-800">
-                            {alt.name}
-                            {index !== result.alternateMedicines.length - 1
-                              ? ", "
-                              : ""}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  <span className="text-sm font-semibold text-gray-900">{result.drugName}</span>
+                  <span className="text-xs text-gray-500">{result.category}</span>
                 </div>
               ))}
             </div>
           )}
 
           {loading && (
-            <div className="absolute top-full left-0 mt-2 w-[90%] text-center text-sm text-gray-500">
+            <div className="absolute top-full left-0 mt-2 w-full text-center text-sm text-gray-500">
               Loading...
             </div>
           )}
         </div>
 
-        {/* 🔹 Navigation Links */}
-        <div className="flex items-center space-x-6">
-          <Link
-            to="/infoOrder"
-            className="text-black text-base hover:text-blue-600 hidden sm:block"
-          >
+        {/* Desktop Navigation */}
+        <div className="hidden sm:flex items-center space-x-6">
+          <Link to="/infoOrder" className="text-black text-base hover:text-blue-600">
             How to order
           </Link>
-          <Link
-            to="/contact"
-            className="text-black text-base hover:text-blue-600 hidden sm:block"
-          >
+          <Link to="/contact" className="text-black text-base hover:text-blue-600">
             Contact
           </Link>
 
-          {/* 🔹 Auth Links */}
           {authState ? (
             <>
-              <Link
-                to="/profile"
-                className="text-black text-base hover:text-blue-600"
-              >
+              <Link to="/profile" className="text-black text-base hover:text-blue-600">
                 Profile
               </Link>
-              <Link
-                to="/cart"
-                className="text-black text-base hover:text-blue-600"
-              >
+              <Link to="/cart" className="text-black text-base hover:text-blue-600">
                 <div className="w-6 h-6 bg-white rounded-full flex justify-center items-center shadow-md">
                   <img className="w-4 h-4" src={cartImage} alt="Cart" />
                 </div>
               </Link>
-              {/*<button onClick={handleLogout} className="text-black text-base hover:text-red-600">
-                Logout
-              </button>*/}
             </>
           ) : (
             <>
-              <Link
-                to="/login"
-                className="text-black text-base hover:text-blue-600"
-              >
+              <Link to="/login" className="text-black text-base hover:text-blue-600">
                 Login
               </Link>
-              <Link
-                to="/register"
-                className="text-black text-base hover:text-blue-600"
-              >
+              <Link to="/register" className="text-black text-base hover:text-blue-600">
                 Sign Up
               </Link>
             </>
           )}
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <div className="sm:hidden flex flex-col items-center bg-[#c8f4df] py-4 space-y-3">
+          <Link to="/infoOrder" className="text-black text-base hover:text-blue-600">
+            How to order
+          </Link>
+          <Link to="/contact" className="text-black text-base hover:text-blue-600">
+            Contact
+          </Link>
+
+          {authState ? (
+            <>
+              <Link to="/profile" className="text-black text-base hover:text-blue-600">
+                Profile
+              </Link>
+              <Link to="/cart" className="text-black text-base hover:text-blue-600">
+                Cart
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="text-black text-base hover:text-blue-600">
+                Login
+              </Link>
+              <Link to="/register" className="text-black text-base hover:text-blue-600">
+                Sign Up
+              </Link>
+            </>
+          )}
+        </div>
+      )}
     </nav>
   );
 }

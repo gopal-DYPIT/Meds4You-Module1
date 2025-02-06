@@ -4,6 +4,11 @@ import axios from "axios";
 import MedicineCarousel from "../components/MedicineCarousel";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination, Autoplay, Navigation } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 
 const Home = () => {
   const [products, setProducts] = useState([]);
@@ -41,17 +46,17 @@ const Home = () => {
   ];
 
   useEffect(() => {
-    // Check for token in localStorage
     const token = localStorage.getItem("token");
     if (token) {
       setUser({ token });
     }
 
-    axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/products`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    axios
+      .get(`${import.meta.env.VITE_BACKEND_URL}/api/products`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
       .then((response) => {
         setProducts(response.data);
       })
@@ -83,7 +88,6 @@ const Home = () => {
           },
         }
       );
-      // console.log('Cart updated:', response.data);
       toast.success("Added to Cart!", {
         position: "top-center",
         autoClose: 3000,
@@ -99,133 +103,115 @@ const Home = () => {
 
   return (
     <div>
-      <div className="mx-auto max-w-7xl mt-20">
+      <div className="mx-auto max-w-7xl mt-16 sm:mt-20 px-4">
         {/* Header Section */}
-        <div className="header-section text-center bg-blue-100 py-16">
-          <h1 className="text-4xl font-bold text-[#333333] mb-4">
+        <div className="text-center bg-blue-100 py-4 sm:py-16">
+          <h1 className="text-2xl sm:text-4xl font-bold mb-0 text-gray-800 sm:mb-2">
             Your Partner in Affordable Healthcare
           </h1>
-          <div className="space-x-4">
-            {/* <Link to="/infoOrder">
-              <button className="bg-[#d1f3e0] text-[#444444] px-6 py-2 rounded-full hover:bg-[#4CAF50]">
-                Upload Prescription
-              </button>
-            </Link>
-            <Link to="/join-partner">
-              <button className="bg-[#d1f3e0] text-[#444444] px-6 py-2 rounded-full hover:bg-[#4CAF50]">
-                Join as Store Partner
-              </button>
-            </Link> */}
-          </div>
         </div>
 
         {/* Medicine Carousel */}
-        <div className="px-8 mt-8">
+        <div className="px-0 sm:px-8 mt-[-3rem] mb-0 sm:mb-8 sm:mt-[-3rem] ">
           <MedicineCarousel products={products} addToCart={addToCart} />
         </div>
 
-        {/* Why Choose Us Section */}
-        <div className="why-choose-us bg-gray-100 py-12">
-          <h2 className="text-2xl font-bold text-center mb-6">
+        {/* Why Choose Us */}
+        <div className="bg-gray-100 py-6 sm:py-12 text-center mt-[-4rem]">
+          <h2 className="text-lg sm:text-3xl font-bold mb-4 sm:mb-6">
             Why Choose Us?
           </h2>
-          <ul className="list-none text-center">
-            <li>Save up to 30% with high-quality generic alternatives.</li>
-            <li>Easy prescription upload and alternative suggestions.</li>
-            <li>Dedicated to making healthcare accessible to all.</li>
+          <ul className="list-none text-sm sm:text-lg">
+            <li>✅ Save up to 30% with high-quality generic alternatives.</li>
+            <li>📑 Easy prescription upload and alternative suggestions.</li>
+            <li>🌍 Dedicated to making healthcare accessible to all.</li>
           </ul>
         </div>
 
-        {/* WhatsApp Section */}
-        <section
-          style={{
-            position: "fixed",
-            bottom: "20px",
-            right: "16px",
-            zIndex: 1000,
-          }}
-        >
+        {/* WhatsApp Floating Button */}
+        <section className="fixed bottom-4 right-2 sm:right-4 z-50">
           <a
             href="https://wa.me/918484883367?text=Hello%20there!"
             target="_blank"
             rel="noopener noreferrer"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              padding: "12px 20px",
-              backgroundColor: "#25D366",
-              color: "white",
-              borderRadius: "50px",
-              boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-              textDecoration: "none",
-              transition: "all 0.3s ease",
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.backgroundColor = "#1EBE55")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.backgroundColor = "#25D366")
-            }
+            className="flex items-center px-4 sm:px-5 py-2 sm:py-3 bg-green-500 text-white rounded-full shadow-lg transition hover:bg-green-600"
           >
             <img
               src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
               alt="WhatsApp"
-              style={{
-                width: "24px",
-                height: "24px",
-                marginRight: "8px",
-                
-              }}
+              className="w-5 sm:w-6 h-5 sm:h-6 mr-2"
             />
-            <span
-              style={{
-                fontSize: "16px",
-                fontWeight: "bold",
-              }}
-            >
+            <span className="text-sm sm:text-lg font-bold">
               Chat on WhatsApp
             </span>
           </a>
         </section>
 
-        
-
-
-        {/* Customer Testimonials Section */}
-        <section className="py-0" id="happy-customers">
-          <h2 className="text-left text-2xl font-bold mb-6 text-black-800">
+        {/* Testimonials Section */}
+        <section className="py-8 sm:py-12" id="happy-customers">
+          <h2 className="text-left text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-black-800">
             💬 Hear from Our Happy Customers
           </h2>
-          <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 px-6">
+
+          {/* Mobile Slide */}
+          <div className="sm:hidden">
+            <Swiper
+              spaceBetween={10}
+              slidesPerView={1}
+              autoplay={{ delay: 5000, disableOnInteraction: false }}
+              // navigation
+              // pagination={{ clickable: true }}      
+              modules={[Autoplay, Pagination]}
+            >
+              {testimonials.map((testimonial, index) => (
+                <SwiperSlide key={index}>
+                  <div
+                    className="rounded-lg shadow-md flex flex-col justify-end text-left relative overflow-hidden h-[400px] bg-cover bg-center"
+                    style={{ backgroundImage: `url(${testimonial.image})` }}
+                  >
+                    <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+                    <div className="relative z-10 p-3 text-white mt-auto">
+                      <h3 className="font-semibold text-xs mb-1">
+                        <span className="mr-1">😊</span>
+                        {testimonial.name}{" "}
+                        <span className="text-gray-300">
+                          | {testimonial.age}
+                        </span>
+                      </h3>
+                      <p className="text-xs mt-1 leading-tight">
+                        {testimonial.text}
+                      </p>
+                    </div>
+                  </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>
+
+          {/* Desktop Grid */}
+          <div className="hidden sm:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8 px-2 sm:px-6">
             {testimonials.map((testimonial, index) => (
               <div
                 key={index}
-                className="rounded-lg shadow-md flex flex-col justify-end text-left relative overflow-hidden"
-                style={{
-                  backgroundImage: `url(${testimonial.image})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                  height: "300px",
-                }}
+                className="rounded-lg shadow-md flex flex-col justify-end text-left relative overflow-hidden h-[250px] sm:h-[300px] bg-cover bg-center"
+                style={{ backgroundImage: `url(${testimonial.image})` }}
               >
-                {/* Dark Overlay */}
-                <div className="absolute inset-0 bg-black bg-opacity-50"></div>
-
-                {/* Content */}
-                <div className="relative z-10 p-4 text-white mt-auto">
-                  <h3 className="font-semibold text-sm mb-1">
-                    <span className="mr-2">😊</span>
+                <div className="absolute inset-0 bg-black bg-opacity-40 sm:bg-opacity-50"></div>
+                <div className="relative z-10 p-3 sm:p-4 text-white mt-auto">
+                  <h3 className="font-semibold text-xs sm:text-sm mb-1">
+                    <span className="mr-1 sm:mr-2">😊</span>
                     {testimonial.name}{" "}
                     <span className="text-gray-300">| {testimonial.age}</span>
                   </h3>
-                  <p className="text-xs mt-2 leading-tight">{testimonial.text}</p>
+                  <p className="text-xs sm:text-sm mt-1 sm:mt-2 leading-tight">
+                    {testimonial.text}
+                  </p>
                 </div>
               </div>
             ))}
           </div>
         </section>
 
-        {/* Toastify Container */}
         <ToastContainer />
       </div>
     </div>
