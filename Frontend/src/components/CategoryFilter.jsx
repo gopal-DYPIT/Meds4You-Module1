@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 const CategoryFilter = ({ selectedCategory, setSelectedCategory }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [itemsToShow, setItemsToShow] = useState(4);
+  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
 
   const categories = [
     { value: "TopSellers", label: "Top Sellers" },
@@ -17,14 +18,13 @@ const CategoryFilter = ({ selectedCategory, setSelectedCategory }) => {
     { value: "digestive-care", label: "Digestive Care" },
   ];
 
-  // Updated responsive items to show based on screen size
+  // Handle screen resizing for responsiveness
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 640) {
-        setItemsToShow(2); // Show 2 items on mobile instead of 1
-      } else if (window.innerWidth < 768) {
+      setScreenWidth(window.innerWidth);
+      if (window.innerWidth < 480) {
         setItemsToShow(3);
-      } else if (window.innerWidth < 1024) {
+      } else if (window.innerWidth < 768) {
         setItemsToShow(3);
       } else {
         setItemsToShow(4);
@@ -32,41 +32,27 @@ const CategoryFilter = ({ selectedCategory, setSelectedCategory }) => {
     };
 
     handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 640) {
-        setItemsToShow(3); // ✅ Show 3 categories on mobile instead of 2
-      } else if (window.innerWidth < 768) {
-        setItemsToShow(3);
-      } else if (window.innerWidth < 1024) {
-        setItemsToShow(3);
-      } else {
-        setItemsToShow(4);
-      }
-    };
-
-    handleResize(); // Call once on mount to set initial value
     window.addEventListener("resize", handleResize);
-
-    return () => window.removeEventListener("resize", handleResize); // Cleanup on unmount
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const canScrollLeft = currentIndex > 0;
-  const canScrollRight = currentIndex + itemsToShow < categories.length;
+  let  canScrollRight;
+  if(screenWidth < 480) {
+    canScrollRight = currentIndex + itemsToShow < categories.length+4;
+  } else {
+    canScrollRight = currentIndex + itemsToShow < categories.length;
+  }
 
   const handlePrevious = () => {
     if (canScrollLeft) {
-      setCurrentIndex(currentIndex - 1);
+      setCurrentIndex((prev) => prev - 1);
     }
   };
 
   const handleNext = () => {
     if (canScrollRight) {
-      setCurrentIndex(currentIndex + 1);
+      setCurrentIndex((prev) => prev + 1);
     }
   };
 
@@ -75,16 +61,13 @@ const CategoryFilter = ({ selectedCategory, setSelectedCategory }) => {
     currentIndex + itemsToShow
   );
 
-  
-  
-
   return (
-    <div className="flex justify-center items-center min-h-[80px] w-full px-2 pr-8 sm:px-4 sm:min-h-[100px]">
-      <div className="w-full max-w-3xl sm:max-w-6xl sm:pr-10 mx-auto">
-        <div className="relative flex items-center justify-between space-x-1 sm:space-x-2 md:space-x-4 bg-[#f0f8ff] p-2 sm:p-3 md:p-4 rounded-xl shadow-md">
+    <div className="flex justify-center pr-6 sm:pr-20 items-center min-h-[80px] w-full px-2 sm:px-8">
+      <div className="w-full max-w-3xl sm:max-w-6xl mx-auto">
+        <div className="relative flex items-center bg-[#f0f8ff] p-2 sm:p-3 md:p-4 rounded-xl shadow-md">
           {/* Left Arrow */}
           <button
-            className={`flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full bg-white shadow-md transition-all duration-200 flex-shrink-0 ${
+            className={`flex items-center justify-center w-8 h-8 rounded-full bg-white shadow-md transition-all duration-200 ${
               canScrollLeft
                 ? "hover:bg-gray-100 text-gray-700"
                 : "opacity-50 cursor-not-allowed text-gray-400"
@@ -93,48 +76,45 @@ const CategoryFilter = ({ selectedCategory, setSelectedCategory }) => {
             disabled={!canScrollLeft}
             aria-label="Previous categories"
           >
-            <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+            <ChevronLeft className="w-5 h-5" />
           </button>
 
-          {/* Category Container */}
-          <div className="flex justify-center space-x-1 sm:space-x-2 md:space-x-3 flex-1">
-            {visibleCategories.map((category) => (
-              <button
-                key={category.value}
-                onClick={() => setSelectedCategory(category.value)}
-                className={`
-                  px-2 py-1 
-                  sm:px-3 sm:py-1.5 
-                  md:px-4 md:py-2
-                  rounded-lg 
-                  font-medium 
-                  text-[10px]
-                  sm:text-xs 
-                  md:text-sm
-                  whitespace-nowrap 
-                  transition-all 
-                  duration-200 
-                  transform 
-                  hover:scale-105 
-                  flex-1
-                  focus:outline-none 
-                  focus:ring-2 
-                  focus:ring-offset-2
-                  ${
+          {/* Category Container (Fixed Width & Overflow Hidden) */}
+          <div className="flex overflow-hidden w-full mx-2">
+            <div
+              className="flex transition-transform duration-300 space-x-2"
+              style={{
+                transform: `translateX(-${
+                  currentIndex * (100 / itemsToShow)
+                }%)`,
+                minWidth: "100%",
+              }}
+            >
+              {categories.map((category) => (
+                <button
+                  key={category.value}
+                  onClick={() => setSelectedCategory(category.value)}
+                  className={`px-3 py-1.5 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 whitespace-nowrap ${
                     selectedCategory === category.value
-                      ? "bg-[#d7548c] text-white shadow-md focus:ring-[#419ec8]"
-                      : "bg-white text-gray-700 shadow-md hover:bg-[#75c6eb] focus:ring-gray-400"
-                  }
-                `}
-              >
-                {category.label}
-              </button>
-            ))}
+                      ? "bg-[#d7548c] text-white shadow-md"
+                      : "bg-white text-gray-700 shadow-md hover:bg-[#75c6eb]"
+                  }`}
+                  style={{
+                    flex: `0 0 ${
+                      100 / Math.min(itemsToShow, categories.length)
+                    }%`,
+                  }}
+                  // Ensures each button takes equal width
+                >
+                  {category.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Right Arrow */}
           <button
-            className={`flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full bg-white shadow-md transition-all duration-200 flex-shrink-0 ${
+            className={`flex items-center justify-center w-8 h-8 rounded-full bg-white shadow-md transition-all duration-200 ${
               canScrollRight
                 ? "hover:bg-gray-100 text-gray-700"
                 : "opacity-50 cursor-not-allowed text-gray-400"
@@ -143,7 +123,7 @@ const CategoryFilter = ({ selectedCategory, setSelectedCategory }) => {
             disabled={!canScrollRight}
             aria-label="Next categories"
           >
-            <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+            <ChevronRight className="w-5 h-5" />
           </button>
         </div>
       </div>
