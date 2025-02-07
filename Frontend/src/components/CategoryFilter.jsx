@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const CategoryFilter = ({ selectedCategory, setSelectedCategory }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [itemsToShow, setItemsToShow] = useState(4);
-  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+  const containerRef = useRef(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
 
   const categories = [
     { value: "TopSellers", label: "Top Sellers" },
@@ -18,51 +19,56 @@ const CategoryFilter = ({ selectedCategory, setSelectedCategory }) => {
     { value: "digestive-care", label: "Digestive Care" },
   ];
 
-  // Handle screen resizing for responsiveness
+  // Responsive item display
   useEffect(() => {
     const handleResize = () => {
-      setScreenWidth(window.innerWidth);
-      if (window.innerWidth < 480) {
+      const width = window.innerWidth;
+      if (width < 480) {
         setItemsToShow(3);
-      } else if (window.innerWidth < 768) {
-        setItemsToShow(3);
-      } else {
+      } else if (width < 768) {
         setItemsToShow(4);
+      } else {
+        setItemsToShow(5);
       }
     };
-
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const canScrollLeft = currentIndex > 0;
-  let  canScrollRight;
-  if(screenWidth < 480) {
-    canScrollRight = currentIndex + itemsToShow < categories.length+4;
-  } else {
-    canScrollRight = currentIndex + itemsToShow < categories.length;
-  }
-
-  const handlePrevious = () => {
-    if (canScrollLeft) {
-      setCurrentIndex((prev) => prev - 1);
+  // Update scroll buttons visibility
+  useEffect(() => {
+    const checkScroll = () => {
+      if (!containerRef.current) return;
+      setCanScrollLeft(containerRef.current.scrollLeft > 0);
+      setCanScrollRight(
+        containerRef.current.scrollLeft <
+          containerRef.current.scrollWidth - containerRef.current.clientWidth
+      );
+    };
+    checkScroll();
+    if (containerRef.current) {
+      containerRef.current.addEventListener("scroll", checkScroll);
     }
-  };
+    return () => {
+      if (containerRef.current) {
+        containerRef.current.removeEventListener("scroll", checkScroll);
+      }
+    };
+  }, []);
 
-  const handleNext = () => {
-    if (canScrollRight) {
-      setCurrentIndex((prev) => prev + 1);
-    }
+  // Handle arrow navigation
+  const handleScroll = (direction) => {
+    if (!containerRef.current) return;
+    const scrollAmount = containerRef.current.clientWidth / itemsToShow;
+    containerRef.current.scrollBy({
+      left: direction === "left" ? -scrollAmount : scrollAmount,
+      behavior: "smooth",
+    });
   };
-
-  const visibleCategories = categories.slice(
-    currentIndex,
-    currentIndex + itemsToShow
-  );
 
   return (
-    <div className="flex justify-center pr-6 sm:pr-20 items-center min-h-[80px] w-full px-2 sm:px-8">
+    <div className="flex justify-center ml-[-8px] sm:ml-[-24px] items-center w-full pt-2 pb-4 sm:px-8 sm:pb-4">
       <div className="w-full max-w-3xl sm:max-w-6xl mx-auto">
         <div className="relative flex items-center bg-[#f0f8ff] p-2 sm:p-3 md:p-4 rounded-xl shadow-md">
           {/* Left Arrow */}
@@ -72,44 +78,31 @@ const CategoryFilter = ({ selectedCategory, setSelectedCategory }) => {
                 ? "hover:bg-gray-100 text-gray-700"
                 : "opacity-50 cursor-not-allowed text-gray-400"
             }`}
-            onClick={handlePrevious}
+            onClick={() => handleScroll("left")}
             disabled={!canScrollLeft}
             aria-label="Previous categories"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
 
-          {/* Category Container (Fixed Width & Overflow Hidden) */}
-          <div className="flex overflow-hidden w-full mx-2">
-            <div
-              className="flex transition-transform duration-300 space-x-2"
-              style={{
-                transform: `translateX(-${
-                  currentIndex * (100 / itemsToShow)
-                }%)`,
-                minWidth: "100%",
-              }}
-            >
-              {categories.map((category) => (
-                <button
-                  key={category.value}
-                  onClick={() => setSelectedCategory(category.value)}
-                  className={`px-3 py-1.5 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 whitespace-nowrap ${
-                    selectedCategory === category.value
-                      ? "bg-[#d7548c] text-white shadow-md"
-                      : "bg-white text-gray-700 shadow-md hover:bg-[#75c6eb]"
-                  }`}
-                  style={{
-                    flex: `0 0 ${
-                      100 / Math.min(itemsToShow, categories.length)
-                    }%`,
-                  }}
-                  // Ensures each button takes equal width
-                >
-                  {category.label}
-                </button>
-              ))}
-            </div>
+          {/* Category Container */}
+          <div
+            className="flex overflow-x-auto w-full mx-2 gap-4 scroll-smooth scrollbar-hide"
+            ref={containerRef}
+          >
+            {categories.map((category) => (
+              <button
+                key={category.value}
+                onClick={() => setSelectedCategory(category.value)}
+                className={`px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 whitespace-nowrap ${
+                  selectedCategory === category.value
+                    ? "bg-[#d7548c] text-white shadow-md"
+                    : "bg-white text-gray-700 shadow-md sm:hover:bg-[#75c6eb]"
+                }`}
+              >
+                {category.label}
+              </button>
+            ))}
           </div>
 
           {/* Right Arrow */}
@@ -119,7 +112,7 @@ const CategoryFilter = ({ selectedCategory, setSelectedCategory }) => {
                 ? "hover:bg-gray-100 text-gray-700"
                 : "opacity-50 cursor-not-allowed text-gray-400"
             }`}
-            onClick={handleNext}
+            onClick={() => handleScroll("right")}
             disabled={!canScrollRight}
             aria-label="Next categories"
           >
