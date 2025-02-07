@@ -171,6 +171,7 @@ const MedicineCarousel = ({ products, addToCart }) => {
                     alt="Tablet"
                     style={{ height: "40px", width: "100px" }}
                   />
+                  <div className="space-y-4">
                   <b>{product.drugName}</b>
                   <p style={{ marginBottom: "8px", lineHeight: "1.5" }}>
                     {product.manufacturer}
@@ -178,7 +179,11 @@ const MedicineCarousel = ({ products, addToCart }) => {
                   <p style={{ marginBottom: "4px", lineHeight: "1.2" }}>
                     {product.category}
                   </p>
-                  <p>MRP: ₹{product.mrp}</p>
+                  <p style={{ marginBottom: "4px", lineHeight: "1.2" }}>
+                    {product.size}
+                  </p>
+                  <p className="pb-4">MRP: ₹{product.mrp}</p>
+                  </div>
                 </div>
                 <div style={rightStyle} className="mt-3">
                   <b>Recommended</b>
@@ -203,8 +208,12 @@ const MedicineCarousel = ({ products, addToCart }) => {
                         <div className="pt-4 font-roboto text-xl">
                           {alt.manufacturer}
                         </div>
+                        <div className="pt-4 font-roboto text-xl">
+                          {product.size}
+                        </div>
+
                         <div
-                          className="font-bold text-2xl"
+                          className="font-bold pt-2 text-2xl"
                           style={{ color: "rgb(12, 159, 12)" }}
                         >
                           ₹{alt.price}
