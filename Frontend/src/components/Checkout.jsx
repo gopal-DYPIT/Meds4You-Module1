@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux"; // For accessing Redux state
-import { useDispatch } from "react-redux"; // For dispatching actions
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { toast, ToastContainer } from "react-toastify";
 
 const CheckoutPage = () => {
   const [cart, setCart] = useState([]);
@@ -13,17 +14,13 @@ const CheckoutPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // Get token from Redux state
   const token = useSelector((state) => state.auth.token);
 
   useEffect(() => {
     if (token) {
-      // Fetch the cart if a token exists
       axios
         .get(`${import.meta.env.VITE_BACKEND_URL}/api/cart/`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
           setCart(response.data?.items || []);
@@ -33,16 +30,13 @@ const CheckoutPage = () => {
           console.error("Failed to fetch cart:", err);
         });
 
-      // Fetch user's addresses
       axios
         .get(`${import.meta.env.VITE_BACKEND_URL}/api/users/addresses`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
           setAddresses(response.data?.addresses || []);
-          setLoading(false); // Set loading to false after data is fetched
+          setLoading(false);
         })
         .catch((err) => {
           setError("Failed to fetch addresses");
@@ -50,8 +44,8 @@ const CheckoutPage = () => {
           console.error("Failed to fetch addresses:", err);
         });
     } else {
-      setLoading(false); // If no token, stop loading
-      navigate("/login"); // Redirect to login if not authenticated
+      setLoading(false);
+      navigate("/login");
     }
   }, [token, navigate]);
 
@@ -68,7 +62,7 @@ const CheckoutPage = () => {
     axios
       .post(
         `${import.meta.env.VITE_BACKEND_URL}/api/orders/create`,
-        { address: selectedAddress }, // Send required data in the body
+        { address: selectedAddress },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -76,62 +70,84 @@ const CheckoutPage = () => {
         }
       )
       .then((response) => {
-        alert("Order placed successfully!");
-        navigate("/order-summary");
+        toast.success("Order placed successfully!", {
+          position: "top-center",
+          autoClose: 2000, // Ensure autoClose is set
+        });
+
+        // Delay navigation to allow toast to appear
+        setTimeout(() => {
+          navigate("/order-summary");
+        }, 3000);
       })
       .catch((err) => {
         setError("Failed to place order");
+        toast.error("Failed to place order", { position: "top-center" }); // Add toast for error
         console.error("Failed to place order:", err);
       });
-  }; 
-
-  // Calculate the total price of the cart and format it to 2 decimal places
-  const calculateTotal = () => {
-    return cart.reduce((total, item) => {
-      // Use the first alternate medicine's price, if available
-      const alternatePrice = item?.productId?.alternateMedicines?.[0]?.price || item?.productId?.price;
-      return total + alternatePrice * (item?.quantity || 0);
-    }, 0).toFixed(2);
   };
-  
+
+  const calculateTotal = () => {
+    return cart
+      .reduce((total, item) => {
+        const alternatePrice =
+          item?.productId?.alternateMedicines?.[0]?.price ||
+          item?.productId?.price;
+        return total + alternatePrice * (item?.quantity || 0);
+      }, 0)
+      .toFixed(2);
+  };
 
   const totalAmount = calculateTotal();
 
   return (
-    <div className="container min-h-screen mx-auto p-24">
-      <h1 className="text-center text-3xl mb-6">Checkout</h1>
+    <div className="container pt-16  min-h-screen mx-auto p-4 sm:p-12">
+      <h1 className="text-center font-semibold text-2xl sm:text-3xl mb-6">
+        Checkout
+      </h1>
       {error && <p className="text-red-500 text-center">{error}</p>}
 
       {loading ? (
         <p className="text-center">Loading...</p>
       ) : (
         <div className="space-y-6">
-          <h2 className="text-2xl font-bold mb-4">Select Shipping Address</h2>
+          {/* Address Selection */}
+          <h2 className="text-xl sm:text-2xl font-bold mb-4">
+            Select Shipping Address
+          </h2>
           {addresses.length === 0 ? (
             <p className="text-center text-gray-500">
               You have no saved addresses.
             </p>
           ) : (
-            <div>
+            <div className="space-y-4">
               {addresses.map((address) => (
                 <div
                   key={address._id}
-                  className={`flex items-center border p-4 rounded-md mb-4 cursor-pointer ${
+                  className={`flex items-center border p-4 rounded-lg cursor-pointer transition-all duration-300 ${
                     selectedAddress?._id === address._id
-                      ? "border-blue-500"
-                      : "border-gray-300"
+                      ? "border-green-500 bg-green-50 shadow-md"
+                      : "border-gray-300 hover:border-blue-400"
                   }`}
                   onClick={() => handleAddressSelect(address)}
                 >
-                  <div className="flex-1">
+                  <input
+                    type="radio"
+                    name="address"
+                    checked={selectedAddress?._id === address._id}
+                    onChange={() => handleAddressSelect(address)}
+                    className="w-5 h-5 text-green-500 focus:ring-green-500"
+                  />
+                  <div className="ml-4">
                     <h3 className="font-bold text-lg">{address.street}</h3>
                     <p>
                       {address.city}, {address.state}
                     </p>
-                    <p>{address.country}</p>
-                    <p>{address.zipCode}</p>
+                    <p>
+                      {address.country}, {address.zipCode}
+                    </p>
                     {address.isPrimary && (
-                      <span className="text-sm text-green-600">
+                      <span className="text-sm text-green-600 font-medium">
                         Primary Address
                       </span>
                     )}
@@ -141,27 +157,26 @@ const CheckoutPage = () => {
             </div>
           )}
 
-          <h2 className="text-2xl font-bold mb-4">Order Summary</h2>
+          {/* Order Summary */}
+          <h2 className="text-xl sm:text-2xl font-bold mb-4">Order Summary</h2>
           {cart.length === 0 ? (
             <p className="text-center text-gray-500">Your cart is empty.</p>
           ) : (
-            <div>
+            <div className="space-y-4">
               {cart.map((item, index) => {
-                // Extract alternate medicine details (if available)
                 const alternateMedicine =
                   item?.productId?.alternateMedicines?.[0] || null;
-
                 return (
                   <div
                     key={index}
-                    className="flex items-center border p-4 rounded-md"
+                    className="flex items-center border p-4 rounded-lg shadow-sm"
                   >
                     <img
                       src={
                         alternateMedicine?.manufacturerUrl || "placeholder.jpg"
                       }
                       alt={alternateMedicine?.name || "Unnamed product"}
-                      className="w-16 h-16 object-cover rounded mr-4"
+                      className="w-16 h-16 object-cover rounded-lg mr-4"
                     />
                     <div className="flex-1">
                       <h2 className="font-bold text-lg">
@@ -178,20 +193,24 @@ const CheckoutPage = () => {
             </div>
           )}
 
-          {/* Display the total amount */}
-          <div className="flex justify-between items-center font-semibold text-lg mt-6">
+          {/* Total Amount */}
+          <div className="flex justify-between items-center font-bold text-lg sm:text-xl border-t border-gray-300 pt-4">
             <span>Total:</span>
-            <span>Rs.{totalAmount}</span>
+            <span className="text-green-600 text-xl sm:text-2xl font-extrabold">
+              Rs.{totalAmount}
+            </span>
           </div>
 
+          {/* Place Order Button */}
           <button
             onClick={handlePlaceOrder}
-            className="bg-green-500 text-white p-2 rounded mt-6 block mx-auto transition transform duration-300 ease-in-out hover:bg-green-600 hover:scale-105"
+            className="w-full sm:w-auto bg-green-500 text-white px-6 py-3 rounded-md text-lg font-semibold mt-4 block mx-auto transition-all duration-300 ease-in-out hover:bg-green-600 hover:scale-105 shadow-md"
           >
             Place Order
           </button>
         </div>
       )}
+      <ToastContainer />
     </div>
   );
 };

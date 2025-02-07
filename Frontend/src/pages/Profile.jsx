@@ -12,6 +12,7 @@ const Profile = () => {
   const navigate = useNavigate();
 
   const [user, setUser] = useState(null);
+  const [orderHistory, setOrderHistory] = useState([]);
   const [addresses, setAddresses] = useState([]);
   const [newAddress, setNewAddress] = useState({
     street: "",
@@ -47,7 +48,20 @@ const Profile = () => {
       }
     };
 
+    const fetchOrders = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/api/orders/order-history`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setOrderHistory(response.data);
+      } catch (error) {
+        console.error("Error fetching order history:", error);
+      }
+    };
+
     verifyUser();
+    fetchOrders();
   }, [token, dispatch]);
 
   const handleLogout = () => {
@@ -162,6 +176,16 @@ const Profile = () => {
             }`}
           >
             Manage Address
+          </button>
+          <button
+            onClick={() => setSelectedSection("orderHistory")}
+            className={`flex-1 md:w-full text-center md:text-left p-2 md:p-3 rounded-md transition ${
+              selectedSection === "orderHistory"
+                ? "bg-gray-400"
+                : "bg-gray-300 hover:bg-gray-400"
+            }`}
+          >
+            Order History
           </button>
           <button
             onClick={handleLogout}
@@ -286,6 +310,44 @@ const Profile = () => {
                   Add Address
                 </button>
               </div>
+            )}
+          </div>
+        )}
+
+        {selectedSection === "orderHistory" && (
+          <div className="max-w-4xl mx-auto p-4 sm:p-6 bg-white rounded-lg shadow-lg">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">
+              Order History
+            </h2>
+            {orderHistory.length === 0 ? (
+              <p className="text-gray-500">No orders found.</p>
+            ) : (
+              <ul className="divide-y divide-gray-200">
+                {orderHistory.map((order) => (
+                  <li
+                    key={order._id}
+                    className="py-4 border border-gray-200 rounded-lg p-4 sm:p-6 shadow-sm"
+                  >
+                    <p className="font-medium text-gray-900">
+                      Order ID: {order._id}
+                    </p>
+                    <p className="text-gray-700">
+                      <strong>Total:</strong> ₹{order.totalAmount.toFixed(2)}
+                    </p>
+                    <p className="text-gray-700">
+                      <strong>Status:</strong> {order.orderStatus}
+                    </p>
+                    <ul className="mt-2 space-y-2">
+                      {order.items.map((item) => (
+                        <li key={item.productId._id} className="text-gray-600">
+                          {item.productId.drugName} (Qty: {item.quantity}) - ₹
+                          {item.price.toFixed(2)}
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                ))}
+              </ul>
             )}
           </div>
         )}

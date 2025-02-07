@@ -23,28 +23,73 @@ const OrderSummary = () => {
       });
   }, [token]);
 
-  if (error) return <div className="text-red-500">{error}</div>;
-  if (!order) return <div>Loading...</div>;
+  if (error)
+    return <div className="text-red-500 text-center mt-10">{error}</div>;
+  if (!order) return <div className="text-center mt-10">Loading...</div>;
 
   return (
-    <div className="p-10 mt-32  max-w-2xl mx-auto bg-gray-100 shadow-md rounded-lg">
-      <h2 className="text-2xl font-semibold mb-4">Order Summary</h2>
-      {/* <div>{console.log(order)}</div> */}
-      <p className="text-gray-700"><strong>Order ID:</strong> {order._id}</p>
-      <p className="text-gray-700"><strong>Total Amount:</strong> ${order.totalAmount}</p>
-      <p className="text-gray-700"><strong>Payment Status:</strong> {order.paymentStatus}</p>
-      <p className="text-gray-700"><strong>Order Status:</strong> {order.orderStatus}</p>
-      <h3 className="text-lg font-semibold mt-4">Items:</h3>
-      <ul className="list-disc pl-5">
+    <div className="max-w-3xl mx-auto p-4  sm:p-8 mt-24 mb-20 sm:mt-28 bg-white shadow-lg rounded-lg border border-gray-200">
+      <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 sm:mb-6 text-center">
+        Order Summary
+      </h2>
+      <div className="border-b pb-3 sm:pb-4 mb-3 sm:mb-4 space-y-1 sm:space-y-2">
+        <p className="text-base sm:text-lg text-gray-700">
+          <strong>Order ID:</strong> {order._id}
+        </p>
+        <p className="text-base sm:text-lg text-gray-700">
+          <strong>Total Amount:</strong> ₹{order.totalAmount.toFixed(2)}
+        </p>
+        <p className="text-base sm:text-lg text-gray-700">
+          <strong>Payment Status:</strong>{" "}
+          <span
+            className={`px-2 py-1 rounded ${
+              order.paymentStatus === "paid"
+                ? "bg-green-100 text-green-700"
+                : "bg-yellow-100 text-yellow-700"
+            }`}
+          >
+            {order.paymentStatus}
+          </span>
+        </p>
+        <p className="text-base sm:text-lg text-gray-700">
+          <strong>Order Status:</strong>{" "}
+          <span
+            className={`px-2 py-1 rounded ${
+              order.orderStatus === "shipped"
+                ? "bg-blue-100 text-blue-700"
+                : "bg-gray-100 text-gray-700"
+            }`}
+          >
+            {order.orderStatus}
+          </span>
+        </p>
+      </div>
+      <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2 sm:mb-3">
+        Items Ordered
+      </h3>
+      <ul className="divide-y divide-gray-200">
         {order.items.map((item) => (
-          <li key={item.productId} className="text-gray-700">
-            {item.productName} - {item.quantity} x ${item.price}
+          <li
+            key={item.productId}
+            className="py-2 sm:py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center"
+          >
+            <div>
+              <p className="text-gray-900 font-medium text-sm sm:text-base">
+                {item.productId.drugName}
+              </p>
+              <p className="text-gray-500 text-sm">
+                Qty: {item.quantity} x ₹{item.price.toFixed(2)}
+              </p>
+            </div>
+            <p className="text-gray-900 font-semibold text-sm sm:text-base">
+              ₹{(item.quantity * item.price).toFixed(2)}
+            </p>
           </li>
         ))}
       </ul>
-      <button 
+      <button
         onClick={() => navigate("/")}
-        className="mt-4 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600"
+        className="mt-5 sm:mt-6 w-full sm:w-auto bg-red-500 text-white py-2 sm:py-3 px-4 sm:px-6 rounded-lg hover:bg-red-600 text-lg font-medium"
       >
         Continue Shopping
       </button>

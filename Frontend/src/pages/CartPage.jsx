@@ -88,7 +88,7 @@ const CartPage = () => {
 
   return (
     <div className="container min-h-screen mx-auto p-4 sm:p-12 mt-24 sm:mt-16"> {/* Adjusted padding for mobile */}
-      <h1 className="text-center text-2xl sm:text-3xl mb-4 sm:mb-6">Your Cart</h1>
+      <h1 className="text-center font-semibold text-2xl sm:text-3xl mb-4 sm:mb-6">Your Cart</h1>
       {error && <p className="text-red-500 text-center">{error}</p>}
       {cart.length === 0 ? (
         <p className="text-center text-gray-500">Your cart is empty.</p>

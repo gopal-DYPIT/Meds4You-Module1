@@ -107,7 +107,7 @@ const Home = () => {
 
   return (
     <div>
-      <div className="mx-auto max-w-7xl mt-20 sm:mt-20 px-4">
+      <div className="mx-auto max-w-7xl mt-20 sm:mt-22 px-4">
         {/* Header Section */}
         <div className="text-center bg-blue-100 py-4 sm:py-16">
           <h1 className="text-2xl sm:text-4xl font-bold mb-0 text-gray-800 sm:mb-2">
@@ -115,7 +115,7 @@ const Home = () => {
           </h1>
         </div>
 
-        <div className="flex justify-start ml-4 sm:ml-11 mt-4 sm:mb-[4px]  sm:mt-[4px]">
+        <div className="flex justify-start ml-4 sm:ml-11 mt-0 sm:mb-[4px]  sm:mt-[20px]">
           <CategoryFilter
             selectedCategory={selectedCategory}
             setSelectedCategory={setSelectedCategory}
@@ -128,11 +128,11 @@ const Home = () => {
         </div>
 
         {/* Why Choose Us */}
-        <div className="bg-gray-100 py-6 sm:py-12 text-center mt-[-4rem]">
-          <h2 className="text-lg sm:text-3xl font-bold mb-4 sm:mb-6">
+        <div className="bg-gray-100 py-6 sm:py-12 mt-[-6rem] sm:mt-[-4rem] px-4 sm:px-12">
+          <h2 className="text-lg sm:text-3xl font-bold mb-4 sm:mb-6 text-left">
             Why Choose Us?
           </h2>
-          <ul className="list-none text-sm sm:text-lg">
+          <ul className="list-none text-sm sm:text-lg text-left space-y-2 sm:space-y-3">
             <li>✅ Save up to 30% with high-quality generic alternatives.</li>
             <li>📑 Easy prescription upload and alternative suggestions.</li>
             <li>🌍 Dedicated to making healthcare accessible to all.</li>

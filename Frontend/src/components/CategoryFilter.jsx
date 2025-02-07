@@ -1,101 +1,152 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const CategoryFilter = ({ selectedCategory, setSelectedCategory }) => {
-  const [showFilters, setShowFilters] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [itemsToShow, setItemsToShow] = useState(4);
 
   const categories = [
-    { value: "TopSellers", label: "Top Sellers" }, // Null represents default (no category)
+    { value: "TopSellers", label: "Top Sellers" },
     { value: "Diabetes", label: "Diabetes" },
-    {
-      value: "Neurological-and-Psychiatric",
-      label: "Neurological & Psychiatric",
-    },
-    { value: "Piles-Fissures-Fistula", label: "Piles, Fissures & Fistula" },
-    {
-      value: "Reproductive-Health-Wellness",
-      label: "Reproductive Health & Wellness",
-    },
-    { value: "vitamins-and-minerals", label: "Vitamins & Minerals" },
-    { value: "skin-care", label: "Skin Care" },
     { value: "heart-care", label: "Heart Care" },
+    { value: "skin-care", label: "Skin Care" },
+    { value: "vitamins-and-minerals", label: "Vitamins & Minerals" },
+    { value: "Neurological-and-Psychiatric", label: "Neurology & Psychiatry" },
+    { value: "Piles-Fissures-Fistula", label: "Piles & Fissures" },
+    { value: "Reproductive-Health-Wellness", label: "Reproductive Health" },
     { value: "digestive-care", label: "Digestive Care" },
-    { value: "kidney-care", label: "Kidney Care" },
-    { value: "respiratory-care", label: "Respiratory Care" },
-    { value: "joints-and-muscle-care", label: "Joints & Muscle Care" },
-    { value: "arthritis", label: "Arthritis" },
-    { value: "autoimmune-conditions", label: "Autoimmune Conditions" },
-    { value: "cancer-care", label: "Cancer Care" },
-    { value: "infectious", label: "Infectious Diseases" },
-    { value: "liver-care", label: "Liver Care" },
   ];
 
+  // Updated responsive items to show based on screen size
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 640) {
+        setItemsToShow(2); // Show 2 items on mobile instead of 1
+      } else if (window.innerWidth < 768) {
+        setItemsToShow(3);
+      } else if (window.innerWidth < 1024) {
+        setItemsToShow(3);
+      } else {
+        setItemsToShow(4);
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 640) {
+        setItemsToShow(3); // ✅ Show 3 categories on mobile instead of 2
+      } else if (window.innerWidth < 768) {
+        setItemsToShow(3);
+      } else if (window.innerWidth < 1024) {
+        setItemsToShow(3);
+      } else {
+        setItemsToShow(4);
+      }
+    };
+
+    handleResize(); // Call once on mount to set initial value
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize); // Cleanup on unmount
+  }, []);
+
+  const canScrollLeft = currentIndex > 0;
+  const canScrollRight = currentIndex + itemsToShow < categories.length;
+
+  const handlePrevious = () => {
+    if (canScrollLeft) {
+      setCurrentIndex(currentIndex - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (canScrollRight) {
+      setCurrentIndex(currentIndex + 1);
+    }
+  };
+
+  const visibleCategories = categories.slice(
+    currentIndex,
+    currentIndex + itemsToShow
+  );
+
+  
+  
+
   return (
-    <div className="relative flex justify-start my-4 sm:my-6">
-      {/* Filters Button */}
-      <button
-        onClick={() => setShowFilters(!showFilters)}
-        className="flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 sm:px-6 sm:py-3 rounded-lg border border-gray-300 shadow-md hover:bg-gray-200 transition"
-      >
-        <span className="font-medium">Filters</span>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-5 h-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M10 6h10M5 12h15m-10 6h10"
-          />
-        </svg>
-      </button>
+    <div className="flex justify-center items-center min-h-[80px] w-full px-2 pr-8 sm:px-4 sm:min-h-[100px]">
+      <div className="w-full max-w-3xl sm:max-w-6xl sm:pr-10 mx-auto">
+        <div className="relative flex items-center justify-between space-x-1 sm:space-x-2 md:space-x-4 bg-[#f0f8ff] p-2 sm:p-3 md:p-4 rounded-xl shadow-md">
+          {/* Left Arrow */}
+          <button
+            className={`flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full bg-white shadow-md transition-all duration-200 flex-shrink-0 ${
+              canScrollLeft
+                ? "hover:bg-gray-100 text-gray-700"
+                : "opacity-50 cursor-not-allowed text-gray-400"
+            }`}
+            onClick={handlePrevious}
+            disabled={!canScrollLeft}
+            aria-label="Previous categories"
+          >
+            <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+          </button>
 
-      {/* Filters Popover (Left-Aligned) */}
-      {showFilters && (
-        <div className="absolute top-12 left-0 w-72 sm:w-96 bg-white shadow-lg rounded-lg border border-gray-300 p-4 z-50">
-          <h3 className="text-lg font-semibold text-gray-800 mb-3">
-            Filter by Category
-          </h3>
-
-          
-
-          {/* Category List */}
-          <div className="grid grid-cols-2 gap-2 text-sm text-gray-700 mt-2">
-            {categories
-              .filter((category) => category.value !== null) // Exclude "Top Sellers" from the list
-              .map((category) => (
-                <label
-                  key={category.value}
-                  className="flex items-center space-x-2 cursor-pointer"
-                >
-                  <input
-                    type="radio"
-                    name="category"
-                    value={category.value}
-                    checked={selectedCategory === category.value}
-                    onChange={() => {
-                      setSelectedCategory(category.value);
-                      setShowFilters(false);
-                    }}
-                    className="w-4 h-4 accent-blue-500 cursor-pointer"
-                  />
-                  <span>{category.label}</span>
-                </label>
-              ))}
+          {/* Category Container */}
+          <div className="flex justify-center space-x-1 sm:space-x-2 md:space-x-3 flex-1">
+            {visibleCategories.map((category) => (
+              <button
+                key={category.value}
+                onClick={() => setSelectedCategory(category.value)}
+                className={`
+                  px-2 py-1 
+                  sm:px-3 sm:py-1.5 
+                  md:px-4 md:py-2
+                  rounded-lg 
+                  font-medium 
+                  text-[10px]
+                  sm:text-xs 
+                  md:text-sm
+                  whitespace-nowrap 
+                  transition-all 
+                  duration-200 
+                  transform 
+                  hover:scale-105 
+                  flex-1
+                  focus:outline-none 
+                  focus:ring-2 
+                  focus:ring-offset-2
+                  ${
+                    selectedCategory === category.value
+                      ? "bg-[#d7548c] text-white shadow-md focus:ring-[#419ec8]"
+                      : "bg-white text-gray-700 shadow-md hover:bg-[#75c6eb] focus:ring-gray-400"
+                  }
+                `}
+              >
+                {category.label}
+              </button>
+            ))}
           </div>
 
-          {/* Close Button */}
+          {/* Right Arrow */}
           <button
-            onClick={() => setShowFilters(false)}
-            className="mt-4 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition"
+            className={`flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full bg-white shadow-md transition-all duration-200 flex-shrink-0 ${
+              canScrollRight
+                ? "hover:bg-gray-100 text-gray-700"
+                : "opacity-50 cursor-not-allowed text-gray-400"
+            }`}
+            onClick={handleNext}
+            disabled={!canScrollRight}
+            aria-label="Next categories"
           >
-            Apply Filters
+            <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />
           </button>
         </div>
-      )}
+      </div>
     </div>
   );
 };

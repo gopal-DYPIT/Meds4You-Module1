@@ -80,14 +80,14 @@ const MedicineDetails = () => {
 
   return (
     <div className="mx-auto max-w-6xl mt-10 sm:mt-20 px-4 sm:px-8 py-8 sm:py-12">
-      <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-6 sm:mb-8">
+      <h2 className="text-3xl mt-8 sm:mt-0 sm:text-4xl font-bold text-gray-900 text-center mb-6 sm:mb-8">
         Recommended Medicine
       </h2>
 
       <div className="flex flex-col sm:flex-row gap-6 sm:gap-10">
         {/* 🏥 General Medicine (Less Emphasis) */}
         <div className="flex-1 p-4 sm:p-6 border border-gray-300 bg-white shadow-md rounded-lg text-center">
-          <h3 className="text-xl sm:text-2xl font-semibold text-gray-800">Original Medicine</h3>
+          <h3 className="text-xl sm:text-2xl font-semibold text-gray-800">Searched Medicine</h3>
           <img
             src={medicine.imageUrl || "default-image.jpg"}
             alt={medicine.drugName}

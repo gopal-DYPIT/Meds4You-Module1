@@ -267,4 +267,22 @@ router.put(
   }
 );
 
+router.get("/order-history", authorizeRoles("user"), async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const orders = await Order.find({ userId })
+      .populate("items.productId", "drugName price")
+      .sort({ createdAt: -1 });
+
+    // console.log("Orders found:", orders);
+
+    res.status(200).json(orders);
+  } catch (error) {
+    console.error("Error fetching order history:", error);
+    res.status(500).json({ error: "Failed to fetch order history" });
+  }
+});
+
+
 export default router;

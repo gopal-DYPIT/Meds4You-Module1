@@ -58,7 +58,7 @@ function AppContent() {
         {/* Other routes */}
       </Routes>
       {shouldShowLayout && <Footer />}
-      <ToastContainer position="top-center" />
+      <ToastContainer position="top-center" autoClose={3000} />
     </>
   );
 }

@@ -3,6 +3,23 @@ import Product from "../models/product.js";
 import { authenticateToken } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
+
+router.get("/search", async (req, res) => {
+  const { q } = req.query;
+  if (!q) return res.json([]);
+
+  try {
+    const results = await Product.find({
+      drugName: { $regex: `^${q}`, $options: "i" }, // ✅ Strictly search by drugName only
+    }).limit(10);
+
+    res.json(results);
+  } catch (error) {
+    console.error("Search API error:", error.message);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
 router.get("/", async (req, res) => {
   try {
     const { search, category } = req.query;
@@ -23,10 +40,11 @@ router.get("/", async (req, res) => {
     const products = await Product.find(query);
     res.json(products);
   } catch (err) {
-    res.status(500).json({ message: "Error fetching products", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching products", error: err.message });
   }
 });
-
 
 // Fetch products by category or return top sellers if no category is provided
 router.get("/category", async (req, res) => {
@@ -43,32 +61,13 @@ router.get("/category", async (req, res) => {
     const products = await Product.find(query);
     res.json(products);
   } catch (err) {
-    res.status(500).json({ message: "Error fetching category products", error: err.message });
+    res.status(500).json({
+      message: "Error fetching category products",
+      error: err.message,
+    });
   }
 });
 
-
-router.get("/products/search", async (req, res) => {
-  const { q } = req.query;
-  if (!q) return res.json([]);
-
-  try {
-    const results = await Product.find({
-      $or: [
-        { drugName: { $regex: q, $options: "i" } },
-        { manufacturer: { $regex: q, $options: "i" } },
-        { salt: { $regex: q, $options: "i" } },
-        { "alternateMedicines.name": { $regex: q, $options: "i" } }, // ✅ Search in alternate medicines
-      ],
-    }).limit(10);
-
-    res.json(results);
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
-  }
-});
-
-// Fetch a single product by ID and its alternate products
 router.get("/:id", async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -96,7 +95,6 @@ router.get("/:id", async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-
 
 // Add a new product
 router.post("/createProduct", authenticateToken, async (req, res) => {

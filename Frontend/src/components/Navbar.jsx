@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import cartImage from "../assets/cart.png";
 import companyicon from "../assets/CompanyLogo.png";
+import { ExternalLink } from "lucide-react";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -21,20 +22,19 @@ function Navbar() {
   const searchQuery = useSelector((state) => state.search.searchQuery);
   const searchResults = useSelector((state) => state.search.searchResults);
   const loading = useSelector((state) => state.search.loading);
-
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const [authState, setAuthState] = useState(isAuthenticated);
 
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (isMenuOpen && !event.target.closest('.mobile-menu-container')) {
+      if (isMenuOpen && !event.target.closest(".mobile-menu-container")) {
         setIsMenuOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isMenuOpen]);
 
   useEffect(() => {
@@ -69,25 +69,32 @@ function Navbar() {
   const fetchSearchResults = async () => {
     try {
       dispatch(setLoading(true));
+
       const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/api/products?search=${searchQuery}`
+        `${
+          import.meta.env.VITE_BACKEND_URL
+        }/api/products/search?q=${searchQuery}` // ✅ Fixed route
       );
+
+
       dispatch(setSearchResults(response.data));
     } catch (error) {
-      console.error("Search error:", error);
+      console.error("Search error:", error.response?.data || error.message);
     } finally {
       dispatch(setLoading(false));
     }
   };
+  // Don't return null for the entire navbar
+  const showSearchResults = searchResults.length > 0;
 
   return (
     <nav className="bg-[#c8f4df] p-4 fixed top-0 left-0 w-full z-50 shadow-md">
-      <div className="max-w-[1400px] mx-auto px-4 flex justify-between items-center">
+      <div className="max-w-[1400px] mx-auto px-2 flex justify-between items-center">
         <Link to="/">
           <img
             src={companyicon}
             alt="Icon"
-            className="w-20 h-6 sm:w-24 sm:h-10"
+            className="w-20 h-10 sm:w-32 sm:h-12"
           />
         </Link>
 
@@ -118,7 +125,7 @@ function Navbar() {
             )}
           </form>
 
-          {searchResults.length > 0 && (
+          {/* {searchResults.length > 0 && (
             <div className="absolute top-full left-0 mt-2 w-[90%] bg-white border border-gray-300 rounded-md shadow-lg overflow-y-auto z-50 transition-all ease-in-out duration-300 max-h-[35vh]">
               {searchResults.map((result) => (
                 <div
@@ -154,6 +161,74 @@ function Navbar() {
                 </div>
               ))}
             </div>
+          )} */}
+          {showSearchResults && (
+            <div className="absolute sm:absolute top-[calc(100%+0.5rem)] left-[100px] sm:left-[450px] -translate-x-1/2 sm:right-auto mx-2 sm:mx-0 w-full sm:max-w-full max-w-xl bg-white border border-gray-200 rounded-xl shadow-2xl z-50 transition-all ease-in-out duration-300 max-h-[30vh] sm:max-h-[35vh] overflow-hidden">
+              {/* Header - Stick to the top */}
+              <div className="sticky top-0 bg-gray-50 px-4 py-2 border-b border-gray-100 z-10">
+                <p className="text-xs text-gray-500 font-medium">
+                  {searchResults.length}{" "}
+                  {searchResults.length === 1 ? "result" : "results"} found
+                </p>
+              </div>
+
+              {/* Scrollable Search Results */}
+              <div className="overflow-y-auto max-h-[40vh] sm:max-h-[30vh] scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 rounded-lg shadow-md">
+                {searchResults.map((result) => (
+                  <div
+                    key={result._id}
+                    className="group transition-all duration-200 ease-in-out hover:bg-blue-50/50"
+                    onClick={() => {
+                      dispatch(setSearchResults([]));
+                      dispatch(setSearchQuery(""));
+                      navigate(`/medicine/${result._id}`);
+                    }}
+                  >
+                    <div className="px-5 py-4 border-b border-gray-200 last:border-0 flex items-center gap-4 cursor-pointer">
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-semibold text-gray-900 truncate">
+                          {result.drugName}
+                        </h4>
+
+                        {/* Category Tag */}
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {result.category}
+                        </span>
+
+                        {/* Alternate Medicines */}
+                        {result.alternateMedicines?.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            <span className="text-xs text-gray-500 font-medium">
+                              Alternates:
+                            </span>
+                            <div className="flex flex-wrap gap-1">
+                              {result.alternateMedicines.map((alt, index) => (
+                                <span
+                                  key={index}
+                                  className="text-xs px-2 py-0.5 rounded-md bg-gray-200 text-gray-700 shadow-sm"
+                                >
+                                  {alt.name}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* External Link Icon */}
+                      <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Footer - Stick to the bottom */}
+              <div className="sticky bottom-0 bg-gradient-to-t from-white to-transparent py-2">
+                <div className="text-center text-xs text-gray-500">
+                  Click any result to view details
+                </div>
+              </div>
+            </div>
           )}
 
           {loading && (
@@ -169,7 +244,11 @@ function Navbar() {
           className="sm:hidden p-2 rounded-md hover:bg-[#b3dcc7] transition-colors duration-200 focus:outline-none"
           aria-label={isMenuOpen ? "Close menu" : "Open menu"}
         >
-          {isMenuOpen ? <HiX className="w-6 h-6" /> : <HiMenu className="w-6 h-6" />}
+          {isMenuOpen ? (
+            <HiX className="w-6 h-6" />
+          ) : (
+            <HiMenu className="w-6 h-6" />
+          )}
         </button>
 
         {/* Improved Mobile Menu with Animation */}
