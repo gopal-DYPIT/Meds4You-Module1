@@ -76,7 +76,6 @@ function Navbar() {
         }/api/products/search?q=${searchQuery}` // ✅ Fixed route
       );
 
-
       dispatch(setSearchResults(response.data));
     } catch (error) {
       console.error("Search error:", error.response?.data || error.message);
@@ -288,12 +287,25 @@ function Navbar() {
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <div className="flex items-center space-x-2">
-                    <div className="w-6 h-6 bg-white rounded-full flex justify-center items-center shadow-md">
+                    {/* <div className="w-6 h-6 bg-white rounded-full flex justify-center items-center shadow-md">
                       <img className="w-4 h-4" src={cartImage} alt="Cart" />
-                    </div>
+                    </div> */}
                     <span>Cart</span>
                   </div>
                 </Link>
+                <div className="flex pl-4 pt-4">
+                  <button
+                    className="w-32 sm:w-auto px-8 py-2 text-white bg-red-500 hover:bg-red-600 rounded-md shadow-md transition duration-200"
+                    onClick={() => {
+                      dispatch(logout());
+                      localStorage.removeItem("token");
+                      setIsMenuOpen(false);
+                      navigate("/login");
+                    }}
+                  >
+                    Logout
+                  </button>
+                </div>
               </>
             ) : (
               <>

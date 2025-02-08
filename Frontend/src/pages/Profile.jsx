@@ -83,12 +83,6 @@ const Profile = () => {
     fetchOrders();
   }, [token, dispatch]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    dispatch(logout());
-    navigate("/login");
-  };
-
   const handleAddAddress = async () => {
     if (
       !newAddress.street ||
@@ -175,10 +169,11 @@ const Profile = () => {
           Hello! {user ? user.name : "Not Logged In"}
         </div>
 
-        <div className="flex md:block space-x-2 md:space-x-0 md:space-y-4">
+        {/* Buttons - Updated for better wrapping on tablets */}
+        <div className="grid grid-cols-2 md:grid-cols-1 gap-2 md:gap-4">
           <button
             onClick={() => setSelectedSection("profileInfo")}
-            className={`flex-1 md:w-full text-center md:text-left p-2 md:p-3 rounded-md transition ${
+            className={`w-full p-2 md:p-3 rounded-md transition ${
               selectedSection === "profileInfo"
                 ? "bg-gray-400"
                 : "bg-gray-300 hover:bg-gray-400"
@@ -188,7 +183,7 @@ const Profile = () => {
           </button>
           <button
             onClick={() => setSelectedSection("manageAddress")}
-            className={`flex-1 md:w-full text-center md:text-left p-2 md:p-3 rounded-md transition ${
+            className={`w-full p-2 md:p-3 rounded-md transition ${
               selectedSection === "manageAddress"
                 ? "bg-gray-400"
                 : "bg-gray-300 hover:bg-gray-400"
@@ -198,7 +193,7 @@ const Profile = () => {
           </button>
           <button
             onClick={() => setSelectedSection("orderHistory")}
-            className={`flex-1 md:w-full text-center md:text-left p-2 md:p-3 rounded-md transition ${
+            className={`w-full p-2 md:p-3 rounded-md transition ${
               selectedSection === "orderHistory"
                 ? "bg-gray-400"
                 : "bg-gray-300 hover:bg-gray-400"
@@ -208,20 +203,13 @@ const Profile = () => {
           </button>
           <button
             onClick={() => setSelectedSection("managePrescriptions")}
-            className={`flex-1 md:w-full text-center md:text-left p-2 md:p-3 rounded-md transition ${
+            className={`w-full p-2 md:p-3 rounded-md transition ${
               selectedSection === "managePrescriptions"
                 ? "bg-gray-400"
                 : "bg-gray-300 hover:bg-gray-400"
             }`}
           >
             My Prescriptions
-          </button>
-
-          <button
-            onClick={handleLogout}
-            className="flex-1 md:w-full text-center md:text-left p-2 md:p-3 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
-          >
-            Logout
           </button>
         </div>
       </div>
