@@ -24,6 +24,25 @@ const Profile = () => {
   });
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [selectedSection, setSelectedSection] = useState("profileInfo");
+  const [prescriptions, setPrescriptions] = useState([]);
+
+  useEffect(() => {
+    const fetchPrescriptions = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/api/prescriptions/user`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setPrescriptions(response.data);
+      } catch (error) {
+        console.error("Error fetching prescriptions:", error);
+      }
+    };
+
+    if (token) {
+      fetchPrescriptions();
+    }
+  }, [token]);
 
   useEffect(() => {
     const verifyUser = async () => {
@@ -188,6 +207,17 @@ const Profile = () => {
             Order History
           </button>
           <button
+            onClick={() => setSelectedSection("managePrescriptions")}
+            className={`flex-1 md:w-full text-center md:text-left p-2 md:p-3 rounded-md transition ${
+              selectedSection === "managePrescriptions"
+                ? "bg-gray-400"
+                : "bg-gray-300 hover:bg-gray-400"
+            }`}
+          >
+            My Prescriptions
+          </button>
+
+          <button
             onClick={handleLogout}
             className="flex-1 md:w-full text-center md:text-left p-2 md:p-3 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
           >
@@ -345,6 +375,46 @@ const Profile = () => {
                         </li>
                       ))}
                     </ul>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+        {selectedSection === "managePrescriptions" && (
+          <div className="max-w-4xl mx-auto p-4 sm:p-6 bg-white rounded-lg shadow-lg">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">
+              My Prescriptions
+            </h2>
+
+            {prescriptions.length === 0 ? (
+              <p className="text-gray-500">No prescriptions uploaded.</p>
+            ) : (
+              <ul className="divide-y divide-gray-200">
+                {prescriptions.map((prescription) => (
+                  <li
+                    key={prescription._id}
+                    className="py-4 border border-gray-200 rounded-lg p-4 sm:p-6 shadow-sm"
+                  >
+                    <p className="font-medium text-gray-900">
+                      Uploaded:{" "}
+                      {prescription.uploadedAt
+                        ? new Date(prescription.uploadedAt).toLocaleString()
+                        : "N/A"}
+                    </p>
+
+                    <p className="text-gray-700">
+                      <strong>Status:</strong>{" "}
+                      {prescription.status || "Pending"}
+                    </p>
+                    <a
+                      href={prescription.fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 hover:underline"
+                    >
+                      View Prescription
+                    </a>
                   </li>
                 ))}
               </ul>

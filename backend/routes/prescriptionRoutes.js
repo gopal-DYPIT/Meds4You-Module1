@@ -23,7 +23,7 @@ router.post(
     try {
       const domain = process.env.DOMAIN || "meds4you.in"; // Fallback domain
       const fileUrl = `https://${domain}/uploads/${req.file.filename}`;
-      console.log("✅ File URL:", fileUrl);
+      // console.log("✅ File URL:", fileUrl);
 
       // console.log("✅ File should be accessible at:", fileUrl);
 
@@ -60,5 +60,52 @@ router.get("/admin", authorizeRoles("admin"), async (req, res) => {
     res.status(500).json({ error: "Failed to fetch prescriptions." });
   }
 });
+
+router.get("/user", authorizeRoles("user"), async (req, res) => {
+  try {
+    const prescriptions = await Prescription.find({ userId: req.user.id })
+      .select("fileUrl status uploadedAt")
+      .sort({ uploadedAt: -1 });
+
+    // ✅ Convert uploadedAt to ISO string before sending
+    const formattedPrescriptions = prescriptions.map(prescription => ({
+      ...prescription.toObject(),
+      uploadedAt: prescription.uploadedAt.toISOString()
+    }));
+
+    res.status(200).json(formattedPrescriptions);
+  } catch (error) {
+    console.error("Error fetching prescriptions:", error);
+    res.status(500).json({ error: "Failed to fetch prescriptions." });
+  }
+});
+
+router.put("/update-status/:id", authorizeRoles("admin"), async (req, res) => {
+  try {
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({ message: "Status is required" });
+    }
+
+    const prescription = await Prescription.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true } // ✅ Ensures MongoDB returns the updated document
+    );
+
+    if (!prescription) {
+      return res.status(404).json({ message: "Prescription not found" });
+    }
+
+    res.status(200).json({ message: "Status updated successfully", prescription });
+  } catch (error) {
+    console.error("❌ Error updating status:", error);
+    res.status(500).json({ message: "Error updating prescription status" });
+  }
+});
+
+
+
 
 export default router;
