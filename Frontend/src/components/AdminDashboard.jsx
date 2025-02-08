@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 // ✅ Redux Imports for Auth State Management
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../redux/slice/authSlice";
+import ManagePrescriptions from "./ManagePrescriptions";
 
 const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState("manageProducts");
@@ -314,6 +315,19 @@ const AdminDashboard = () => {
             }`}
           >
             Manage Orders
+          </button>
+          <button
+            onClick={() => {
+              // console.log("Setting active section to manageOrders");
+              setActiveSection("managePrescription");
+            }}
+            className={`w-full mb-4 px-4 py-2 rounded-md font-medium text-white ${
+              activeSection === "managePrescription"
+                ? "bg-gray-700"
+                : "hover:bg-gray-700"
+            }`}
+          >
+            Prescriptions
           </button>
           <button
             onClick={handleLogout}
@@ -748,6 +762,7 @@ const AdminDashboard = () => {
             )}
           </div>
         )}
+        {activeSection === "managePrescription" && <ManagePrescriptions />}
       </main>
       <ToastContainer />
     </div>
