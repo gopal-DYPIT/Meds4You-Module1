@@ -24,12 +24,18 @@ function AppContent() {
     setProducts(searchResults);
   };
 
-  const noLayoutRoutes = ["/admin"];
-  const shouldShowLayout = !noLayoutRoutes.includes(location.pathname);
+  if (location.pathname.startsWith("/uploads/")) {
+    window.location.replace(`https://meds4you.in${location.pathname}`);
+    return null; // Prevents React from rendering anything
+  }
+
+  const noLayoutRoutes = ["/admin", "/uploads"];
+  const shouldShowLayout = !noLayoutRoutes.some(route => location.pathname.startsWith(route));
 
   return (
     <>
       {shouldShowLayout && <Navbar onSearch={handleSearch} />}
+      
       <Routes>
         {/* Public Routes (accessible by non-logged-in users) */}
         <Route element={<ProtectedRoute publicOnly={true} />}>

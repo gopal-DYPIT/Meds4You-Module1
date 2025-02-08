@@ -14,4 +14,9 @@ export default {
     },
   },
   plugins: [require("tailwind-scrollbar-hide")],
+  server: {
+    proxy: {
+      "/uploads": "https://meds4you.in",
+    },
+  },
 }
