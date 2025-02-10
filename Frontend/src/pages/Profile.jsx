@@ -428,7 +428,6 @@ const Profile = () => {
             ) : (
               <ul className="divide-y divide-gray-200">
                 {prescriptions.map((prescription) => {
-                  console.log("File URL:", prescription.fileUrl); // Debugging
 
                   // Check if the file is an image
                   const isImage = prescription.fileUrl?.match(

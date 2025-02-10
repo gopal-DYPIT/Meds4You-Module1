@@ -5,9 +5,8 @@ import { authorizeRoles } from "../middlewares/authMiddleware.js";
 import dotenv from "dotenv";
 dotenv.config();
 
-const router = express.Router();
+const router = express.Router(); 
 
-// Upload Prescription
 router.post(
   "/upload",
   authorizeRoles("user"),
@@ -18,28 +17,26 @@ router.post(
       return res.status(400).json({ error: "No file uploaded." });
     }
 
-    // console.log("✅ Multer received file:", req.file.path); // Log received file
-
     try {
       const domain = process.env.DOMAIN || "meds4you.in"; // Fallback domain
       const fileUrl = `https://${domain}/uploads/${req.file.filename}`;
-      // console.log("✅ File URL:", fileUrl);
-
-      // console.log("✅ File should be accessible at:", fileUrl);
+      
+      const { address, instructions } = req.body;
+      const parsedAddress = JSON.parse(address);
 
       const newPrescription = new Prescription({
         userId: req.user.id,
         fileUrl,
+        deliveryAddress: parsedAddress,
+        instructions,
       });
 
       await newPrescription.save();
-      res
-        .status(200)
-        .json({
-          success: true,
-          message: "Prescription uploaded successfully!",
-          fileUrl,
-        });
+      res.status(200).json({
+        success: true,
+        message: "Prescription uploaded successfully!",
+        fileUrl,
+      });
     } catch (error) {
       console.error("❌ Error saving prescription:", error);
       res.status(500).json({ error: "Error saving prescription." });
