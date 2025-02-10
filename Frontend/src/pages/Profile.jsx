@@ -268,8 +268,24 @@ const Profile = () => {
                 <strong>Email:</strong> {user ? user.email : "N/A"}
               </p>
               <p>
-                <strong>PhoneNumber:</strong> {user ? user.phoneNumber : "N/A"}
+                <strong>Phone Number:</strong> {user ? user.phoneNumber : "N/A"}
               </p>
+
+              {/* Display Primary Address */}
+              {user?.addresses?.length > 0 ? (
+                user.addresses.map((address) =>
+                  address.isPrimary ? (
+                    <p key={address._id}>
+                      <strong>Default Address:</strong>{" "}
+                      {`${address.street}, ${address.city}, ${address.state}, ${address.zipCode}, ${address.country}`}
+                    </p>
+                  ) : null
+                )
+              ) : (
+                <p>
+                  <strong>Default Address:</strong> N/A
+                </p>
+              )}
             </div>
           </div>
         )}
@@ -428,7 +444,6 @@ const Profile = () => {
             ) : (
               <ul className="divide-y divide-gray-200">
                 {prescriptions.map((prescription) => {
-
                   // Check if the file is an image
                   const isImage = prescription.fileUrl?.match(
                     /\.(jpeg|jpg|png|gif)$/
@@ -459,7 +474,7 @@ const Profile = () => {
 
                       <div>
                         <p className="font-medium text-gray-900">
-                        <strong>Uploaded:</strong>{" "}
+                          <strong>Uploaded:</strong>{" "}
                           {prescription.uploadedAt
                             ? new Date(
                                 prescription.uploadedAt
