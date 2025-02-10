@@ -40,7 +40,6 @@ const ManagePrescriptions = () => {
     try {
       const token = localStorage.getItem("token");
 
-      // ✅ Make sure the request is sending the right data
       const response = await axios.put(
         `${
           import.meta.env.VITE_BACKEND_URL
@@ -54,9 +53,6 @@ const ManagePrescriptions = () => {
         }
       );
 
-      // console.log("✅ Status update response:", response.data);
-
-      // ✅ Update UI immediately after status change
       setPrescriptions((prev) =>
         prev.map((prescription) =>
           prescription._id === id
@@ -78,74 +74,84 @@ const ManagePrescriptions = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">Uploaded Prescriptions</h2>
+      <h2 className="text-2xl font-bold mb-4 text-center sm:text-left">
+        Uploaded Prescriptions
+      </h2>
 
       {prescriptions.length === 0 ? (
-        <p className="text-gray-500">No prescriptions uploaded yet.</p>
+        <p className="text-gray-500 text-center">
+          No prescriptions uploaded yet.
+        </p>
       ) : (
-        <div className="overflow-x-auto p-4">
-          <table className="w-full border-collapse border border-gray-300">
-            <thead>
-              <tr className="bg-gray-200 text-gray-700 text-sm uppercase tracking-wider">
-                <th className="px-6 py-3 border border-gray-300 w-1/5 text-center">
-                  User
-                </th>
-                <th className="px-6 py-3 border border-gray-300 w-1/5 text-center">
-                  Phone
-                </th>
-                <th className="px-6 py-3 border border-gray-300 w-1/5 text-center">
-                  Prescription
-                </th>
-                <th className="px-6 py-3 border border-gray-300 w-1/5 text-center">
-                  Uploaded At
-                </th>
-                <th className="px-6 py-3 border border-gray-300 w-1/5 text-center">
-                  Update Status
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {prescriptions.map((prescription) => (
-                <tr
-                  key={prescription._id}
-                  className="hover:bg-gray-100 transition-all duration-300"
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {prescriptions.map((prescription) => (
+            <div
+              key={prescription._id}
+              className="bg-white shadow-lg rounded-lg p-4 border border-gray-200"
+            >
+              {/* User Info */}
+              <div className="mb-2">
+                <p className="text-lg font-semibold">
+                  {prescription.userId?.name || "Unknown"}
+                </p>
+                <p className="text-gray-600 text-sm">
+                  {prescription.userId?.phoneNumber || "N/A"}
+                </p>
+              </div>
+
+              {/* Prescription Link */}
+              <div className="mb-2">
+                <a
+                  href={prescription.fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 underline"
                 >
-                  <td className="px-6 py-4 border border-gray-300 text-center">
-                    {prescription.userId?.name || "Unknown"}
-                  </td>
-                  <td className="px-6 py-4 border border-gray-300 text-center">
-                    {prescription.userId?.phoneNumber || "N/A"}
-                  </td>
-                  <td className="px-6 py-4 border border-gray-300 text-center">
-                    <a
-                      href={prescription.fileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 underline"
-                    >
-                      View Prescription
-                    </a>
-                  </td>
-                  <td className="px-6 py-4 border border-gray-300 text-center">
-                    {new Date(prescription.uploadedAt).toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4 border border-gray-300 text-center">
-                    <select
-                      className="border p-2 rounded w-full max-w-[150px]"
-                      value={prescription.status || "Pending"}
-                      onChange={(e) =>
-                        handleStatusChange(prescription._id, e.target.value)
-                      }
-                    >
-                      <option value="Pending">Pending</option>
-                      <option value="Reviewed">Reviewed</option>
-                      <option value="Completed">Completed</option>
-                    </select>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  View Prescription
+                </a>
+              </div>
+
+              {/* Uploaded Date */}
+              <p className="text-sm text-gray-600">
+                <strong>Uploaded At:</strong>{" "}
+                {new Date(prescription.uploadedAt).toLocaleDateString()}
+              </p>
+
+              {/* Delivery Address */}
+              <div className="mt-2 text-sm text-gray-700">
+                <strong>Address:</strong> <br />
+                {prescription.deliveryAddress
+                  ? `${prescription.deliveryAddress.street}, ${prescription.deliveryAddress.city}, 
+                    ${prescription.deliveryAddress.state}, ${prescription.deliveryAddress.zipCode}, 
+                    ${prescription.deliveryAddress.country}`
+                  : "N/A"}
+              </div>
+
+              {/* Instructions with Wrapping */}
+              <div className="mt-2 text-sm text-gray-700">
+                <strong>Instructions:</strong>
+                <p className="break-words">
+                  {prescription.instructions || "N/A"}
+                </p>
+              </div>
+
+              {/* Status Dropdown */}
+              <div className="mt-4">
+                <label className="text-sm font-semibold">Update Status:</label>
+                <select
+                  className="border p-2 rounded w-full mt-1 text-sm"
+                  value={prescription.status || "Pending"}
+                  onChange={(e) =>
+                    handleStatusChange(prescription._id, e.target.value)
+                  }
+                >
+                  <option value="Pending">Pending</option>
+                  <option value="Reviewed">Reviewed</option>
+                  <option value="Completed">Completed</option>
+                </select>
+              </div>
+            </div>
+          ))}
         </div>
       )}
       <ToastContainer />

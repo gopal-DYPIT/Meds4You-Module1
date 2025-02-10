@@ -35,7 +35,18 @@ const CheckoutPage = () => {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
-          setAddresses(response.data?.addresses || []);
+          const sortedAddresses = response.data?.addresses
+            ? [...response.data.addresses].sort(
+                (a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0)
+              )
+            : [];
+
+          setAddresses(sortedAddresses);
+          setSelectedAddress(
+            sortedAddresses.find((addr) => addr.isPrimary) ||
+              sortedAddresses[0] ||
+              null
+          );
           setLoading(false);
         })
         .catch((err) => {
@@ -72,17 +83,16 @@ const CheckoutPage = () => {
       .then((response) => {
         toast.success("Order placed successfully!", {
           position: "top-center",
-          autoClose: 2000, // Ensure autoClose is set
+          autoClose: 2000,
         });
 
-        // Delay navigation to allow toast to appear
         setTimeout(() => {
           navigate("/order-summary");
         }, 3000);
       })
       .catch((err) => {
         setError("Failed to place order");
-        toast.error("Failed to place order", { position: "top-center" }); // Add toast for error
+        toast.error("Failed to place order", { position: "top-center" });
         console.error("Failed to place order:", err);
       });
   };
@@ -101,7 +111,7 @@ const CheckoutPage = () => {
   const totalAmount = calculateTotal();
 
   return (
-    <div className="container pt-16  min-h-screen mx-auto p-4 sm:p-12">
+    <div className="container pt-16 min-h-screen mx-auto p-4 sm:p-12">
       <h1 className="text-center font-semibold text-2xl sm:text-3xl mb-6">
         Checkout
       </h1>
@@ -148,12 +158,15 @@ const CheckoutPage = () => {
                     </p>
                     {address.isPrimary && (
                       <span className="text-sm text-green-600 font-medium">
-                        Primary Address
+                        Default Address
                       </span>
                     )}
                   </div>
                 </div>
               ))}
+              <h2 className="text-sm sm:text-lg font-semibold font-lato text-gray-800 p-2 pl-2 sm:pl-2 ">
+                Manage Address from Profile Section
+              </h2>
             </div>
           )}
 

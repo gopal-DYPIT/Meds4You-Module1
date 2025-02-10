@@ -258,6 +258,13 @@ function Navbar() {
         >
           <div className="flex flex-col py-4">
             <Link
+              to="/"
+              className="px-6 py-3 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Home
+            </Link>
+            <Link
               to="/infoOrder"
               className="px-6 py-3 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
               onClick={() => setIsMenuOpen(false)}
@@ -330,6 +337,12 @@ function Navbar() {
 
         {/* Desktop Menu (unchanged) */}
         <div className="hidden sm:flex items-center space-x-6">
+          <Link
+            to="/"
+            className="text-black text-base hover:text-blue-600"
+          >
+            Home
+          </Link>
           <Link
             to="/infoOrder"
             className="text-black text-base hover:text-blue-600"

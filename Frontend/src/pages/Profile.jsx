@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { FileText } from "lucide-react";
 import axios from "axios";
 import { loginSuccess, logout } from "../redux/slice/authSlice";
 import { useNavigate } from "react-router-dom";
@@ -118,7 +119,10 @@ const Profile = () => {
         }
       );
 
-      toast.success("Address added successfully!");
+      toast.success("Address added successfully!", {
+        position: "top-center",
+        autoClose: 2000,
+      });
       setAddresses([...response.data.addresses]);
       setNewAddress({
         street: "",
@@ -132,6 +136,7 @@ const Profile = () => {
       console.error("Error adding address:", error);
       toast.error("Error adding address.");
     }
+    setShowAddressForm(false);
   };
 
   const handleDeleteAddress = async (addressId) => {
@@ -141,7 +146,10 @@ const Profile = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setAddresses(response.data);
-      toast.success("Address deleted successfully!");
+      toast.success("Address deleted successfully!", {
+        position: "top-center",
+        autoClose: 2000,
+      });
     } catch (error) {
       toast.error("Error deleting address.");
     }
@@ -154,11 +162,27 @@ const Profile = () => {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setAddresses(response.data);
-      toast.success("Primary address set successfully!");
+
+      // Ensure the primary address appears first
+      const sortedAddresses = response.data
+        .slice() // Create a copy to avoid modifying state directly
+        .sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0)); // Sort: primary first
+
+      setAddresses(sortedAddresses);
+
+      toast.success("Default address set successfully!", {
+        position: "top-center",
+        autoClose: 2000,
+      });
     } catch (error) {
       toast.error("Error setting primary address.");
     }
+  };
+
+  const handleLogout = () => {
+    dispatch(logout());
+    localStorage.removeItem("token");
+    navigate("/login");
   };
 
   return (
@@ -179,7 +203,7 @@ const Profile = () => {
                 : "bg-gray-300 hover:bg-gray-400"
             }`}
           >
-            Profile Info
+            User Profile
           </button>
           <button
             onClick={() => setSelectedSection("manageAddress")}
@@ -190,6 +214,16 @@ const Profile = () => {
             }`}
           >
             Manage Address
+          </button>
+          <button
+            onClick={() => setSelectedSection("salesProfile")}
+            className={`w-full p-2 md:p-3 rounded-md transition ${
+              selectedSection === "salesProfile"
+                ? "bg-gray-400"
+                : "bg-gray-300 hover:bg-gray-400"
+            }`}
+          >
+            Sales Profile
           </button>
           <button
             onClick={() => setSelectedSection("orderHistory")}
@@ -211,6 +245,13 @@ const Profile = () => {
           >
             My Prescriptions
           </button>
+          {/* Logout Button - Visible only on desktop */}
+          <button
+            onClick={handleLogout}
+            className="hidden md:block w-full p-2 md:p-3 rounded-md transition bg-red-500 text-white hover:bg-red-600 mt-4"
+          >
+            Logout
+          </button>
         </div>
       </div>
 
@@ -218,7 +259,7 @@ const Profile = () => {
       <div className="flex-1 bg-white p-4 md:p-6 rounded-lg">
         {selectedSection === "profileInfo" && (
           <div>
-            <h2 className="text-xl md:text-2xl font-bold mb-4">Profile Info</h2>
+            <h2 className="text-xl md:text-2xl font-bold mb-4">User Profile</h2>
             <div className="space-y-4">
               <p>
                 <strong>Name:</strong> {user ? user.name : "N/A"}
@@ -235,55 +276,60 @@ const Profile = () => {
 
         {selectedSection === "manageAddress" && (
           <div>
-            <h2 className="text-xl font-bold mb-4">Manage Addresses</h2>
+            <h2 className="text-xl font-bold mb-4">Your Addresses</h2>
             <div className="space-y-4">
-              {addresses.map((address) => (
-                <div
-                  key={address._id}
-                  className="bg-gray-50 p-4 rounded-md shadow-md"
-                >
-                  <p className="font-semibold">
-                    {address.isPrimary ? "Primary Address" : "Address"}
-                  </p>
-                  <p className="text-sm md:text-base my-2">
-                    {address.street}, {address.city}, {address.state} -{" "}
-                    {address.zipCode}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      onClick={() => handleSetPrimaryAddress(address._id)}
-                      className="bg-blue-500 text-white py-1 px-4 rounded-md text-sm hover:bg-blue-600"
-                    >
-                      Set as Primary
-                    </button>
-                    <button
-                      onClick={() => handleDeleteAddress(address._id)}
-                      className="bg-red-500 text-white py-1 px-4 rounded-md text-sm hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
+              {addresses
+                .slice() // Create a copy to avoid mutating state directly
+                .sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0)) // Sort to keep the primary address on top
+                .map((address) => (
+                  <div
+                    key={address._id}
+                    className="bg-gray-50 p-4 rounded-md shadow-md"
+                  >
+                    <p className="font-semibold">
+                      {address.isPrimary ? "Default Address" : ""}
+                    </p>
+                    <p className="text-sm md:text-base my-2">
+                      {address.street}, {address.city}, {address.state} -{" "}
+                      {address.zipCode}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {!address.isPrimary && (
+                        <button
+                          onClick={() => handleSetPrimaryAddress(address._id)}
+                          className="bg-blue-500 text-white py-1 px-4 rounded-md text-sm hover:bg-blue-600"
+                        >
+                          Set as Default
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleDeleteAddress(address._id)}
+                        className="bg-red-500 text-white py-1 px-4 rounded-md text-sm hover:bg-red-600"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
 
             <button
               onClick={() => setShowAddressForm(!showAddressForm)}
-              className="w-full bg-blue-500 text-white py-2 rounded-md mt-4 hover:bg-blue-600"
+              className="w-44 bg-blue-500 text-white py-2 rounded-md mt-4 hover:bg-blue-600"
             >
               {showAddressForm ? "Cancel" : "Add New Address"}
             </button>
 
             {showAddressForm && (
-              <div className="mt-4 space-y-2">
+              <div className="mt-4 space-y-3 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-3">
                 <input
                   type="text"
-                  placeholder="Street"
+                  placeholder="Flat, House no., Building, Company, Apartment"
                   value={newAddress.street}
                   onChange={(e) =>
                     setNewAddress({ ...newAddress, street: e.target.value })
                   }
-                  className="border p-2 rounded-md w-full"
+                  className="border p-3 rounded-md w-full"
                 />
                 <input
                   type="text"
@@ -292,7 +338,7 @@ const Profile = () => {
                   onChange={(e) =>
                     setNewAddress({ ...newAddress, city: e.target.value })
                   }
-                  className="border p-2 rounded-md w-full"
+                  className="border p-3 rounded-md w-full"
                 />
                 <input
                   type="text"
@@ -301,7 +347,7 @@ const Profile = () => {
                   onChange={(e) =>
                     setNewAddress({ ...newAddress, state: e.target.value })
                   }
-                  className="border p-2 rounded-md w-full"
+                  className="border p-3 rounded-md w-full"
                 />
                 <input
                   type="text"
@@ -310,7 +356,7 @@ const Profile = () => {
                   onChange={(e) =>
                     setNewAddress({ ...newAddress, zip: e.target.value })
                   }
-                  className="border p-2 rounded-md w-full"
+                  className="border p-3 rounded-md w-full"
                 />
                 <input
                   type="text"
@@ -319,14 +365,16 @@ const Profile = () => {
                   onChange={(e) =>
                     setNewAddress({ ...newAddress, country: e.target.value })
                   }
-                  className="border p-2 rounded-md w-full"
+                  className="border p-3 rounded-md w-full"
                 />
-                <button
-                  onClick={handleAddAddress}
-                  className="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600"
-                >
-                  Add Address
-                </button>
+                <div className="col-span-2 flex justify-center sm:justify-start">
+                  <button
+                    onClick={handleAddAddress}
+                    className="w-full sm:w-auto bg-green-500 text-white py-3 px-6 rounded-md hover:bg-green-600 transition"
+                  >
+                    Add Address
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -379,32 +427,54 @@ const Profile = () => {
               <p className="text-gray-500">No prescriptions uploaded.</p>
             ) : (
               <ul className="divide-y divide-gray-200">
-                {prescriptions.map((prescription) => (
-                  <li
-                    key={prescription._id}
-                    className="py-4 border border-gray-200 rounded-lg p-4 sm:p-6 shadow-sm"
-                  >
-                    <p className="font-medium text-gray-900">
-                      Uploaded:{" "}
-                      {prescription.uploadedAt
-                        ? new Date(prescription.uploadedAt).toLocaleString()
-                        : "N/A"}
-                    </p>
+                {prescriptions.map((prescription) => {
+                  console.log("File URL:", prescription.fileUrl); // Debugging
 
-                    <p className="text-gray-700">
-                      <strong>Status:</strong>{" "}
-                      {prescription.status || "Pending"}
-                    </p>
-                    <a
-                      href={prescription.fileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-500 hover:underline"
+                  // Check if the file is an image
+                  const isImage = prescription.fileUrl?.match(
+                    /\.(jpeg|jpg|png|gif)$/
+                  );
+                  const isPdf = prescription.fileUrl?.endsWith(".pdf");
+
+                  return (
+                    <li
+                      key={prescription._id}
+                      className="py-4 border border-gray-200 rounded-lg p-4 sm:p-6 shadow-sm flex items-center space-x-4"
                     >
-                      View Prescription
-                    </a>
-                  </li>
-                ))}
+                      {/* Thumbnail Preview */}
+                      {isImage ? (
+                        <img
+                          src={prescription.fileUrl}
+                          alt="Prescription"
+                          className="w-16 h-16 object-cover rounded-lg border border-gray-300"
+                        />
+                      ) : isPdf ? (
+                        <div className="w-16 h-16 flex items-center justify-center bg-red-500 text-white rounded-lg border">
+                          <FileText className="w-8 h-8" />
+                        </div>
+                      ) : (
+                        <div className="w-16 h-16 flex items-center justify-center bg-gray-200 text-gray-500 rounded-lg border">
+                          ❓ Unknown
+                        </div>
+                      )}
+
+                      <div>
+                        <p className="font-medium text-gray-900">
+                        <strong>Uploaded:</strong>{" "}
+                          {prescription.uploadedAt
+                            ? new Date(
+                                prescription.uploadedAt
+                              ).toLocaleDateString()
+                            : "N/A"}
+                        </p>
+                        <p className="text-gray-700">
+                          <strong>Status:</strong>{" "}
+                          {prescription.status || "Pending"}
+                        </p>
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </div>
