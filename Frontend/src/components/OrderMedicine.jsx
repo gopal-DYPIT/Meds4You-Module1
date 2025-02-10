@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const OrderMedicine = () => {
   const [file, setFile] = useState(null);
@@ -11,7 +12,7 @@ const OrderMedicine = () => {
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [instructions, setInstructions] = useState("");
-
+  const navigate = useNavigate();
   const { isAuthenticated, token } = useSelector((state) => state.auth);
 
   useEffect(() => {
@@ -98,6 +99,47 @@ const OrderMedicine = () => {
     }
   };
 
+  if (!isAuthenticated) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[#FFF0F5] px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl bg-white shadow-2xl rounded-2xl p-6 sm:p-8 text-center">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+            Order Medicine by Prescription
+          </h1>
+          <p className="text-gray-600 text-sm sm:text-base mt-2">
+            Please log in to upload your prescription and place an order.
+          </p>
+          
+          <div className="flex justify-center mt-6">
+            <img
+              src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+              alt="Login Illustration"
+              className="w-32 sm:w-40 md:w-48"
+            />
+          </div>
+  
+          <button
+            onClick={() => navigate("/login")}
+            className="mt-6 w-full bg-[#FF007F] text-white font-semibold text-sm sm:text-base px-5 py-3 rounded-lg shadow-lg transform transition duration-300 hover:bg-[#E60072] hover:scale-20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Log In to Continue
+          </button>
+  
+          <p className="text-xs sm:text-sm text-gray-500 mt-4">
+            Don't have an account?{" "}
+            <span
+              className="text-blue-600 font-semibold cursor-pointer hover:underline"
+              onClick={() => navigate("/register")}
+            >
+              Sign Up
+            </span>
+          </p>
+        </div>
+      </div>
+    );
+  }
+  
+
   return (
     <div className="flex flex-col p-28 items-center justify-center min-h-screen bg-gradient-to-br bg-[#FFF0F5] px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-lg md:max-w-xl lg:max-w-2xl space-y-6 p-6 sm:p-8 bg-white shadow-xl rounded-lg">
@@ -118,7 +160,7 @@ const OrderMedicine = () => {
         <div className="relative">
           <label
             htmlFor="prescription"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-sm font-bold text-gray-700 mb-2"
           >
             Upload Prescription
           </label>
