@@ -259,7 +259,7 @@ const Profile = () => {
       <div className="flex-1 bg-white p-4 md:p-6 rounded-lg">
         {selectedSection === "profileInfo" && (
           <div>
-            <h2 className="text-xl md:text-2xl font-bold mb-4">User Profile</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mb-4">User Profile</h2>
             <div className="space-y-4">
               <p>
                 <strong>Name:</strong> {user ? user.name : "N/A"}

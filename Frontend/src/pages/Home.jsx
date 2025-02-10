@@ -13,6 +13,7 @@ import "swiper/css/pagination";
 
 const Home = () => {
   const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("Diabetes");
 
@@ -64,8 +65,10 @@ const Home = () => {
       })
       .then((response) => {
         setProducts(response.data);
+        setIsLoading(false);
       })
       .catch((err) => {
+        setIsLoading(false);
         console.error("Error fetching products:", err);
       });
   }, [selectedCategory]); // Fetch products whenever category changes
@@ -124,7 +127,7 @@ const Home = () => {
 
         {/* Medicine Carousel */}
         <div className="px-0 sm:px-8 mt-[-6rem] mb-0 sm:mb-8 sm:mt-[-6rem] ">
-          <MedicineCarousel products={products} addToCart={addToCart} />
+          <MedicineCarousel products={products} addToCart={addToCart} isLoading={isLoading}/>
         </div>
 
         {/* Why Choose Us */}

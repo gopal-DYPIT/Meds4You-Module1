@@ -189,7 +189,7 @@ const CheckoutPage = () => {
                         alternateMedicine?.manufacturerUrl || "placeholder.jpg"
                       }
                       alt={alternateMedicine?.name || "Unnamed product"}
-                      className="w-16 h-16 object-cover rounded-lg mr-4"
+                      className="w-24 h-10 sm:w-32 object-cover rounded-lg mr-4"
                     />
                     <div className="flex-1">
                       <h2 className="font-bold text-lg">

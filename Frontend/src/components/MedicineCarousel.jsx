@@ -79,7 +79,7 @@ const alternateMedicineStyle = {
   textAlign: "center",
 };
 
-const MedicineCarousel = ({ products, addToCart }) => {
+const MedicineCarousel = ({ products, addToCart, isLoading }) => {
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const [selectedVariant, setSelectedVariant] = useState({});
   const [swiperInstance, setSwiperInstance] = useState(null);
@@ -114,149 +114,168 @@ const MedicineCarousel = ({ products, addToCart }) => {
   const isDesktop = window.innerWidth >= 1024;
 
   return (
-    <div style={cardStyle}>
-      <Swiper
-        modules={[Pagination, Autoplay]}
-        pagination={{ clickable: true, dynamicBullets: true }}
-        autoplay={{ delay: 5000, disableOnInteraction: false }}
-        spaceBetween={20}
-        loop={true}
-        grabCursor={true}
-        preventClicks={false}
-        preventClicksPropagation={false}
-        touchStartPreventDefault={false} // ✅ Allows better touch gestures on mobile
-        touchMoveStopPropagation={true}
-        touchReleaseOnEdges={true}
-        resistance={false}
-        onSwiper={(swiper) => setSwiperInstance(swiper)}
-        style={{ paddingBottom: "20px" }}
-        breakpoints={{
-          0: {
-            // ✅ Ensures smooth mobile experience
-            slidesPerView: 1,
-            spaceBetween: 10,
-          },
-          320: {
-            slidesPerView: 1,
-            spaceBetween: 10,
-          },
-          768: {
-            slidesPerView: 1,
-            spaceBetween: 20,
-          },
-          1024: {
-            slidesPerView: 2,
-            spaceBetween: 20,
-          },
-          1200: {
-            slidesPerView: 3,
-            spaceBetween: 20,
-          },
-        }}
-      >
-        {products.map((product) => (
-          <SwiperSlide
-            key={product._id}
-            style={{ display: "flex", justifyContent: "center" }}
-            onMouseEnter={() => isDesktop && swiperInstance?.autoplay.stop()} // Stop autoplay only on desktop
-            onMouseLeave={() => isDesktop && swiperInstance?.autoplay.start()} // Resume autoplay only on desktop
+    <>
+      {isLoading ? (
+        <div className="flex justify-center items-center min-h-[300px]">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-gray-900"></div>
+        </div>
+      ) : products.length === 0 ? (
+        <div className="text-center text-gray-500 text-lg py-10">
+          No medicines available
+        </div>
+      ) : (
+        <div style={cardStyle}>
+          <Swiper
+            modules={[Pagination, Autoplay]}
+            pagination={{ clickable: true, dynamicBullets: true }}
+            autoplay={{ delay: 5000, disableOnInteraction: false }}
+            spaceBetween={20}
+            loop={true}
+            grabCursor={true}
+            preventClicks={false}
+            preventClicksPropagation={false}
+            touchStartPreventDefault={false} // ✅ Allows better touch gestures on mobile
+            touchMoveStopPropagation={true}
+            touchReleaseOnEdges={true}
+            resistance={false}
+            onSwiper={(swiper) => setSwiperInstance(swiper)}
+            style={{ paddingBottom: "20px" }}
+            breakpoints={{
+              0: {
+                // ✅ Ensures smooth mobile experience
+                slidesPerView: 1,
+                spaceBetween: 10,
+              },
+              320: {
+                slidesPerView: 1,
+                spaceBetween: 10,
+              },
+              768: {
+                slidesPerView: 1,
+                spaceBetween: 20,
+              },
+              1024: {
+                slidesPerView: 2,
+                spaceBetween: 20,
+              },
+              1200: {
+                slidesPerView: 3,
+                spaceBetween: 20,
+              },
+            }}
           >
-            <div style={wholeCardStyle}>
-              <div style={topStyle}>{product.salt}</div>
-              <div style={mainStyle}>
-                <div style={leftRightCommonStyle}>
-                  <b>Regular</b>
-                  <img
-                    src={product.imageUrl || "default-image.jpg"}
-                    alt="Tablet"
-                    style={{ height: "40px", width: "100px" }}
-                  />
-                  <div className="space-y-4">
-                  <b>{product.drugName}</b>
-                  <p style={{ marginBottom: "8px", lineHeight: "1.5" }}>
-                    {product.manufacturer}
-                  </p>
-                  <p style={{ marginBottom: "4px", lineHeight: "1.2" }}>
-                    {product.category}
-                  </p>
-                  <p style={{ marginBottom: "4px", lineHeight: "1.2" }}>
-                    {product.size}
-                  </p>
-                  <p className="pb-4">MRP: ₹{product.mrp}</p>
-                  </div>
-                </div>
-                <div style={rightStyle} className="mt-3">
-                  <b>Recommended</b>
-                  <div style={recommendedContainerStyle}>
-                    {product.alternateMedicines?.map((alt, index) => (
-                      <div
-                        key={index}
-                        onClick={() =>
-                          setSelectedVariant({
-                            ...selectedVariant,
-                            [product._id]: index,
-                          })
-                        }
-                        style={alternateMedicineStyle}
-                      >
-                        <img
-                          src={alt.manufacturerUrl || "default-image.jpg"}
-                          alt="Tablet"
-                          style={{ height: "40px", width: "100px" }}
-                        />
-                        <div className="pt-4 font-bold">{alt.name}</div>
-                        <div className="pt-4 font-roboto text-xl">
-                          {alt.manufacturer}
-                        </div>
-                        <div className="pt-4 font-roboto text-xl">
+            {products.map((product) => (
+              <SwiperSlide
+                key={product._id}
+                style={{ display: "flex", justifyContent: "center" }}
+                onMouseEnter={() =>
+                  isDesktop && swiperInstance?.autoplay.stop()
+                } // Stop autoplay only on desktop
+                onMouseLeave={() =>
+                  isDesktop && swiperInstance?.autoplay.start()
+                } // Resume autoplay only on desktop
+              >
+                <div style={wholeCardStyle}>
+                  <div style={topStyle}>{product.salt}</div>
+                  <div style={mainStyle}>
+                    <div style={leftRightCommonStyle}>
+                      <b>Regular</b>
+                      <img
+                        src={product.imageUrl || "default-image.jpg"}
+                        alt="Tablet"
+                        style={{ height: "40px", width: "100px" }}
+                      />
+                      <div className="space-y-4">
+                        <b>{product.drugName}</b>
+                        <p style={{ marginBottom: "8px", lineHeight: "1.5" }}>
+                          {product.manufacturer}
+                        </p>
+                        <p style={{ marginBottom: "4px", lineHeight: "1.2" }}>
+                          {product.category}
+                        </p>
+                        <p style={{ marginBottom: "4px", lineHeight: "1.2" }}>
                           {product.size}
-                        </div>
-
-                        <div
-                          className="font-bold pt-2 text-2xl"
-                          style={{ color: "rgb(12, 159, 12)" }}
-                        >
-                          ₹{alt.price}
-                        </div>
+                        </p>
+                        <p className="pb-4">MRP: ₹{product.mrp}</p>
                       </div>
-                    ))}
+                    </div>
+                    <div style={rightStyle} className="mt-3">
+                      <b>Recommended</b>
+                      <div style={recommendedContainerStyle}>
+                        {product.alternateMedicines?.map((alt, index) => (
+                          <div
+                            key={index}
+                            onClick={() =>
+                              setSelectedVariant({
+                                ...selectedVariant,
+                                [product._id]: index,
+                              })
+                            }
+                            style={alternateMedicineStyle}
+                          >
+                            <img
+                              src={alt.manufacturerUrl || "default-image.jpg"}
+                              alt="Tablet"
+                              style={{ height: "40px", width: "100px" }}
+                            />
+                            <div className="pt-4 font-bold">{alt.name}</div>
+                            <div className="pt-4 font-roboto text-xl">
+                              {alt.manufacturer}
+                            </div>
+                            <div className="pt-4 font-roboto text-xl">
+                              {product.size}
+                            </div>
+
+                            <div
+                              className="font-bold pt-2 text-2xl"
+                              style={{ color: "rgb(12, 159, 12)" }}
+                            >
+                              ₹{alt.price}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <button
+                        className="bg-[#419ec8] hover:bg-[#3b9075] text-white px-4 py-2 border-none h-10 w-36 text-lg rounded-lg opacity-60 transition duration-300"
+                        onClick={() =>
+                          handleAddToCart(
+                            product._id,
+                            selectedVariant[product._id]
+                          )
+                        }
+                      >
+                        Add to Cart
+                      </button>
+                    </div>
                   </div>
-                  <button
-                    className="bg-[#419ec8] hover:bg-[#3b9075] text-white px-4 py-2 border-none h-10 w-36 text-lg rounded-lg opacity-60 transition duration-300"
-                    onClick={() =>
-                      handleAddToCart(product._id, selectedVariant[product._id])
-                    }
-                  >
-                    Add to Cart
-                  </button>
                 </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+          {products.length > 0 && (
+            <div className="my-swiper relative pb-3.5">
+              <div
+                id="swiper-button-prev"
+                className="hidden sm:flex absolute top-1/2 transform -translate-y-1/2 justify-center items-center w-12 h-12 bg-gray-200 text-gray-800 rounded-full shadow-lg cursor-pointer transition-all ease-in-out duration-200 z-10 left-1/2 sm:left-0 md:left-10 lg:left-20"
+                onClick={handlePrev}
+                style={{ top: "-230px", left: "-16px" }}
+              >
+                <span className="text-2xl">&#10094;</span>
+              </div>
+
+              <div
+                id="swiper-button-next"
+                className="hidden sm:flex absolute top-1/2 transform -translate-y-1/2 justify-center items-center w-12 h-12 bg-gray-200 text-gray-800 rounded-full shadow-lg cursor-pointer transition-all ease-in-out duration-200 z-10 right-1/2 sm:right-0 md:right-10 lg:right-20"
+                onClick={handleNext}
+                style={{ top: "-230px", right: "-16px" }}
+              >
+                <span className="text-2xl">&#10095;</span>
               </div>
             </div>
-          </SwiperSlide>
-        ))}
-      </Swiper>
-      {products.length > 0 && (
-        <div className="my-swiper relative pb-3.5">
-          <div
-            id="swiper-button-prev"
-            className="hidden sm:flex absolute top-1/2 transform -translate-y-1/2 justify-center items-center w-12 h-12 bg-gray-200 text-gray-800 rounded-full shadow-lg cursor-pointer transition-all ease-in-out duration-200 z-10 left-1/2 sm:left-0 md:left-10 lg:left-20"
-            onClick={handlePrev}
-            style={{ top: "-230px", left: "-16px" }}
-          >
-            <span className="text-2xl">&#10094;</span>
-          </div>
-
-          <div
-            id="swiper-button-next"
-            className="hidden sm:flex absolute top-1/2 transform -translate-y-1/2 justify-center items-center w-12 h-12 bg-gray-200 text-gray-800 rounded-full shadow-lg cursor-pointer transition-all ease-in-out duration-200 z-10 right-1/2 sm:right-0 md:right-10 lg:right-20"
-            onClick={handleNext}
-            style={{ top: "-230px", right: "-16px" }}
-          >
-            <span className="text-2xl">&#10095;</span>
-          </div>
+          )}
         </div>
       )}
-    </div>
+    </>
   );
 };
 

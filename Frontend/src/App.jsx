@@ -16,6 +16,7 @@ import { ToastContainer } from "react-toastify";
 import ProtectedRoute from "./components/protectedRoute";
 import "react-toastify/dist/ReactToastify.css";
 import OrderSummary from "./pages/OrderSummary";
+import ScrollToTop from "./components/ScrollToTop";
 
 function AppContent() {
   const location = useLocation();
@@ -30,12 +31,15 @@ function AppContent() {
   }
 
   const noLayoutRoutes = ["/admin", "/uploads"];
-  const shouldShowLayout = !noLayoutRoutes.some(route => location.pathname.startsWith(route));
+  const shouldShowLayout = !noLayoutRoutes.some((route) =>
+    location.pathname.startsWith(route)
+  );
 
   return (
     <>
       {shouldShowLayout && <Navbar onSearch={handleSearch} />}
-      
+
+      <ScrollToTop />
       <Routes>
         {/* Public Routes (accessible by non-logged-in users) */}
         <Route element={<ProtectedRoute publicOnly={true} />}>
