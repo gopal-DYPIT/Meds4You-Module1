@@ -1,7 +1,7 @@
 import express from "express";
 import upload from "../middlewares/uploadMiddleware.js";
 import { authorizeRoles } from "../middlewares/authMiddleware.js";
-import PendingPartner from "../models/pendingPartnerModel.js";
+import PendingPartner from "../models/partnerApprovals.js";
 import dotenv from "dotenv";
 
 dotenv.config();
