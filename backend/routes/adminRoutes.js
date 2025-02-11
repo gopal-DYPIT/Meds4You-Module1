@@ -6,9 +6,27 @@ import {authorizeRoles } from "../middlewares/authMiddleware.js";
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import pkg from "bcryptjs";
+import referNum from "../models/referNum.js";
 import PendingRequest from '../models/partnerApprovals.js';
 import Partner from '../models/partner.js';
 const { hash } = pkg;
+
+
+const generateReferralCode = async (name) => {
+	//   return `${name.substring(0, 3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
+		const refNum = await referNum.findOne();
+		if(refNum == null){
+			const newRefNum = new referNum({
+				number: 1000
+			});
+			await newRefNum.save();
+			return `${name.substring(0, 3).toUpperCase()}-1000`;
+		}
+		const newNum = refNum.number + 1;
+		refNum.number  = newNum;
+		await refNum.save();
+		return `${name.substring(0, 3).toUpperCase()}-${newNum}`;
+	};
 
 adminRoutes.get('/orders', authorizeRoles("admin"), async (req, res) => {
   	try {
@@ -184,6 +202,7 @@ adminRoutes.put("/partners/:id/approve", authorizeRoles("admin"), async (req, re
 
 	  // Hash the password before moving to Partner model
 	  const hashedPassword = await bcrypt.hash(pendingPartner.password, 10);
+	  const referralCode = await generateReferralCode(pendingPartner.name);
 
 	  // Create a new partner in the Partner collection
 	  const newPartner = new Partner({
@@ -191,7 +210,7 @@ adminRoutes.put("/partners/:id/approve", authorizeRoles("admin"), async (req, re
 			email: pendingPartner.email,
 			phone: pendingPartner.phone,
 			password: hashedPassword, // Store hashed password
-			referralCode: pendingPartner.referralCode,
+			referralCode,
 			aadharUrl: pendingPartner.aadharUrl,
 			panUrl: pendingPartner.panUrl,
 			cashBack: 0, // Default cashback

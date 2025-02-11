@@ -2,28 +2,15 @@ import express from "express";
 import upload from "../middlewares/uploadMiddleware.js";
 import { authorizeRoles } from "../middlewares/authMiddleware.js";
 import PendingPartner from "../models/partnerApprovals.js";
-import referNum from "../models/referNum.js";
+import Partner from "../models/partner.js";
 import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs"; 
 
 dotenv.config();
 
 const router = express.Router();
-const generateReferralCode = async (name) => {
-//   return `${name.substring(0, 3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
-    const refNum = await referNum.findOne();
-    if(refNum == null){
-        const newRefNum = new referNum({
-            number: 1000
-        });
-        await newRefNum.save();
-        return `${name.substring(0, 3).toUpperCase()}-1000`;
-    }
-    const newNum = refNum.number + 1;
-    refNum.number  = newNum;
-    await refNum.save();
-    return `${name.substring(0, 3).toUpperCase()}-${newNum}`;
-};
+
 
 // Aadhar Upload Route
 router.post(
@@ -94,16 +81,12 @@ router.post("/register", async (req, res) => {
 
     // Hash password before storing
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    const referralCode = await generateReferralCode(name);
-    
     // Create new pending partner request
     const newPendingPartner = new PendingPartner({
       name,
       email,
       phone,
       password: hashedPassword, // Store hashed password
-      referralCode,
       aadharUrl,
       panUrl,
     });
@@ -118,5 +101,60 @@ router.post("/register", async (req, res) => {
     res.status(500).json({ error: "Error registering partner." });
   }
 });
+
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validate required fields
+    if (!email || !password) {
+      return res.status(400).json({ error: "All fields are required." });
+    }
+
+    let user = await Partner.findOne({ email });
+    let userType = "partner"; // Default type
+
+    if (!user) {
+      // If not a partner, check Referral collection
+      user = await Referral.findOne({ email });
+      userType = "referral";
+    }
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    // Compare password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: "Invalid credentials." });
+    }
+
+    // Generate JWT Token
+    const token = jwt.sign(
+      { id: user._id, email: user.email, userType }, // Include userType in token
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    // Send response with user type
+    res.status(200).json({
+      success: true,
+      message: "Login successful.",
+      token,
+      userType, // ✅ Include userType to determine dashboard
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        referralCode: user.referralCode || null, // Referral code if available
+      },
+    });
+  } catch (error) {
+    console.error("❌ Error logging in:", error);
+    res.status(500).json({ error: "Error logging in." });
+  }
+});
+
 
 export default router;

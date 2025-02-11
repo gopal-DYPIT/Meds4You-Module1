@@ -19,6 +19,7 @@ import OrderSummary from "./pages/OrderSummary";
 import ScrollToTop from "./components/ScrollToTop";
 import ReferralRegister from "./pages/Program/ReferralRegister";
 import PartnerRegister from "./pages/Program/PartnerRegister";
+import { CommonLogin } from "./pages/Program/CommonLogin";
 
 function AppContent() {
   const location = useLocation();
@@ -47,6 +48,7 @@ function AppContent() {
         <Route element={<ProtectedRoute publicOnly={true} />}>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/login/program" element={<CommonLogin />} />
           <Route path="/register" element={<Signup />} />
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/products/:id" element={<MedicineDetails />} />

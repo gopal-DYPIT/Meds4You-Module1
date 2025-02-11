@@ -33,8 +33,11 @@ const PartnerRegister = () => {
       setUploading((prev) => ({ ...prev, [type]: true }));
   
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/partner/upload/${type}`,
-        formData // ❌ Removed manual headers
+        `${import.meta.env.VITE_BACKEND_URL}/api/partners/upload/${type}`, 
+        formData, 
+        {
+          headers: { "Content-Type": "multipart/form-data" }, // ✅ Add this header
+        }
       );
   
       setFormData((prev) => ({
@@ -44,12 +47,13 @@ const PartnerRegister = () => {
   
       alert(`${type.toUpperCase()} uploaded successfully!`);
     } catch (error) {
-      console.error(`Error uploading ${type}:`, error);
+      console.error(`❌ Error uploading ${type}:`, error);
       alert(`Failed to upload ${type}. Please try again.`);
     } finally {
       setUploading((prev) => ({ ...prev, [type]: false }));
     }
   };
+  
   
 
   const handleSubmit = async (e) => {
@@ -67,7 +71,7 @@ const PartnerRegister = () => {
 
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/partner/register`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/partners/register`,
         formData
       );
       alert(response.data.message);
