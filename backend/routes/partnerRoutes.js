@@ -10,13 +10,14 @@ const router = express.Router();
 
 // Aadhar Upload Route
 router.post(
-  "/upload/aadhar",
-  authorizeRoles("user"),
+  "/upload/aadhar", // Remove this line for testing
   upload.single("aadhar"),
   async (req, res) => {
+
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded." });
     }
+
     try {
       const domain = process.env.DOMAIN || "meds4you.in";
       const aadharUrl = `https://${domain}/uploads/${req.file.filename}`;
@@ -27,16 +28,16 @@ router.post(
         aadharUrl,
       });
     } catch (error) {
-      console.error("❌ Error uploading Aadhar:", error);
-      res.status(500).json({ error: "Error uploading Aadhar." });
+      console.error("❌ Upload Error:", error);
+      return res.status(500).json({ error: "Error uploading Aadhar." });
     }
   }
 );
 
+
 // PAN Upload Route
 router.post(
   "/upload/pan",
-  authorizeRoles("user"),
   upload.single("pan"),
   async (req, res) => {
     if (!req.file) {

@@ -25,21 +25,23 @@ const PartnerRegister = () => {
   const handleFileUpload = async (e, type) => {
     const file = e.target.files[0];
     if (!file) return;
-
+  
     const formData = new FormData();
     formData.append(type, file);
-
+  
     try {
       setUploading((prev) => ({ ...prev, [type]: true }));
+  
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/partner/upload/${type}`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
+        formData // ❌ Removed manual headers
       );
+  
       setFormData((prev) => ({
         ...prev,
         [`${type}Url`]: response.data[`${type}Url`],
       }));
+  
       alert(`${type.toUpperCase()} uploaded successfully!`);
     } catch (error) {
       console.error(`Error uploading ${type}:`, error);
@@ -48,6 +50,7 @@ const PartnerRegister = () => {
       setUploading((prev) => ({ ...prev, [type]: false }));
     }
   };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
