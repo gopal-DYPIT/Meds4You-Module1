@@ -4,6 +4,7 @@ import { authorizeRoles } from "../middlewares/authMiddleware.js";
 import PendingPartner from "../models/partnerApprovals.js";
 import referNum from "../models/referNum.js";
 import dotenv from "dotenv";
+import bcrypt from "bcryptjs"; 
 
 dotenv.config();
 
@@ -91,13 +92,17 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ error: "Partner request already exists." });
     }
 
+    // Hash password before storing
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const referralCode = await generateReferralCode(name);
+    
     // Create new pending partner request
     const newPendingPartner = new PendingPartner({
       name,
       email,
       phone,
-      password, // Will be hashed before saving (pre-save hook)
+      password: hashedPassword, // Store hashed password
       referralCode,
       aadharUrl,
       panUrl,
