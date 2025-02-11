@@ -19,7 +19,7 @@ import OrderSummary from "./pages/OrderSummary";
 import ScrollToTop from "./components/ScrollToTop";
 import ReferralRegister from "./pages/Program/ReferralRegister";
 import PartnerRegister from "./pages/Program/PartnerRegister";
-import { CommonLogin } from "./pages/Program/CommonLogin";
+import CommonLogin from "./pages/Program/CommonLogin";
 
 function AppContent() {
   const location = useLocation();
