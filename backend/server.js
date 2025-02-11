@@ -29,7 +29,7 @@ app.use('/api/cart', authenticateToken, cartRoutes);
 app.use('/api/admin', authenticateToken, adminRoutes);
 app.use("/api/prescriptions",authenticateToken, prescriptionRoutes);
 app.use('/api/referrers', referrerRoutes);
-app.use('/api/partner', partnerRoutes);
+app.use('/api/partners', partnerRoutes);
 app.use("/uploads", express.static("/var/www/uploads"));
 
 

@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../redux/slice/authSlice";
 import ManagePrescriptions from "./ManagePrescriptions";
+import ManagePartners from "./ManagePartners";
 
 const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState("manageProducts");
@@ -328,6 +329,19 @@ const AdminDashboard = () => {
             }`}
           >
             Prescriptions
+          </button>
+          <button
+            onClick={() => {
+              // console.log("Setting active section to manageOrders");
+              setActiveSection("managePartner");
+            }}
+            className={`w-full mb-4 px-4 py-2 rounded-md font-medium text-white ${
+              activeSection === "managePartner"
+                ? "bg-gray-700"
+                : "hover:bg-gray-700"
+            }`}
+          >
+            Manage Partners
           </button>
           <button
             onClick={handleLogout}
@@ -763,6 +777,7 @@ const AdminDashboard = () => {
           </div>
         )}
         {activeSection === "managePrescription" && <ManagePrescriptions />}
+        {activeSection === "managePartner" && <ManagePartners />}
       </main>
       <ToastContainer />
     </div>

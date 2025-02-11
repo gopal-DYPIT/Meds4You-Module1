@@ -2,11 +2,27 @@ import express from "express";
 import upload from "../middlewares/uploadMiddleware.js";
 import { authorizeRoles } from "../middlewares/authMiddleware.js";
 import PendingPartner from "../models/partnerApprovals.js";
+import referNum from "../models/referNum.js";
 import dotenv from "dotenv";
 
 dotenv.config();
 
 const router = express.Router();
+const generateReferralCode = async (name) => {
+//   return `${name.substring(0, 3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const refNum = await referNum.findOne();
+    if(refNum == null){
+        const newRefNum = new referNum({
+            number: 1000
+        });
+        await newRefNum.save();
+        return `${name.substring(0, 3).toUpperCase()}-1000`;
+    }
+    const newNum = refNum.number + 1;
+    refNum.number  = newNum;
+    await refNum.save();
+    return `${name.substring(0, 3).toUpperCase()}-${newNum}`;
+};
 
 // Aadhar Upload Route
 router.post(
@@ -75,12 +91,14 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ error: "Partner request already exists." });
     }
 
+    const referralCode = await generateReferralCode(name);
     // Create new pending partner request
     const newPendingPartner = new PendingPartner({
       name,
       email,
       phone,
       password, // Will be hashed before saving (pre-save hook)
+      referralCode,
       aadharUrl,
       panUrl,
     });

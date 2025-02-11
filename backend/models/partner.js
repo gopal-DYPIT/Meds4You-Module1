@@ -6,6 +6,7 @@ const partnerSchema = new mongoose.Schema({
   email: { type: String, required: true, trim: true, unique: true },
   phone: { type: String, required: true, trim: true },
   password: { type: String, required: true },
+  referralCode: { type: String, unique: true },
   aadharUrl: { type: String,required: true }, // Unique referral code for others to use
   panUrl: { type: String, required: true }, // Reward points
   cashBack: { type: Number, default: 0 } // Redeemed points

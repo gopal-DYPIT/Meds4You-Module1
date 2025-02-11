@@ -4,11 +4,12 @@ import Order from '../models/order.js';
 import Product from "../models/product.js";
 import {authorizeRoles } from "../middlewares/authMiddleware.js";
 import User from '../models/User.js';
+import bcrypt from 'bcryptjs';
 import pkg from "bcryptjs";
+import PendingRequest from '../models/partnerApprovals.js';
+import Partner from '../models/partner.js';
 const { hash } = pkg;
 
-// Get all orders (including populated product details)
-// Only Admins and Managers can access this route
 adminRoutes.get('/orders', authorizeRoles("admin"), async (req, res) => {
   	try {
     	const orders = await Order.find().populate('items.productId');
@@ -18,8 +19,6 @@ adminRoutes.get('/orders', authorizeRoles("admin"), async (req, res) => {
   	}
 });
 
-// Update order status (e.g., Pending -> Completed)
-// Only Admins and Managers can access this route
 adminRoutes.put('/orders/:id/status', authorizeRoles("admin"), async (req, res) => {
   	const { orderStatus, paymentStatus } = req.body;
 
@@ -49,9 +48,6 @@ adminRoutes.put('/orders/:id/status', authorizeRoles("admin"), async (req, res) 
   	}
 });
 
-// Delete an order by ID
-// Only Admins can delete and order
-// rather than delete I made it to make order as cancelled
 adminRoutes.post('/orders/:id', authorizeRoles("admin"), async (req, res) => {
   	try {
     	const order = await Order.findById(req.params.id);
@@ -67,8 +63,6 @@ adminRoutes.post('/orders/:id', authorizeRoles("admin"), async (req, res) => {
   	}
 });	
 
-// Get an order by ID (optional, for detailed view)
-// Only Admins and Managers can access this route
 adminRoutes.get('/orders/:id',  authorizeRoles("admin"), async (req, res) => {
   	try {
     	const order = await Order.findById(req.params.id).populate('items.productId');
@@ -81,18 +75,6 @@ adminRoutes.get('/orders/:id',  authorizeRoles("admin"), async (req, res) => {
   	}
 });
 
-// Manage Products (Optional: For Admin to view or delete products)
-// this route exists for everybody in productRoutes
-// adminRoutes.get('/products',  authorizeRoles("admin", "manager"), async (req, res) => {
-//   try {
-//     const products = await Product.find();
-//     res.json(products);
-//   } catch (error) {
-//     res.status(500).json({ message: 'Error fetching products' });
-//   }
-// });
-
-// Create a new product (Only for Admin)
 adminRoutes.post("/products",authorizeRoles("admin"), async (req, res) => {
 	try {
 	  	const { name, image, description, type, brand, category, price, discount } = req.body;
@@ -144,26 +126,7 @@ adminRoutes.delete('/products/:id', authorizeRoles("admin"), async (req, res) =>
   	}
 });
 
-//better soft delete function but dont know whether to implement
-// adminRoutes.delete('/products/:id', verifyToken, authorizeRoles("admin"), async (req, res) => {
-// 	try {
-// 	  const product = await Product.findById(req.params.id);
-// 	  if (!product) {
-// 			return res.status(404).json({ message: 'Product not found' });
-// 	  }
 
-// 	  // Soft delete: Mark as deleted instead of removing from DB
-// 	  product.status = "deleted";  // Ensure `status` exists in the Product schema
-// 	  product.updatedBy = req.user.id;  // Track who deleted it
-// 	  await product.save();
-
-// 	  res.json({ message: 'Product marked as deleted successfully' });
-
-// 	} catch (error) {
-// 	  console.error("Error deleting product:", error);
-// 	  res.status(500).json({ message: 'Error deleting product' });
-// 	}
-// });
 
 adminRoutes.post('/registerAdmin',  authorizeRoles("admin"), async (req, res, next) => {
     try{
@@ -200,6 +163,69 @@ adminRoutes.post('/registerAdmin',  authorizeRoles("admin"), async (req, res, ne
         next(err);
     }
 });
+
+adminRoutes.get("/partners/pending", authorizeRoles("admin"), async (req, res) => {
+	try {
+	  const pendingPartners = await PendingRequest.find();
+	  res.status(200).json(pendingPartners);
+	} catch (error) {
+	  console.error("❌ Error fetching pending partners:", error);
+	  res.status(500).json({ message: "Error fetching pending partners" });
+	}
+});
+
+adminRoutes.put("/partners/:id/approve", authorizeRoles("admin"), async (req, res) => {
+	try {
+	  // Find the pending partner request
+	  const pendingPartner = await PendingRequest.findById(req.params.id);
+	  if (!pendingPartner) {
+			return res.status(404).json({ message: "Pending partner request not found" });
+	  }
+
+	  // Hash the password before moving to Partner model
+	  const hashedPassword = await bcrypt.hash(pendingPartner.password, 10);
+
+	  // Create a new partner in the Partner collection
+	  const newPartner = new Partner({
+			name: pendingPartner.name,
+			email: pendingPartner.email,
+			phone: pendingPartner.phone,
+			password: hashedPassword, // Store hashed password
+			referralCode: pendingPartner.referralCode,
+			aadharUrl: pendingPartner.aadharUrl,
+			panUrl: pendingPartner.panUrl,
+			cashBack: 0, // Default cashback
+			createdAt: pendingPartner.createdAt,
+			updatedAt: Date.now(),
+	  });
+
+	  await newPartner.save(); // Save to Partner collection
+
+	  // Remove from pending requests
+	  await PendingRequest.findByIdAndDelete(req.params.id);
+
+	  res.json({ message: "Partner approved successfully! Now they can log in.", partner: newPartner });
+	} catch (error) {
+	  console.error("❌ Error approving partner:", error);
+	  res.status(500).json({ message: "Error approving partner" });
+	}
+});
+
+adminRoutes.delete('/partners/:id/reject', authorizeRoles("admin"), async (req, res) => {
+	try {
+	  const pendingPartner = await PendingRequest.findById(req.params.id);
+	  if (!pendingPartner) {
+			return res.status(404).json({ message: "Pending partner request not found" });
+	  }
+
+	  await PendingRequest.findByIdAndDelete(req.params.id);
+	  res.json({ message: "Partner request rejected successfully" });
+	} catch (error) {
+	  console.error("❌ Error rejecting partner request:", error);
+	  res.status(500).json({ message: "Error rejecting partner request" });
+	}
+});
+
 
 
 export default adminRoutes;
