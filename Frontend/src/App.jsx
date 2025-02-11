@@ -17,6 +17,8 @@ import ProtectedRoute from "./components/protectedRoute";
 import "react-toastify/dist/ReactToastify.css";
 import OrderSummary from "./pages/OrderSummary";
 import ScrollToTop from "./components/ScrollToTop";
+import ReferralRegister from "./pages/Program/ReferralRegister";
+import PartnerRegister from "./pages/Program/PartnerRegister";
 
 function AppContent() {
   const location = useLocation();
@@ -50,6 +52,8 @@ function AppContent() {
           <Route path="/products/:id" element={<MedicineDetails />} />
           <Route path="/medicine/:id" element={<MedicineDetails />} />
           <Route path="/infoOrder" element={<OrderMedicine />} />
+          <Route path="/register/referral" element={<ReferralRegister />} />
+          <Route path="/register/partner" element={<PartnerRegister />} />
         </Route>
 
         {/* Protected Routes for Admin */}

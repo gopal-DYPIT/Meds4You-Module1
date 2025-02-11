@@ -16,7 +16,7 @@ router.post(
       console.error("❌ Multer did NOT receive any file!");
       return res.status(400).json({ error: "No file uploaded." });
     }
-
+    
     try {
       const domain = process.env.DOMAIN || "meds4you.in"; // Fallback domain
       const fileUrl = `https://${domain}/uploads/${req.file.filename}`;

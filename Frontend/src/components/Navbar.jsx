@@ -236,6 +236,12 @@ function Navbar() {
             </div>
           )}
         </div>
+        <Link
+          to="/"
+          className="text-black text-sm sm:text-base hover:text-blue-600 px-2 sm:px-4 py-1 sm:py-2"
+        >
+          Home
+        </Link>
 
         {/* Improved Hamburger Menu Button */}
         <button
@@ -257,13 +263,13 @@ function Navbar() {
           }`}
         >
           <div className="flex flex-col py-4">
-            <Link
+            {/* <Link
               to="/"
               className="px-6 py-3 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
               onClick={() => setIsMenuOpen(false)}
             >
               Home
-            </Link>
+            </Link> */}
             <Link
               to="/infoOrder"
               className="px-6 py-3 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
@@ -337,12 +343,12 @@ function Navbar() {
 
         {/* Desktop Menu (unchanged) */}
         <div className="hidden sm:flex items-center space-x-6">
-          <Link
+          {/* <Link
             to="/"
             className="text-black text-base hover:text-blue-600"
           >
             Home
-          </Link>
+          </Link> */}
           <Link
             to="/infoOrder"
             className="text-black text-base hover:text-blue-600"
