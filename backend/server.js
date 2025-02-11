@@ -11,6 +11,7 @@ import cartRoutes from './routes/cartRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import prescriptionRoutes from './routes/prescriptionRoutes.js';
 import referrerRoutes from './routes/referrerRoutes.js';
+import partnerRoutes from './routes/partnerRoutes.js';
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use('/api/cart', authenticateToken, cartRoutes);
 app.use('/api/admin', authenticateToken, adminRoutes);
 app.use("/api/prescriptions",authenticateToken, prescriptionRoutes);
 app.use('/api/referrers', referrerRoutes);
+app.use('/api/partner', partnerRoutes);
 app.use("/uploads", express.static("/var/www/uploads"));
 
 
