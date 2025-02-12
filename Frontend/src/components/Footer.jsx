@@ -8,21 +8,33 @@ const Footer = () => {
         {/* Company Section */}
         <div>
           <h3 className="text-xl font-semibold text-gray-800 mb-3">Company</h3>
-          <h1 className="text-2xl font-semibold text-gray-800">Mediforge LTD</h1>
+          {/* <h1 className="text-2xl font-semibold text-gray-800">Mediforge LTD</h1> */}
           {/* <h2 className="text-gray-600 mt-2 text-md">Meds4You</h2> */}
           <ul className="space-y-2 mt-2 text-sm">
+              <a 
+              href="/best-online-pharmacy" 
+              className="text-gray-600 hover:text-blue-500 text-sm transition duration-200">
+              Best Online Pharmacy in India 
+              </a>
+              <li>
+              <a href="/buy-medicines-online" className="text-gray-600 hover:text-blue-500 text-sm transition duration-200">
+                Buy Medicines Online With Discount
+              </a>
+            </li>
+            <li>
+              <a href="/privacy-policy" className="text-gray-600 hover:text-blue-500 text-sm transition duration-200">
+                Privacy Policy
+              </a>
+            </li>
+            <li>
+              <a href="/terms-of-use" className="text-gray-600 hover:text-blue-500 text-sm transition duration-200">
+                Terms of Use
+              </a>
+            </li>               
             <li className="text-gray-600 hover:text-blue-500 transition duration-300">
-              <a href="#">Terms and Conditions</a>
+                <a href="#">Terms and Conditions</a>
             </li>
           </ul>
-        </div>
-
-        {/* Contact Section */}
-        <div>
-          <h3 className="text-xl font-semibold text-gray-800 mb-3">Contact Us</h3>
-          <p className="text-gray-600 text-sm">meds4you01@gmail.com</p>
-          <p className="text-gray-600 text-sm font-semibold pt-2">+91 8484883367</p>
-          <p className="text-gray-600 text-sm pt-2">Available 24/7</p>
         </div>
 
         {/* Join Us Section - Clickable */}
@@ -35,6 +47,14 @@ const Footer = () => {
           <a href="/register/partner" className="text-gray-600 text-sm hover:text-blue-500 transition duration-300">
             Affiliates/ Partners
           </a>
+        </div>
+
+        {/* Contact Section */}
+        <div>
+          <h3 className="text-xl font-semibold text-gray-800 mb-3">Contact Us</h3>
+          <p className="text-gray-600 text-sm">meds4you01@gmail.com</p>
+          <p className="text-gray-600 text-sm font-semibold pt-2">+91 8484883367</p>
+          <p className="text-gray-600 text-sm pt-2">Available 24/7</p>
         </div>
 
         {/* Social Media Section - Clickable */}
