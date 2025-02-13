@@ -6,8 +6,7 @@ const userSchema = new Schema({
     password: { type: String, required: true }, // Make sure to hash this password before saving
     name: { type: String, required: true, ref: "User" }, // Name of the user
     phoneNumber: { type: String, required: true }, // Phone number should be unique if that's your use case
-    // storePartnerReferenceId: { type: String, ref: "StorePartner" }, 
-    // earnings: { type: Number, default: 0 },
+    referralCode: { type: String }, // Unique referral code for each user
     role: { type: String, enum: ["user", "admin"],  required: true },
     addresses: [{
         street: { type: String, required: true },
@@ -16,8 +15,7 @@ const userSchema = new Schema({
         zipCode: { type: String },
         country: { type: String, required: true },
         isPrimary: { type: Boolean, default: false }
-      }]
-    // bdeId: { type: Schema.Types.ObjectId, required: true, ref: "BDE" }  
+      }] 
 }, { timestamps: true });  // Automatically adds createdAt and updatedAt timestamps
 
 // Export the model

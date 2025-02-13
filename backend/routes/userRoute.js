@@ -2,6 +2,7 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js"; // Ensure the correct path and use .js extension
 import {authorizeRoles} from '../middlewares/authMiddleware.js'; // Import the auth middleware
+import {getReferralDetails} from "../controllers/getReferralDetails.js"
 
 const router = express.Router();
 
@@ -82,6 +83,7 @@ router.post("/address", authorizeRoles('user'), async (req, res) => {
     }
   });
 
+  router.get("/referral-details/:referralCode", getReferralDetails);
   
 
 export default router;

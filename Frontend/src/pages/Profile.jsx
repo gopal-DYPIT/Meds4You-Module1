@@ -26,6 +26,7 @@ const Profile = () => {
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [selectedSection, setSelectedSection] = useState("profileInfo");
   const [prescriptions, setPrescriptions] = useState([]);
+  const [referrerDetails, setReferrerDetails] = useState(null);
 
   useEffect(() => {
     const fetchPrescriptions = async () => {
@@ -83,6 +84,26 @@ const Profile = () => {
     verifyUser();
     fetchOrders();
   }, [token, dispatch]);
+
+  useEffect(() => {
+    if (user?.referralCode) {
+      axios
+        .get(
+          `${import.meta.env.VITE_BACKEND_URL}/api/users//referral-details/${
+            user.referralCode
+          }`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        )
+        .then((response) => {
+          if (response.data.name && response.data.email) {
+            setReferrerDetails(response.data); // Store referral details in state
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching referral details:", error);
+        });
+    }
+  }, [user?.referralCode]);
 
   const handleAddAddress = async () => {
     if (
@@ -216,16 +237,6 @@ const Profile = () => {
             Manage Address
           </button>
           <button
-            onClick={() => setSelectedSection("salesProfile")}
-            className={`w-full p-2 md:p-3 rounded-md transition ${
-              selectedSection === "salesProfile"
-                ? "bg-gray-400"
-                : "bg-gray-300 hover:bg-gray-400"
-            }`}
-          >
-            Sales Profile
-          </button>
-          <button
             onClick={() => setSelectedSection("orderHistory")}
             className={`w-full p-2 md:p-3 rounded-md transition ${
               selectedSection === "orderHistory"
@@ -258,8 +269,31 @@ const Profile = () => {
       {/* Main Content */}
       <div className="flex-1 bg-white p-4 md:p-6 rounded-lg">
         {selectedSection === "profileInfo" && (
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">User Profile</h2>
+          <div className="relative">
+            {/* Referral Details - Positioned in top-right on larger screens, stacked on mobile */}
+            <div className="w-full md:w-64 p-4 border rounded-md bg-gray-100 shadow-md mb-4 md:mb-0 md:absolute md:top-0 md:right-0">
+              {user?.referralCode && referrerDetails ? (
+                <>
+                  <h3 className="text-xl font-semibold mb-2">
+                    Referred By ({referrerDetails.type})
+                  </h3>
+                  <p>
+                    <strong>Name:</strong> {referrerDetails.name}
+                  </p>
+                  <p>
+                    <strong>Email:</strong> {referrerDetails.email}
+                  </p>
+                </>
+              ) : (
+                <p>
+                  <strong>Referred By:</strong> N/A
+                </p>
+              )}
+            </div>
+
+            <h2 className="text-2xl md:text-3xl font-bold mb-4">
+              User Profile
+            </h2>
             <div className="space-y-4">
               <p>
                 <strong>Name:</strong> {user ? user.name : "N/A"}
@@ -283,7 +317,7 @@ const Profile = () => {
                 )
               ) : (
                 <p>
-                  <strong>Default Address:</strong> N/A
+                  <strong>Default Address:</strong> Not set. Please add an address.
                 </p>
               )}
             </div>
