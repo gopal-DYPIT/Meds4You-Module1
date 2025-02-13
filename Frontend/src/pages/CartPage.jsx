@@ -81,38 +81,55 @@ const CartPage = () => {
     }
   };
 
-  const handleSelectionChange = (productId, isChecked, isRecommended = false) => {
+  const handleSelectionChange = (
+    productId,
+    isChecked,
+    isRecommended = false
+  ) => {
     setSelectedMedicines((prev) => ({
       ...prev,
-      [productId]: isChecked ? (isRecommended ? 'recommended' : 'original') : null,
+      [productId]: isChecked
+        ? isRecommended
+          ? "recommended"
+          : "original"
+        : null,
     }));
   };
 
   const calculateTotal = () => {
-    return cart.reduce((total, item) => {
-      const selectionType = selectedMedicines[item.productId._id];
-      if (!selectionType) return total;
+    return cart
+      .reduce((total, item) => {
+        const selectionType = selectedMedicines[item.productId._id];
+        if (!selectionType) return total;
 
-      if (selectionType === 'original') {
-        return total + item.productId.price * item.quantity;
-      } else if (selectionType === 'recommended' && item.productId.alternateMedicines?.[0]) {
-        return total + item.productId.alternateMedicines[0].price * item.quantity;
-      }
-      return total;
-    }, 0).toFixed(2);
+        if (selectionType === "original") {
+          return total + item.productId.price * item.quantity;
+        } else if (
+          selectionType === "recommended" &&
+          item.productId.alternateMedicines?.[0]
+        ) {
+          return (
+            total + item.productId.alternateMedicines[0].price * item.quantity
+          );
+        }
+        return total;
+      }, 0)
+      .toFixed(2);
   };
 
   const handleCheckout = () => {
-    const selectedProducts = cart.map(item => ({
-      ...item,
-      isRecommended: selectedMedicines[item.productId._id] === 'recommended'
-    })).filter(item => selectedMedicines[item.productId._id]);
-    
-    navigate("/checkout", { 
-      state: { 
+    const selectedProducts = cart
+      .map((item) => ({
+        ...item,
+        isRecommended: selectedMedicines[item.productId._id] === "recommended",
+      }))
+      .filter((item) => selectedMedicines[item.productId._id]);
+
+    navigate("/checkout", {
+      state: {
         selectedProducts,
-        total: calculateTotal()
-      } 
+        total: calculateTotal(),
+      },
     });
   };
 
@@ -124,10 +141,96 @@ const CartPage = () => {
     );
   }
 
+  const MobileCartItem = ({ item, index }) => {
+    const product = item?.productId;
+    const alternate = product?.alternateMedicines?.[0];
+    const selection = selectedMedicines[product._id];
+    const isOriginalSelected = selection === 'original';
+    const isRecommendedSelected = selection === 'recommended';
+
+    return (
+      <div className="bg-white rounded-lg shadow-md p-4 mb-4">
+        <div className="flex justify-between items-center mb-2">
+          <span className="font-semibold">#{index + 1}</span>
+          <button
+            onClick={() => handleDelete(product._id)}
+            className="text-red-500 text-sm"
+          >
+            Remove
+          </button>
+        </div>
+
+        {/* Original Medicine */}
+        <div className={`p-3 rounded-lg mb-3 ${isOriginalSelected ? "bg-blue-50" : "bg-gray-50"}`}>
+          <div className="flex items-center gap-2 mb-2">
+            <input
+              type="radio"
+              name={`medicine-${product._id}`}
+              onChange={(e) => handleSelectionChange(product._id, e.target.checked, false)}
+              checked={isOriginalSelected}
+            />
+            <h3 className="font-medium">{product?.drugName}</h3>
+          </div>
+          <div className="ml-6 space-y-1">
+            <p className="text-sm text-gray-600">Manufacturer: {product?.manufacturer}</p>
+            <p className="text-sm text-gray-600">Price: ₹{product?.price}/unit</p>
+            <div className="flex items-center space-x-3 py-2">
+              <button
+                onClick={() => handleQuantityChange(product._id, item.quantity - 1)}
+                className="w-6 h-6 bg-gray-200 rounded-full hover:bg-red-500 hover:text-white flex items-center justify-center"
+              >
+                −
+              </button>
+              <span>{item.quantity}</span>
+              <button
+                onClick={() => handleQuantityChange(product._id, item.quantity + 1)}
+                className="w-6 h-6 bg-gray-200 rounded-full hover:bg-green-500 hover:text-white flex items-center justify-center"
+              >
+                +
+              </button>
+            </div>
+            <p className="font-medium">Total: ₹{(product?.price * item.quantity).toFixed(2)}</p>
+          </div>
+        </div>
+
+        {/* Alternative Medicine */}
+        {alternate ? (
+          <div className={`p-3 rounded-lg ${isRecommendedSelected ? "bg-green-50" : "bg-gray-50"}`}>
+            <div className="flex items-center gap-2 mb-2">
+              <input
+                type="radio"
+                name={`medicine-${product._id}`}
+                onChange={(e) => handleSelectionChange(product._id, e.target.checked, true)}
+                checked={isRecommendedSelected}
+              />
+              <h3 className="font-medium">{alternate.name}</h3>
+            </div>
+            <div className="ml-6 space-y-1">
+              <div className="w-16 h-16">
+                <img
+                  src={alternate.manufacturerUrl}
+                  alt="Manufacturer"
+                  className="object-contain w-full h-full"
+                />
+              </div>
+              <p className="text-sm text-gray-600">Price: ₹{alternate.price}/unit</p>
+              <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
+              <p className="font-medium">Total: ₹{(alternate.price * item.quantity).toFixed(2)}</p>
+            </div>
+          </div>
+        ) : (
+          <div className="p-3 bg-gray-50 rounded-lg text-center text-gray-500">
+            No alternative available
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="w-full min-h-screen bg-gray-50 py-10 px-4 pt-28">
-      <div className="max-w-8xl mr-6 ml-6">
-        <h1 className="text-3xl ml-3 font-semibold text-gray-800 mb-12">
+      <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 ">
+        <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 mb-6 sm:mb-12">
           Your Cart
         </h1>
 
@@ -138,11 +241,20 @@ const CartPage = () => {
         )}
 
         {cart.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
+          <div className="bg-white rounded-lg shadow p-6 sm:p-12 text-center">
             <p className="text-gray-500">Your cart is empty</p>
           </div>
         ) : (
           <>
+            {/* Mobile View */}
+            <div className="block lg:hidden">
+              {cart.map((item, index) => (
+                <MobileCartItem key={item.id} item={item} index={index} />
+              ))}
+            </div>
+
+            {/* Desktop View */}
+            <div className="hidden lg:block">
             <div className="bg-white rounded-lg shadow">
               <table className="w-full border-collapse">
                 <thead>
@@ -166,7 +278,7 @@ const CartPage = () => {
                     <th className="py-3 px-6 text-left">Quantity</th>
                     <th className="py-3 px-5 text-left ">Total (Rs.)</th>
                     <th className="py-3 px-5 text-left border-r border-gray-200">
-                    Action
+                      Action
                     </th>
                     <th className="py-3 px-8 text-left ">Name</th>
                     <th className="py-3 px-5 text-left">Manufacturer</th>
@@ -180,8 +292,8 @@ const CartPage = () => {
                     const product = item?.productId;
                     const alternate = product?.alternateMedicines?.[0];
                     const selection = selectedMedicines[product._id];
-                    const isOriginalSelected = selection === 'original';
-                    const isRecommendedSelected = selection === 'recommended';
+                    const isOriginalSelected = selection === "original";
+                    const isRecommendedSelected = selection === "recommended";
 
                     return (
                       <tr key={item.id} className="border-t border-gray-200">
@@ -373,6 +485,9 @@ const CartPage = () => {
                 </tbody>
               </table>
             </div>
+            </div>
+
+            {/* Checkout Button */}
 
             <div className="mt-8 flex justify-center">
               <button
