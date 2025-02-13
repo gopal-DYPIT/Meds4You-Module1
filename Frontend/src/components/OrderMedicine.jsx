@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
 
 const OrderMedicine = () => {
   const [file, setFile] = useState(null);
@@ -12,6 +13,7 @@ const OrderMedicine = () => {
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [instructions, setInstructions] = useState("");
+  const [prescriptionItems, setPrescriptionItems] = useState([]);
   const navigate = useNavigate();
   const { isAuthenticated, token } = useSelector((state) => state.auth);
 
@@ -43,8 +45,10 @@ const OrderMedicine = () => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       setFile(selectedFile);
-      setFileUploaded(true); 
+      setFileUploaded(true);
       setMessage("");
+      // Simulating prescription analysis response
+      setPrescriptionItems([]);
     }
   };
 
@@ -82,20 +86,44 @@ const OrderMedicine = () => {
         }
       );
 
-      setMessage(
-        response.status === 200
-          ? "Prescription uploaded successfully!"
-          : "Failed to upload prescription."
-      );
+      if (response.data.items) {
+        setPrescriptionItems(response.data.items);
+      }
+
+      setMessage("Prescription uploaded successfully! Review your medicines below.");
     } catch (error) {
       setMessage("An error occurred. Please try again.");
       console.error("Error uploading file:", error);
     } finally {
       setIsUploading(false);
-      setFile(null);
-      setPreview(null);
-      setInstructions("");
-      document.getElementById("prescription").value = "";
+    }
+  };
+
+  const handleAddToCart = async (item, isRecommended = false) => {
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/cart/add`,
+        {
+          productId: isRecommended ? item.recommendedMedicine.id : item.id,
+          quantity: item.quantity || 1,
+          isRecommended
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      toast.success("Added to cart successfully!", {
+        position: "top-right",
+        autoClose: 2000,
+      });
+    } catch (error) {
+      toast.error("Failed to add to cart", {
+        position: "top-right",
+      });
+      console.error("Error adding to cart:", error);
     }
   };
 
@@ -138,7 +166,6 @@ const OrderMedicine = () => {
       </div>
     );
   }
-  
 
   return (
     <div className="flex flex-col p-28 items-center justify-center min-h-screen bg-gradient-to-br bg-[#FFF0F5] px-4 sm:px-6 lg:px-8">
@@ -153,8 +180,8 @@ const OrderMedicine = () => {
           <li>Upload prescription.</li>
           <li>Select delivery address.</li>
           <li>Provide special instructions (if any).</li>
-          <li>Receive confirmation call.</li>
-          <li>Delivery at your doorstep.</li>
+          <li>Review medicines and add to cart.</li>
+          <li>Proceed to checkout.</li>
         </ul>
 
         <div className="relative">
@@ -215,9 +242,6 @@ const OrderMedicine = () => {
             ))}
           </div>
         )}
-        <p className="text-sm text-gray-500">
-          Manage address from profile section.
-        </p>
 
         <label
           htmlFor="instructions"
@@ -256,7 +280,69 @@ const OrderMedicine = () => {
         >
           {isUploading ? "Uploading..." : "Upload Prescription"}
         </button>
+
+        {prescriptionItems.length > 0 && (
+          <div className="mt-8">
+            <h2 className="text-xl font-bold mb-4">Prescribed Medicines</h2>
+            <div className="bg-white rounded-lg shadow">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-gray-50">
+                    <th className="py-2 px-3 text-left">No.</th>
+                    <th colSpan="3" className="py-2 px-3 text-left border-r border-gray-200">
+                      Regular Medicine
+                    </th>
+                    <th colSpan="3" className="py-2 px-3 text-left">
+                      Recommended Alternative
+                    </th>
+                  </tr>
+                  <tr className="bg-gray-100">
+                    <th className="py-3 px-3 text-left">Sr.no.</th>
+                    <th className="py-3 px-3 text-left">Name</th>
+                    <th className="py-3 px-3 text-left">Price</th>
+                    <th className="py-3 px-3 text-left border-r border-gray-200">Action</th>
+                    <th className="py-3 px-3 text-left">Name</th>
+                    <th className="py-3 px-3 text-left">Price</th>
+                    <th className="py-3 px-3 text-left">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {prescriptionItems.map((item, index) => (
+                    <tr key={index} className="border-t border-gray-200">
+                      <td className="py-4 px-3">{index + 1}</td>
+                      <td className="py-4 px-3">{item.name}</td>
+                      <td className="py-4 px-3">₹{item.price}</td>
+                      <td className="py-4 px-3 border-r border-gray-200">
+                        <button
+                          onClick={() => handleAddToCart(item, false)}
+                          className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                        >
+                          Add to Cart
+                        </button>
+                      </td>
+                      <td className="py-4 px-3">{item.recommendedMedicine?.name || 'N/A'}</td>
+                      <td className="py-4 px-3">
+                        {item.recommendedMedicine ? `₹${item.recommendedMedicine.price}` : 'N/A'}
+                      </td>
+                      <td className="py-4 px-3">
+                        {item.recommendedMedicine && (
+                          <button
+                            onClick={() => handleAddToCart(item, true)}
+                            className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                          >
+                            Add to Cart
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
+      <ToastContainer />
     </div>
   );
 };

@@ -58,22 +58,45 @@ router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Find user in Referrer collection
     const referrer = await Referrer.findOne({ email });
     if (!referrer) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
+    // Compare password
     const isMatch = await bcrypt.compare(password, referrer.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign({ id: referrer._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
-    res.json({ token, referrer });
+    // Generate JWT Token
+    const token = jwt.sign(
+      { id: referrer._id, userType: "referral" }, // ✅ Include userType
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    // Send response with user details
+    res.json({
+      success: true,
+      message: "Login successful.",
+      token,
+      userType: "referral", // ✅ Specify user type
+      referrer: {
+        id: referrer._id,
+        name: referrer.name, // ✅ Include name
+        email: referrer.email, // ✅ Include email
+        phone: referrer.phone || null, // ✅ Include phone if available
+        referralCode: referrer.referralCode || null, // ✅ Include referral code
+        points: referrer.points || 0, // ✅ Include points (default to 0)
+      },
+    });
   } catch (error) {
-    console.error(error);
+    console.error("❌ Error logging in:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 export default router;

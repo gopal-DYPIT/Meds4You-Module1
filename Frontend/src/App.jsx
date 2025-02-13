@@ -20,6 +20,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import ReferralRegister from "./pages/Program/ReferralRegister";
 import PartnerRegister from "./pages/Program/PartnerRegister";
 import CommonLogin from "./pages/Program/CommonLogin";
+import NotFound from "./pages/NotFound";
 
 function AppContent() {
   const location = useLocation();
@@ -33,7 +34,7 @@ function AppContent() {
     return null; // Prevents React from rendering anything
   }
 
-  const noLayoutRoutes = ["/admin", "/uploads"];
+  const noLayoutRoutes = ["/admin", "/uploads","*"];
   const shouldShowLayout = !noLayoutRoutes.some((route) =>
     location.pathname.startsWith(route)
   );
@@ -71,7 +72,9 @@ function AppContent() {
           <Route path="/checkout" element={<CheckoutPage />} />
         </Route>
 
+
         {/* Other routes */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
       {shouldShowLayout && <Footer />}
       <ToastContainer position="top-center" autoClose={3000} />

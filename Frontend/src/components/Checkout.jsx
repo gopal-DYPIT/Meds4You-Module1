@@ -1,35 +1,26 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { toast, ToastContainer } from "react-toastify";
 
 const CheckoutPage = () => {
-  const [cart, setCart] = useState([]);
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
-
   const token = useSelector((state) => state.auth.token);
+
+  // Get selected products from cart page
+  const selectedProducts = location.state?.selectedProducts || [];
+  const totalAmount = location.state?.total || "0.00";
 
   useEffect(() => {
     if (token) {
-      axios
-        .get(`${import.meta.env.VITE_BACKEND_URL}/api/cart/`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((response) => {
-          setCart(response.data?.items || []);
-        })
-        .catch((err) => {
-          setError("Failed to fetch cart");
-          console.error("Failed to fetch cart:", err);
-        });
-
       axios
         .get(`${import.meta.env.VITE_BACKEND_URL}/api/users/addresses`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -73,7 +64,11 @@ const CheckoutPage = () => {
     axios
       .post(
         `${import.meta.env.VITE_BACKEND_URL}/api/orders/create`,
-        { address: selectedAddress },
+        {
+          address: selectedAddress,
+          products: selectedProducts,
+          totalAmount: totalAmount,
+        },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -97,63 +92,53 @@ const CheckoutPage = () => {
       });
   };
 
-  const calculateTotal = () => {
-    return cart
-      .reduce((total, item) => {
-        const alternatePrice =
-          item?.productId?.alternateMedicines?.[0]?.price ||
-          item?.productId?.price;
-        return total + alternatePrice * (item?.quantity || 0);
-      }, 0)
-      .toFixed(2);
-  };
-
-  const totalAmount = calculateTotal();
+  if (loading) {
+    return (
+      <div className="w-full min-h-screen flex justify-center items-center">
+        <p className="text-gray-500">Loading checkout details...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="container pt-16 min-h-screen mx-auto p-4 sm:p-12">
-      <h1 className="text-center font-semibold text-2xl sm:text-3xl mb-6">
-        Checkout
-      </h1>
-      {error && <p className="text-red-500 text-center">{error}</p>}
+    <div className="w-full min-h-screen bg-gray-50 py-10 px-4 pt-28">
+      <div className="max-w-8xl mx-auto">
+        <h1 className="text-3xl font-semibold text-gray-800 mb-8">Checkout</h1>
 
-      {loading ? (
-        <p className="text-center">Loading...</p>
-      ) : (
-        <div className="space-y-6">
-          {/* Address Selection */}
-          <h2 className="text-xl sm:text-2xl font-bold mb-4">
-            Select Shipping Address
-          </h2>
-          {addresses.length === 0 ? (
-            <p className="text-center text-gray-500">
-              You have no saved addresses.
-            </p>
-          ) : (
-            <div className="space-y-4">
-              {addresses.map((address) => (
-                <div
-                  key={address._id}
-                  className={`flex items-center border p-4 rounded-lg cursor-pointer transition-all duration-300 ${
-                    selectedAddress?._id === address._id
-                      ? "border-green-500 bg-green-50 shadow-md"
-                      : "border-gray-300 hover:border-blue-400"
-                  }`}
-                  onClick={() => handleAddressSelect(address)}
-                >
+        {error && (
+          <div className="bg-red-50 text-red-500 p-4 rounded-lg mb-6">
+            {error}
+          </div>
+        )}
+
+        {/* Address Selection Section */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+          <h2 className="text-xl font-bold mb-4">Select Shipping Address</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {addresses.map((address) => (
+              <div
+                key={address._id}
+                className={`border rounded-lg p-4 cursor-pointer transition-all ${
+                  selectedAddress?._id === address._id
+                    ? "border-green-500 bg-green-50"
+                    : "border-gray-200 hover:border-green-400"
+                }`}
+                onClick={() => handleAddressSelect(address)}
+              >
+                <div className="flex items-center">
                   <input
                     type="radio"
                     name="address"
                     checked={selectedAddress?._id === address._id}
                     onChange={() => handleAddressSelect(address)}
-                    className="w-5 h-5 text-green-500 focus:ring-green-500"
+                    className="w-4 h-4 text-green-600"
                   />
                   <div className="ml-4">
-                    <h3 className="font-bold text-lg">{address.street}</h3>
-                    <p>
+                    <h3 className="font-semibold">{address.street}</h3>
+                    <p className="text-gray-600">
                       {address.city}, {address.state}
                     </p>
-                    <p>
+                    <p className="text-gray-600">
                       {address.country}, {address.zipCode}
                     </p>
                     {address.isPrimary && (
@@ -163,66 +148,102 @@ const CheckoutPage = () => {
                     )}
                   </div>
                 </div>
-              ))}
-              <h2 className="text-sm sm:text-lg font-semibold font-lato text-gray-800 p-2 pl-2 sm:pl-2 ">
-                Manage Address from Profile Section
-              </h2>
-            </div>
-          )}
-
-          {/* Order Summary */}
-          <h2 className="text-xl sm:text-2xl font-bold mb-4">Order Summary</h2>
-          {cart.length === 0 ? (
-            <p className="text-center text-gray-500">Your cart is empty.</p>
-          ) : (
-            <div className="space-y-4">
-              {cart.map((item, index) => {
-                const alternateMedicine =
-                  item?.productId?.alternateMedicines?.[0] || null;
-                return (
-                  <div
-                    key={index}
-                    className="flex items-center border p-4 rounded-lg shadow-sm"
-                  >
-                    <img
-                      src={
-                        alternateMedicine?.manufacturerUrl || "placeholder.jpg"
-                      }
-                      alt={alternateMedicine?.name || "Unnamed product"}
-                      className="w-24 h-10 sm:w-32 object-cover rounded-lg mr-4"
-                    />
-                    <div className="flex-1">
-                      <h2 className="font-bold text-lg">
-                        {alternateMedicine?.name || "Unknown Product"}
-                      </h2>
-                      <p className="text-blue-600 font-semibold">
-                        Price: Rs.{alternateMedicine?.price || "N/A"}
-                      </p>
-                      <p>Quantity: {item?.quantity || 0}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Total Amount */}
-          <div className="flex justify-between items-center font-bold text-lg sm:text-xl border-t border-gray-300 pt-4">
-            <span>Total:</span>
-            <span className="text-green-600 text-xl sm:text-2xl font-extrabold">
-              Rs.{totalAmount}
-            </span>
+              </div>
+            ))}
           </div>
+        </div>
 
-          {/* Place Order Button */}
+        {/* Order Summary Table */}
+        <div className="bg-white rounded-lg shadow-md mb-8">
+          <h2 className="text-xl font-bold p-6 border-b">Order Summary</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-gray-50">
+                  <th className="py-3 px-4 text-left border-b">No.</th>
+                  <th className="py-3 px-4 text-left border-b">
+                    Medicine Name
+                  </th>
+                  <th className="py-3 px-4 text-left border-b">Manufacturer</th>
+                  <th className="py-3 px-4 text-left border-b">Type</th>
+                  <th className="py-3 px-4 text-left border-b">
+                    Price/Unit (Rs.)
+                  </th>
+                  <th className="py-3 px-4 text-left border-b">Quantity</th>
+                  <th className="py-3 px-4 text-left border-b">Total (Rs.)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedProducts.map((item, index) => {
+                  const product = item.productId;
+                  const isRecommended = item.isRecommended;
+                  const selectedMedicine = isRecommended
+                    ? product.alternateMedicines[0]
+                    : product;
+
+                  return (
+                    <tr key={index} className="border-b">
+                      <td className="py-4 px-4">{index + 1}</td>
+                      <td className="py-4 px-4">
+                        {isRecommended
+                          ? selectedMedicine.name
+                          : product.drugName}
+                      </td>
+                      <td className="py-4 px-4">
+                        {isRecommended ? (
+                          <img
+                            src={selectedMedicine.manufacturerUrl}
+                            alt="Manufacturer"
+                            className="h-12 w-16 object-contain"
+                          />
+                        ) : (
+                          product.manufacturer
+                        )}
+                      </td>
+
+                      <td className="py-4 px-4">
+                        {isRecommended ? "Recommended" : "Selected"}
+                      </td>
+                      <td className="py-4 px-4">{selectedMedicine.price}</td>
+                      <td className="py-4 px-4">{item.quantity}</td>
+                      <td className="py-4 px-4">
+                        {(selectedMedicine.price * item.quantity).toFixed(2)}
+                      </td>
+                    </tr>
+                  );
+                })}
+                <tr className="bg-gray-50 font-semibold">
+                  <td colSpan="6" className="py-4 px-4 text-right">
+                    Total Amount:
+                  </td>
+                  <td className="py-4 px-4 text-green-600 font-bold">
+                    ₹ {totalAmount}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Place Order Button */}
+        <div className="flex justify-center">
           <button
             onClick={handlePlaceOrder}
-            className="w-full sm:w-auto bg-green-500 text-white px-6 py-3 rounded-md text-lg font-semibold mt-4 block mx-auto transition-all duration-300 ease-in-out hover:bg-green-600 hover:scale-105 shadow-md"
+            disabled={!selectedAddress}
+            className={`
+              px-8 py-3 rounded-lg text-white text-lg font-semibold
+              transition-all duration-300
+              ${
+                selectedAddress
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-gray-400 cursor-not-allowed"
+              }
+            `}
           >
-            Place Order
+            Place Order: ₹ {totalAmount}
           </button>
         </div>
-      )}
+      </div>
       <ToastContainer />
     </div>
   );

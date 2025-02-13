@@ -74,13 +74,14 @@ const Home = () => {
   }, [selectedCategory]); // Fetch products whenever category changes
 
   const addToCart = async (productId) => {
+    // console.log("Adding to cart:", productId);
     if (!user) {
       toast.info("Please log in to add items to your cart.", {
         position: "top-center",
         autoClose: 3000,
       });
       return;
-    }
+    } 
 
     try {
       await axios.post(

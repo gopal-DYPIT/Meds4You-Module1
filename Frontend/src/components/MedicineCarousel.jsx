@@ -54,19 +54,21 @@ const rightStyle = {
   display: "flex",
   flexDirection: "column",
   width: "50%",
-  padding: "5px",
+  // padding: "5px",
   backgroundColor: "rgb(246, 255, 243)",
   borderRadius: "0 0 10px 0",
-  paddingRight: "15px",
+  paddingRight: "15px",  
   paddingBottom: "15px",
   overflow: "hidden",
   alignItems: "center",
-  justifyContent: "space-between", // Keeps Add to Cart button at bottom
+  // justifyContent: "center",
+  // justifyContent: "space-between",  // Keeps Add to Cart button at bottom
 };
 
 const recommendedContainerStyle = {
   maxHeight: "220px", // Prevents overflow
   // overflowY: "auto", // Enables scrolling
+  paddingTop: "28px",
   width: "100%",
 };
 
@@ -74,7 +76,8 @@ const alternateMedicineStyle = {
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
-  justifyContent: "center",
+  // justifyContent: "center",
+  paddingTop: "20px",
   marginBottom: "15px", // Adjusted margin
   textAlign: "center",
 };
@@ -165,6 +168,7 @@ const MedicineCarousel = ({ products, addToCart, isLoading }) => {
             }}
           >
             {products.map((product) => (
+              // console.log(product),
               <SwiperSlide
                 key={product._id}
                 style={{ display: "flex", justifyContent: "center" }}
@@ -196,10 +200,22 @@ const MedicineCarousel = ({ products, addToCart, isLoading }) => {
                         <p style={{ marginBottom: "4px", lineHeight: "1.2" }}>
                           {product.size}
                         </p>
-                        <p className="pb-4">MRP: ₹{product.mrp}</p>
+                        <p className="pb-2">MRP: ₹{product.mrp}</p>
                       </div>
+                      <button
+                        className="bg-[#419ec8] hover:bg-[#3b9075] mb-2 mr-6 text-white px-4 py-2 border-none h-10 w-36 text-lg rounded-lg opacity-60 transition duration-300"
+                        onClick={() =>
+                          handleAddToCart(
+                            product._id,
+                            selectedVariant[product._id]
+                          )
+                        }
+                      >
+                        Add to Cart
+                      </button>
                     </div>
-                    <div style={rightStyle} className="mt-3">
+                    
+                    <div style={rightStyle} className="mt-4">
                       <b>Recommended</b>
                       <div style={recommendedContainerStyle}>
                         {product.alternateMedicines?.map((alt, index) => (
@@ -216,36 +232,26 @@ const MedicineCarousel = ({ products, addToCart, isLoading }) => {
                             <img
                               src={alt.manufacturerUrl || "default-image.jpg"}
                               alt="Tablet"
-                              style={{ height: "40px", width: "100px" }}
+                              style={{ height: "40px", width: "100px", marginBottom: "40px" }}
                             />
-                            <div className="pt-4 font-bold">{alt.name}</div>
-                            <div className="pt-4 font-roboto text-xl">
+                            <div className="font-bold">{alt.name}</div>
+                            <div className="    font-roboto text-lg">
                               {alt.manufacturer}
                             </div>
-                            <div className="pt-4 font-roboto text-xl">
+                            <div className="font-roboto text-lg">
                               {product.size}
                             </div>
 
                             <div
                               className="font-bold pt-2 text-2xl"
-                              style={{ color: "rgb(12, 159, 12)" }}
+                              style={{ color: "rgb(12, 159, 12)", paddingTop: "20px" }}
                             >
                               ₹{alt.price}
                             </div>
                           </div>
                         ))}
                       </div>
-                      <button
-                        className="bg-[#419ec8] hover:bg-[#3b9075] text-white px-4 py-2 border-none h-10 w-36 text-lg rounded-lg opacity-60 transition duration-300"
-                        onClick={() =>
-                          handleAddToCart(
-                            product._id,
-                            selectedVariant[product._id]
-                          )
-                        }
-                      >
-                        Add to Cart
-                      </button>
+                      
                     </div>
                   </div>
                 </div>

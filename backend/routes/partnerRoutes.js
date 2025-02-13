@@ -111,14 +111,8 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ error: "All fields are required." });
     }
 
-    let user = await Partner.findOne({ email });
-    let userType = "partner"; // Default type
-
-    if (!user) {
-      // If not a partner, check Referral collection
-      user = await Referral.findOne({ email });
-      userType = "referral";
-    }
+    // Only check the Partner collection
+    const user = await Partner.findOne({ email });
 
     if (!user) {
       return res.status(404).json({ error: "User not found." });
@@ -132,22 +126,24 @@ router.post("/login", async (req, res) => {
 
     // Generate JWT Token
     const token = jwt.sign(
-      { id: user._id, email: user.email, userType }, // Include userType in token
+      { id: user._id, email: user.email, userType: "partner" },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
-    // Send response with user type
+    // Send response with phone and cashback info
     res.status(200).json({
       success: true,
       message: "Login successful.",
       token,
-      userType, // ✅ Include userType to determine dashboard
+      userType: "partner",
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
-        referralCode: user.referralCode || null, // Referral code if available
+        phone: user.phone || null, // ✅ Include phone number if available
+        cashback: user.cashback || 0, // ✅ Include cashback if available
+        referralCode: user.referralCode || null,
       },
     });
   } catch (error) {
@@ -155,6 +151,7 @@ router.post("/login", async (req, res) => {
     res.status(500).json({ error: "Error logging in." });
   }
 });
+
 
 
 export default router;

@@ -25,63 +25,70 @@ const CommonLogin = () => {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const attemptLogin = async (url) => {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
+  
+    const textResponse = await response.text(); // Read response as text
+    console.log("Raw response:", textResponse); // Debugging
   
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/partners/login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
-  
-      const result = await response.json();
-  
+      const result = JSON.parse(textResponse); // Try parsing as JSON
       if (!response.ok) {
-        throw new Error(result.error || "Login failed. Please try again.");
+        throw new Error(result.error || "Login failed.");
       }
+      return result;
+    } catch (jsonError) {
+      throw new Error("Invalid JSON response from server.");
+    }
+  };
   
-      // Store token in Redux
-      dispatch(
-        loginSuccess({
-          token: result.token,
-          userType: result.userType, // Store user type
-        })
-      );
-  
-      // Save token in local storage
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      let result;
+
+      // First, try logging in as a partner
+      try {
+        result = await attemptLogin(`${import.meta.env.VITE_BACKEND_URL}/api/partners/login`);
+      } catch (partnerError) {
+        console.warn("Partner login failed, trying referral login...");
+        // If partner login fails, try referral login
+        result = await attemptLogin(`${import.meta.env.VITE_BACKEND_URL}/api/referrers/login`);
+      }
+
+      // Store token & userType in Redux
+      dispatch(loginSuccess({ token: result.token, userType: result.userType }));
+
+      // Save token & userType in local storage
       localStorage.setItem("token", result.token);
-      localStorage.setItem("userType", result.userType); // Save user type
-  
+      localStorage.setItem("userType", result.userType);
+
       // Redirect based on userType
       if (result.userType === "partner") {
         navigate("/partner-dashboard");
       } else if (result.userType === "referral") {
         navigate("/referral-dashboard");
       } else {
-        navigate("/"); // Fallback route
+        navigate("/");
       }
-  
+
     } catch (error) {
-      toast.error(error.message, {
-        position: "top-center",
-        autoClose: 3000,
-      });
+      toast.error(error.message, { position: "top-center", autoClose: 3000 });
     } finally {
       setFormData({ email: "", password: "" });
     }
   };
-  
 
   return (
-    <div className="flex justify-center items-center bg-[#FFF0F5] pt-48 pb-36 sm:p-36 sm:pt-48 sm:pb-48"> {/* Removed min-h-screen */}
-      <div className="w-full max-w-sm sm:max-w-md md:max-w-lg bg-white p-6 sm:p-10 rounded-lg shadow-xl"> {/* Adjusted width & padding */}
-        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-4 sm:mb-6 text-gray-800"> {/* Adjusted text size */}
+    <div className="flex justify-center items-center bg-[#FFF0F5] pt-48 pb-36 sm:p-36 sm:pt-48 sm:pb-48">
+      <div className="w-full max-w-sm sm:max-w-md md:max-w-lg bg-white p-6 sm:p-10 rounded-lg shadow-xl">
+        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-4 sm:mb-6 text-gray-800">
           Login
         </h2>
         <form onSubmit={handleSubmit}>
@@ -121,21 +128,11 @@ const CommonLogin = () => {
 
           <button
             type="submit"
-            className="w-full py-3 bg-[#FF007F] text-white font-bold rounded-md hover:bg-[#E60072] transition"
+            className="w-full py-3 bg-[#48a8e3] text-white font-bold rounded-md hover:bg-[#565de3] transition"
           >
             Login
           </button>
         </form>
-
-        <p className="text-center text-sm text-gray-600 mt-4">
-          Not registered? {" "}
-          <button
-            onClick={() => navigate("/register")}
-            className="text-blue-600 hover:underline"
-          >
-            Sign up
-          </button>
-        </p>
         <ToastContainer />
       </div>
     </div>
