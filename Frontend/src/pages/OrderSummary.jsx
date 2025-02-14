@@ -15,6 +15,7 @@ const OrderSummary = () => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
+        // console.log("Order Data:", response.data);
         setOrder(response.data);
       })
       .catch((err) => {
@@ -27,8 +28,29 @@ const OrderSummary = () => {
     return <div className="text-red-500 text-center mt-10">{error}</div>;
   if (!order) return <div className="text-center mt-10">Loading...</div>;
 
+  const OrderItem = ({ item, index }) => {
+    const product = item?.productDetails || {}; // Ensure safe access
+
+    return (
+      <li className="py-2 sm:py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center border-b">
+        <div>
+          <span className="font-semibold text-sm sm:text-base">#{index + 1}</span>
+          <p className="text-gray-900 font-medium text-sm sm:text-base">
+            {product.drugName || "Unknown Product"}
+          </p>
+          <p className="text-gray-500 text-sm">
+            Qty: {item.quantity} x ₹{item.price?.toFixed(2) || "0.00"}
+          </p>
+        </div>
+        <p className="text-gray-900 font-semibold text-sm sm:text-base">
+          ₹{(item.price * item.quantity).toFixed(2)}
+        </p>
+      </li>
+    );
+  };
+
   return (
-    <div className="max-w-3xl mx-auto p-4  sm:p-8 mt-24 mb-20 sm:mt-28 bg-white shadow-lg rounded-lg border border-gray-200">
+    <div className="max-w-3xl mx-auto p-4 sm:p-8 mt-24 mb-20 sm:mt-28 bg-white shadow-lg rounded-lg border border-gray-200">
       <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 sm:mb-6 text-center">
         Order Summary
       </h2>
@@ -37,7 +59,8 @@ const OrderSummary = () => {
           <strong>Order ID:</strong> {order._id}
         </p>
         <p className="text-base sm:text-lg text-gray-700">
-          <strong>Total Amount:</strong> ₹{order.totalAmount.toFixed(2)}
+          <strong>Total Amount:</strong> ₹
+          {order.totalAmount ? order.totalAmount.toFixed(2) : "0.00"}
         </p>
         <p className="text-base sm:text-lg text-gray-700">
           <strong>Payment Status:</strong>{" "}
@@ -68,23 +91,8 @@ const OrderSummary = () => {
         Items Ordered
       </h3>
       <ul className="divide-y divide-gray-200">
-        {order.items.map((item) => (
-          <li
-            key={item.productId}
-            className="py-2 sm:py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center"
-          >
-            <div>
-              <p className="text-gray-900 font-medium text-sm sm:text-base">
-                {item.productId.drugName}
-              </p>
-              <p className="text-gray-500 text-sm">
-                Qty: {item.quantity} x ₹{item.price.toFixed(2)}
-              </p>
-            </div>
-            <p className="text-gray-900 font-semibold text-sm sm:text-base">
-              ₹{(item.quantity * item.price).toFixed(2)}
-            </p>
-          </li>
+        {order.items.map((item, index) => (
+          <OrderItem key={index} item={item} index={index} />
         ))}
       </ul>
       <button

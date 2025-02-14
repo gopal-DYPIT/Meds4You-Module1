@@ -10,20 +10,29 @@ router.get("/admin/orders", authorizeRoles("admin"), async (req, res) => {
   try {
     const orders = await Order.find()
       .populate("userId", "name phoneNumber addresses")
-      .populate("items.productId", "drugName price imageUrl manufacturer alternateMedicines")
+      .populate(
+        "items.productId",
+        "drugName price imageUrl manufacturer alternateMedicines"
+      )
       .lean(); // Convert to plain objects
 
-      // console.log("All orders : ", orders)
+    // console.log("All orders : ", orders)
 
     // Ensure that productId exists before accessing its properties
-    const formattedOrders = orders.map(order => ({
+    const formattedOrders = orders.map((order) => ({
       ...order,
-      items: order.items.map(item => {
+      items: order.items.map((item) => {
         const product = item.productId;
-        
+
         // Check if productId exists (could be null or undefined)
         if (!product) {
-          return { ...item, productId: null, price: 0, name: "Unknown", manufacturer: "Unknown" };
+          return {
+            ...item,
+            productId: null,
+            price: 0,
+            name: "Unknown",
+            manufacturer: "Unknown",
+          };
         }
 
         // Otherwise, process with alternate medicines if available
@@ -41,7 +50,6 @@ router.get("/admin/orders", authorizeRoles("admin"), async (req, res) => {
 
     // console.log("Formatted orders : ", formattedOrders)
 
-
     res.status(200).json(formattedOrders);
   } catch (error) {
     console.error("Error fetching orders:", error);
@@ -49,97 +57,110 @@ router.get("/admin/orders", authorizeRoles("admin"), async (req, res) => {
   }
 });
 
+router.get(
+  "/admin/orders/:orderId",
+  authorizeRoles("admin"),
+  async (req, res) => {
+    try {
+      const { orderId } = req.params;
+      const order = await Order.findById(orderId)
+        .populate("userId", "name phoneNumber addresses")
+        .populate(
+          "items.productId",
+          "drugName price imageUrl manufacturer alternateMedicines"
+        )
+        .lean(); // Converts Mongoose documents to plain JavaScript objects
 
-router.get("/admin/orders/:orderId", authorizeRoles("admin"), async (req, res) => {
-  try {
-    const { orderId } = req.params;
-    const order = await Order.findById(orderId)
-      .populate("userId", "name phoneNumber addresses")
-      .populate("items.productId", "drugName price imageUrl manufacturer alternateMedicines")
-      .lean(); // Converts Mongoose documents to plain JavaScript objects
+      // console.log("Particular order : \n", order);
 
-    // console.log("Particular order : \n", order);
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
+      }
 
-    if (!order) {
-      return res.status(404).json({ error: "Order not found" });
-    }
+      // Format the order with null checks for productId
+      const formattedOrder = {
+        ...order,
+        items: order.items.map((item) => {
+          const product = item.productId;
 
-    // Format the order with null checks for productId
-    const formattedOrder = {
-      ...order,
-      items: order.items.map(item => {
-        const product = item.productId;
+          // Check if productId is null or undefined
+          if (!product) {
+            return {
+              ...item,
+              productId: null,
+              name: "Unknown Product",
+              price: 0,
+              manufacturer: "Unknown Manufacturer",
+            };
+          }
 
-        // Check if productId is null or undefined
-        if (!product) {
+          const alternateMedicine = product?.alternateMedicines?.[0] || product; // Get the first alternate medicine if available
+
           return {
             ...item,
-            productId: null,
-            name: "Unknown Product",
-            price: 0,
-            manufacturer: "Unknown Manufacturer",
+            productId: product._id,
+            name: alternateMedicine.name || product.drugName,
+            price: alternateMedicine.price || product.price,
+            manufacturer:
+              alternateMedicine.manufacturer || product.manufacturer,
           };
-        }
+        }),
+      };
 
-        const alternateMedicine = product?.alternateMedicines?.[0] || product; // Get the first alternate medicine if available
+      // console.log("Formatted order : \n", formattedOrder);
 
-        return {
-          ...item,
-          productId: product._id,
-          name: alternateMedicine.name || product.drugName,
-          price: alternateMedicine.price || product.price,
-          manufacturer: alternateMedicine.manufacturer || product.manufacturer,
-        };
-      }),
-    };
-
-    // console.log("Formatted order : \n", formattedOrder);
-
-    res.status(200).json(formattedOrder);
-  } catch (error) {
-    console.error("Error fetching order:", error);
-    res.status(500).json({ error: "Failed to fetch order" });
+      res.status(200).json(formattedOrder);
+    } catch (error) {
+      console.error("Error fetching order:", error);
+      res.status(500).json({ error: "Failed to fetch order" });
+    }
   }
-});
-
-
+);
 
 router.post("/create", authorizeRoles("user"), async (req, res) => {
-  const { address } = req.body;
+  const { address, products} = req.body;
+
   if (!address) return res.status(400).json({ error: "Address is required" });
 
   try {
     const userId = req.user.id;
-    const cart = await Cart.findOne({ userId }).populate("items.productId");
 
-    if (!cart || !cart.items.length) {
-      return res.status(404).json({ error: "Cart is empty or not found" });
-    }
+    // ✅ Prepare order items based on selection logic
+    const orderItems = products.map(({ productId, quantity, selection }) => {
+      let selectedProduct = productId;
 
-    // ✅ Calculate total amount using alternate medicine if available
-    const totalAmount = cart.items.reduce((total, { productId, quantity }) => {
-      const altMedicine = productId.alternateMedicines?.[0] || productId;
-      return total + (altMedicine.price || productId.price) * quantity;
-    }, 0);
+      if (selection === "recommended" && productId.alternateMedicines?.length) {
+        selectedProduct = productId.alternateMedicines[0]; // Use first alternate medicine
+      }
 
-    // ✅ Prepare order items (Fixed `ObjectId` error)
-    const orderItems = cart.items.map(({ productId, quantity }) => {
-      const altMedicine = productId.alternateMedicines?.[0] || productId;
       return {
-        productId: new mongoose.Types.ObjectId(productId._id), // ✅ Fixed syntax
+        productId: new mongoose.Types.ObjectId(productId._id),
         quantity,
-        price: altMedicine.price || productId.price,
-        name: altMedicine.name || productId.drugName,
-        manufacturer: altMedicine.manufacturer || productId.manufacturer,
+        price: selectedProduct.price,
+        productDetails: {
+          drugName: selectedProduct.name || selectedProduct.drugName, // Name for alt medicine, drugName otherwise
+          imageUrl: selectedProduct.manufacturerUrl || selectedProduct.imageUrl, // Image URL
+          size: productId.size, // Keep original size
+          manufacturer: selectedProduct.manufacturer || productId.manufacturer,
+          category: productId.category, // Keep original category
+          salt: productId.salt, // Keep original salt composition
+          mrp: productId.mrp, // Keep original MRP
+          margin: productId.margin, // Keep original margin
+        },
       };
     });
 
-    // ✅ Create and save order
-    const order = await Order.create({ userId, items: orderItems, totalAmount });
-    // console.log("Order created:", order);
+    // ✅ Calculate total amount based on selected medicines
+    const totalAmount = orderItems.reduce((total, item) => total + item.price * item.quantity, 0);
 
-    // ✅ Clear the cart after order creation
-    await Cart.updateOne({ userId }, { $set: { items: [] } });
+    // ✅ Create order
+    const order = await Order.create({
+      userId,
+      items: orderItems,
+      totalAmount,
+      paymentStatus: "pending",
+      orderStatus: "pending",
+    });
 
     res.status(200).json({ orderId: order._id, totalAmount });
   } catch (error) {
@@ -147,7 +168,6 @@ router.post("/create", authorizeRoles("user"), async (req, res) => {
     res.status(500).json({ error: "Failed to create order", details: error.message });
   }
 });
-
 
 
 router.post(
@@ -192,18 +212,19 @@ router.get("/latest", authorizeRoles("user"), async (req, res) => {
     const latestOrder = await Order.findOne({ userId })
       .sort({ createdAt: -1 })
       .populate("userId", "name phoneNumber addresses")
-      .populate("items.productId" , "drugName price imageUrl manufacturer")
       .exec();
 
     if (!latestOrder) {
       return res.status(404).json({ error: "No orders found" });
     }
+
     res.status(200).json(latestOrder);
   } catch (err) {
     console.error("Error fetching latest order:", err);
     res.status(500).json({ error: "Failed to fetch latest order" });
   }
 });
+
 
 router.put(
   "/orders/:orderId/status",
@@ -272,12 +293,24 @@ router.get("/order-history", authorizeRoles("user"), async (req, res) => {
     const userId = req.user.id;
 
     const orders = await Order.find({ userId })
-      .populate("items.productId", "drugName price")
       .sort({ createdAt: -1 });
 
-    // console.log("Orders found:", orders);
+    // ✅ Return stored product details from order instead of populating productId
+    const formattedOrders = orders.map((order) => ({
+      _id: order._id,
+      totalAmount: order.totalAmount,
+      paymentStatus: order.paymentStatus,
+      orderStatus: order.orderStatus,
+      createdAt: order.createdAt,
+      items: order.items.map((item) => ({
+        productId: item.productId, // Keeping reference
+        quantity: item.quantity,
+        price: item.price,
+        productDetails: item.productDetails, // ✅ Use saved product details
+      })),
+    }));
 
-    res.status(200).json(orders);
+    res.status(200).json(formattedOrders);
   } catch (error) {
     console.error("Error fetching order history:", error);
     res.status(500).json({ error: "Failed to fetch order history" });

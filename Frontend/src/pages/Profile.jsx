@@ -317,7 +317,8 @@ const Profile = () => {
                 )
               ) : (
                 <p>
-                  <strong>Default Address:</strong> Not set. Please add an address.
+                  <strong>Default Address:</strong> Not set. Please add an
+                  address.
                 </p>
               )}
             </div>
@@ -455,9 +456,9 @@ const Profile = () => {
                     </p>
                     <ul className="mt-2 space-y-2">
                       {order.items.map((item) => (
-                        <li key={item.productId._id} className="text-gray-600">
-                          {item.productId.drugName} (Qty: {item.quantity}) - ₹
-                          {item.price.toFixed(2)}
+                        <li key={item.productId} className="text-gray-600">
+                          {item.productDetails.drugName} (Qty: {item.quantity})
+                          - ₹{item.price.toFixed(2)}
                         </li>
                       ))}
                     </ul>
@@ -467,6 +468,7 @@ const Profile = () => {
             )}
           </div>
         )}
+
         {selectedSection === "managePrescriptions" && (
           <div className="max-w-4xl mx-auto p-4 sm:p-6 bg-white rounded-lg shadow-lg">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">

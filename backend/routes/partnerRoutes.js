@@ -5,19 +5,17 @@ import PendingPartner from "../models/partnerApprovals.js";
 import Partner from "../models/partner.js";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs"; 
+import bcrypt from "bcryptjs";
 
 dotenv.config();
 
 const router = express.Router();
-
 
 // Aadhar Upload Route
 router.post(
   "/upload/aadhar", // Remove this line for testing
   upload.single("aadhar"),
   async (req, res) => {
-
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded." });
     }
@@ -38,30 +36,25 @@ router.post(
   }
 );
 
-
 // PAN Upload Route
-router.post(
-  "/upload/pan",
-  upload.single("pan"),
-  async (req, res) => {
-    if (!req.file) {
-      return res.status(400).json({ error: "No file uploaded." });
-    }
-    try {
-      const domain = process.env.DOMAIN || "meds4you.in";
-      const panUrl = `https://${domain}/uploads/${req.file.filename}`;
-
-      res.status(200).json({
-        success: true,
-        message: "PAN uploaded successfully!",
-        panUrl,
-      });
-    } catch (error) {
-      console.error("❌ Error uploading PAN:", error);
-      res.status(500).json({ error: "Error uploading PAN." });
-    }
+router.post("/upload/pan", upload.single("pan"), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "No file uploaded." });
   }
-);
+  try {
+    const domain = process.env.DOMAIN || "meds4you.in";
+    const panUrl = `https://${domain}/uploads/${req.file.filename}`;
+
+    res.status(200).json({
+      success: true,
+      message: "PAN uploaded successfully!",
+      panUrl,
+    });
+  } catch (error) {
+    console.error("❌ Error uploading PAN:", error);
+    res.status(500).json({ error: "Error uploading PAN." });
+  }
+});
 
 // Partner Registration Route
 router.post("/register", async (req, res) => {
@@ -94,7 +87,8 @@ router.post("/register", async (req, res) => {
     await newPendingPartner.save();
     res.status(201).json({
       success: true,
-      message: "Partner request submitted successfully. Awaiting admin approval.",
+      message:
+        "Partner request submitted successfully. Awaiting admin approval.",
     });
   } catch (error) {
     console.error("❌ Error registering partner:", error);
@@ -105,6 +99,7 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log("Login Request Body:", req.body);
 
     // Validate required fields
     if (!email || !password) {
@@ -115,21 +110,26 @@ router.post("/login", async (req, res) => {
     const user = await Partner.findOne({ email });
 
     if (!user) {
+      console.log("❌ User not found in database");
       return res.status(404).json({ error: "User not found." });
     }
 
     // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
+      console.log("❌ Password does not match!");
       return res.status(400).json({ error: "Invalid credentials." });
     }
 
     // Generate JWT Token
+    console.log("✅ Password matched, generating token...");
     const token = jwt.sign(
       { id: user._id, email: user.email, userType: "partner" },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
+
+    console.log("✅ Login successful!");
 
     // Send response with phone and cashback info
     res.status(200).json({
@@ -151,7 +151,5 @@ router.post("/login", async (req, res) => {
     res.status(500).json({ error: "Error logging in." });
   }
 });
-
-
 
 export default router;
