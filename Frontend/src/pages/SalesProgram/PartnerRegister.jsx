@@ -1,8 +1,13 @@
 import React, { useState } from "react";
 import axios from "axios";
 import FAQPartner from "./FAQ-Partner";
+import { ToastContainer, toast } from "react-toastify";
+import ReCAPTCHA from "react-google-recaptcha";
+
+const SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
 const PartnerRegister = () => {
+  const [captchaValue, setCaptchaValue] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -11,12 +16,21 @@ const PartnerRegister = () => {
     confirmPassword: "",
     aadharUrl: "",
     panUrl: "",
+    // Bank Details
+    bankAccountNumber: "",
+    ifscCode: "",
+    bankName: "",
+    accountHolderName: "",
   });
 
   const [uploading, setUploading] = useState({
     aadhar: false,
     pan: false,
   });
+
+  const handleCaptchaChange = (value) => {
+    setCaptchaValue(value);
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -25,26 +39,26 @@ const PartnerRegister = () => {
   const handleFileUpload = async (e, type) => {
     const file = e.target.files[0];
     if (!file) return;
-  
+
     const formData = new FormData();
     formData.append(type, file);
-  
+
     try {
       setUploading((prev) => ({ ...prev, [type]: true }));
-  
+
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/partners/upload/${type}`, 
-        formData, 
+        `${import.meta.env.VITE_BACKEND_URL}/api/partners/upload/${type}`,
+        formData,
         {
           headers: { "Content-Type": "multipart/form-data" }, // ✅ Add this header
         }
       );
-  
+
       setFormData((prev) => ({
         ...prev,
         [`${type}Url`]: response.data[`${type}Url`],
       }));
-  
+
       alert(`${type.toUpperCase()} uploaded successfully!`);
     } catch (error) {
       console.error(`❌ Error uploading ${type}:`, error);
@@ -53,19 +67,53 @@ const PartnerRegister = () => {
       setUploading((prev) => ({ ...prev, [type]: false }));
     }
   };
-  
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!captchaValue) {
+      toast.error("Please complete the CAPTCHA verification", {
+        position: "top-center",
+      });
+      return;
+    }
 
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords do not match!");
       return;
     }
 
+    const phoneRegex = /^\d{10}$/;
+    if (!phoneRegex.test(formData.phone)) {
+      toast.error("Phone number must be exactly 10 digits.", {
+        position: "top-center",
+      });
+      return;
+    }
+
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(formData.password)) {
+      toast.error(
+        "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.",
+        { position: "top-center" }
+      );
+      return;
+    }
+
     if (!formData.aadharUrl || !formData.panUrl) {
       alert("Please upload both Aadhar and PAN before submitting.");
+      return;
+    }
+
+    // ✅ Validate Bank Details
+    if (
+      !formData.bankAccountNumber ||
+      !formData.ifscCode ||
+      !formData.bankName ||
+      !formData.accountHolderName
+    ) {
+      alert("Please fill in all bank details.");
       return;
     }
 
@@ -180,6 +228,74 @@ const PartnerRegister = () => {
                       required
                     />
                   </div>
+                  {/* Bank Details Section */}
+                  <div className="bg-gray-100 p-4 sm:p-6 rounded-lg border border-gray-300 mt-4">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                      Bank Details
+                    </h3>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* Bank Account Number */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Bank Account Number
+                        </label>
+                        <input
+                          type="text"
+                          name="bankAccountNumber"
+                          value={formData.bankAccountNumber}
+                          onChange={handleChange}
+                          className="w-full px-3 py-2 border rounded-lg"
+                          required
+                        />
+                      </div>
+
+                      {/* IFSC Code */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          IFSC Code
+                        </label>
+                        <input
+                          type="text"
+                          name="ifscCode"
+                          value={formData.ifscCode}
+                          onChange={handleChange}
+                          className="w-full px-3 py-2 border rounded-lg"
+                          required
+                        />
+                      </div>
+
+                      {/* Bank Name */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Bank Name
+                        </label>
+                        <input
+                          type="text"
+                          name="bankName"
+                          value={formData.bankName}
+                          onChange={handleChange}
+                          className="w-full px-3 py-2 border rounded-lg"
+                          required
+                        />
+                      </div>
+
+                      {/* Account Holder Name */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Account Holder Name
+                        </label>
+                        <input
+                          type="text"
+                          name="accountHolderName"
+                          value={formData.accountHolderName}
+                          onChange={handleChange}
+                          className="w-full px-3 py-2 border rounded-lg"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
                   {/* Phone */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
@@ -245,6 +361,13 @@ const PartnerRegister = () => {
                       )}
                     </div>
                   ))}
+                  {/* CAPTCHA */}
+                  <div className="mb-4 flex justify-center">
+                    <ReCAPTCHA
+                      sitekey={SITE_KEY}
+                      onChange={handleCaptchaChange}
+                    />
+                  </div>
                   {/* Submit */}
                   <button
                     type="submit"
@@ -262,6 +385,7 @@ const PartnerRegister = () => {
           </div>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };

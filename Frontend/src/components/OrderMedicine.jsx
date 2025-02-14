@@ -29,7 +29,6 @@ const OrderMedicine = () => {
                 (a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0)
               )
             : [];
-
           setAddresses(sortedAddresses);
           setSelectedAddress(
             sortedAddresses.find((addr) => addr.isPrimary) ||
@@ -90,7 +89,9 @@ const OrderMedicine = () => {
         setPrescriptionItems(response.data.items);
       }
 
-      setMessage("Prescription uploaded successfully! Review your medicines below.");
+      setMessage(
+        "Prescription uploaded successfully! Review your medicines below."
+      );
     } catch (error) {
       setMessage("An error occurred. Please try again.");
       console.error("Error uploading file:", error);
@@ -106,7 +107,7 @@ const OrderMedicine = () => {
         {
           productId: isRecommended ? item.recommendedMedicine.id : item.id,
           quantity: item.quantity || 1,
-          isRecommended
+          isRecommended,
         },
         {
           headers: {
@@ -137,7 +138,7 @@ const OrderMedicine = () => {
           <p className="text-gray-600 text-sm sm:text-base mt-2">
             Please log in to upload your prescription and place an order.
           </p>
-          
+
           <div className="flex justify-center mt-6">
             <img
               src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
@@ -145,14 +146,14 @@ const OrderMedicine = () => {
               className="w-32 sm:w-40 md:w-48"
             />
           </div>
-  
+
           <button
             onClick={() => navigate("/login")}
             className="mt-6 w-full bg-[#FF007F] text-white font-semibold text-sm sm:text-base px-5 py-3 rounded-lg shadow-lg transform transition duration-300 hover:bg-[#E60072] hover:scale-20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             Log In to Continue
           </button>
-  
+
           <p className="text-xs sm:text-sm text-gray-500 mt-4">
             Don't have an account?{" "}
             <span
@@ -289,7 +290,10 @@ const OrderMedicine = () => {
                 <thead>
                   <tr className="bg-gray-50">
                     <th className="py-2 px-3 text-left">No.</th>
-                    <th colSpan="3" className="py-2 px-3 text-left border-r border-gray-200">
+                    <th
+                      colSpan="3"
+                      className="py-2 px-3 text-left border-r border-gray-200"
+                    >
                       Regular Medicine
                     </th>
                     <th colSpan="3" className="py-2 px-3 text-left">
@@ -300,7 +304,9 @@ const OrderMedicine = () => {
                     <th className="py-3 px-3 text-left">Sr.no.</th>
                     <th className="py-3 px-3 text-left">Name</th>
                     <th className="py-3 px-3 text-left">Price</th>
-                    <th className="py-3 px-3 text-left border-r border-gray-200">Action</th>
+                    <th className="py-3 px-3 text-left border-r border-gray-200">
+                      Action
+                    </th>
                     <th className="py-3 px-3 text-left">Name</th>
                     <th className="py-3 px-3 text-left">Price</th>
                     <th className="py-3 px-3 text-left">Action</th>
@@ -320,9 +326,13 @@ const OrderMedicine = () => {
                           Add to Cart
                         </button>
                       </td>
-                      <td className="py-4 px-3">{item.recommendedMedicine?.name || 'N/A'}</td>
                       <td className="py-4 px-3">
-                        {item.recommendedMedicine ? `₹${item.recommendedMedicine.price}` : 'N/A'}
+                        {item.recommendedMedicine?.name || "N/A"}
+                      </td>
+                      <td className="py-4 px-3">
+                        {item.recommendedMedicine
+                          ? `₹${item.recommendedMedicine.price}`
+                          : "N/A"}
                       </td>
                       <td className="py-4 px-3">
                         {item.recommendedMedicine && (

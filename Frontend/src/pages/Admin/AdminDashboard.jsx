@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 // ✅ Redux Imports for Auth State Management
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../redux/slice/authSlice";
+import { logout } from "../../redux/slice/authSlice";
 import ManagePrescriptions from "./ManagePrescriptions";
 import ManagePartners from "./ManagePartners";
 

@@ -59,14 +59,14 @@ router.post("/upload/pan", upload.single("pan"), async (req, res) => {
 // Partner Registration Route
 router.post("/register", async (req, res) => {
   try {
-    const { name, email, phone, password, aadharUrl, panUrl } = req.body;
+    const { name, email, phone, password, aadharUrl, panUrl, bankAccountNumber, ifscCode, bankName, accountHolderName } = req.body;
 
     // Validate required fields
-    if (!name || !email || !phone || !password || !aadharUrl || !panUrl) {
+    if (!name || !email || !phone || !password || !aadharUrl || !panUrl || !bankAccountNumber || !ifscCode || !bankName || !accountHolderName) {
       return res.status(400).json({ error: "All fields are required." });
     }
 
-    // Check if partner already exists in pendingRequest
+    // Check if partner already exists
     const existingPartner = await PendingPartner.findOne({ email });
     if (existingPartner) {
       return res.status(400).json({ error: "Partner request already exists." });
@@ -74,27 +74,36 @@ router.post("/register", async (req, res) => {
 
     // Hash password before storing
     const hashedPassword = await bcrypt.hash(password, 10);
-    // Create new pending partner request
+
+    // Save bank details properly inside `bankDetails`
     const newPendingPartner = new PendingPartner({
       name,
       email,
       phone,
-      password: hashedPassword, // Store hashed password
+      password: hashedPassword,
       aadharUrl,
       panUrl,
+      bankDetails: {  // ✅ Wrapping bank details inside an object
+        accountNumber: bankAccountNumber,
+        ifscCode,
+        bankName,
+        accountHolderName,
+      },
     });
 
     await newPendingPartner.save();
     res.status(201).json({
       success: true,
-      message:
-        "Partner request submitted successfully. Awaiting admin approval.",
+      message: "Partner request submitted successfully. Awaiting admin approval.",
     });
+
   } catch (error) {
     console.error("❌ Error registering partner:", error);
     res.status(500).json({ error: "Error registering partner." });
   }
 });
+
+
 
 router.post("/login", async (req, res) => {
   try {

@@ -7,7 +7,7 @@ import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import AdminDashboard from "./components/AdminDashboard";
+import AdminDashboard from "./pages/Admin/AdminDashboard";
 import ContactUs from "./pages/Contact";
 import Profile from "./pages/Profile";
 import OrderMedicine from "./components/OrderMedicine";
@@ -17,9 +17,9 @@ import ProtectedRoute from "./components/protectedRoute";
 import "react-toastify/dist/ReactToastify.css";
 import OrderSummary from "./pages/OrderSummary";
 import ScrollToTop from "./components/ScrollToTop";
-import ReferralRegister from "./pages/Program/ReferralRegister";
-import PartnerRegister from "./pages/Program/PartnerRegister";
-import CommonLogin from "./pages/Program/CommonLogin";
+import ReferralRegister from "./pages/SalesProgram/ReferralRegister";
+import PartnerRegister from "./pages/SalesProgram/PartnerRegister";
+import CommonLogin from "./auth/Login/CommonLogin";
 import NotFound from "./pages/NotFound";
 
 function AppContent() {
