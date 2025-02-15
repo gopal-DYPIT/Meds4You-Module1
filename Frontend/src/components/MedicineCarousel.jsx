@@ -4,88 +4,13 @@ import { toast } from "react-toastify";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
-import "swiper/css/navigation";
 import "swiper/css/pagination";
-
-const cardStyle = {
-  margin: "6rem auto",
-  fontFamily: "Poppins, sans-serif",
-  maxWidth: "1400px",
-  position: "relative",
-};
-
-const wholeCardStyle = {
-  display: "flex",
-  flexDirection: "column",
-  height: "400px",
-  width: "350px",
-  borderRadius: "10px",
-  boxShadow:
-    "rgba(228, 76, 76, 0.1) 0px 1px 1px, rgba(230, 64, 64, 0.1) 1px 1px 10px, rgba(236, 40, 59, 0.1) 0px 1px 15px",
-};
-
-const topStyle = {
-  color: "white",
-  backgroundColor: "#d9327a",
-  fontSize: "1rem",
-  textAlign: "center",
-  borderRadius: "10px 10px 0 0",
-  padding: "5px",
-  fontWeight: "500",
-};
-
-const mainStyle = {
-  height: "98%",
-  width: "100%",
-  display: "flex",
-};
-
-const leftRightCommonStyle = {
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "space-around",
-  width: "50%",
-  padding: "5px",
-  paddingLeft: "20px",
-  gap: "2px",
-};
-
-const rightStyle = {
-  display: "flex",
-  flexDirection: "column",
-  width: "50%",
-  // padding: "5px",
-  backgroundColor: "rgb(246, 255, 243)",
-  borderRadius: "0 0 10px 0",
-  paddingRight: "15px",  
-  paddingBottom: "15px",
-  overflow: "hidden",
-  alignItems: "center",
-  // justifyContent: "center",
-  // justifyContent: "space-between",  // Keeps Add to Cart button at bottom
-};
-
-const recommendedContainerStyle = {
-  maxHeight: "220px", // Prevents overflow
-  // overflowY: "auto", // Enables scrolling
-  paddingTop: "28px",
-  width: "100%",
-};
-
-const alternateMedicineStyle = {
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  // justifyContent: "center",
-  paddingTop: "20px",
-  marginBottom: "15px", // Adjusted margin
-  textAlign: "center",
-};
 
 const MedicineCarousel = ({ products, addToCart, isLoading }) => {
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const [selectedVariant, setSelectedVariant] = useState({});
   const [swiperInstance, setSwiperInstance] = useState(null);
+  const isDesktop = window.innerWidth >= 1024;
 
   const handleAddToCart = (productId, variantIndex) => {
     if (!isAuthenticated) {
@@ -114,8 +39,6 @@ const MedicineCarousel = ({ products, addToCart, isLoading }) => {
     }
   };
 
-  const isDesktop = window.innerWidth >= 1024;
-
   return (
     <>
       {isLoading ? (
@@ -127,157 +50,164 @@ const MedicineCarousel = ({ products, addToCart, isLoading }) => {
           No medicines available
         </div>
       ) : (
-        <div style={cardStyle}>
+        <div className="relative pl-4 py-4 mx-auto max-w-[1500px] my-24">
           <Swiper
             modules={[Pagination, Autoplay]}
-            pagination={{ clickable: true, dynamicBullets: true }}
+            pagination={{
+              el: ".swiper-pagination",
+              clickable: true,
+              dynamicBullets: true,
+            }}
             autoplay={{ delay: 5000, disableOnInteraction: false }}
             spaceBetween={20}
             loop={true}
             grabCursor={true}
             preventClicks={false}
             preventClicksPropagation={false}
-            touchStartPreventDefault={false} // ✅ Allows better touch gestures on mobile
+            touchStartPreventDefault={false}
             touchMoveStopPropagation={true}
             touchReleaseOnEdges={true}
             resistance={false}
             onSwiper={(swiper) => setSwiperInstance(swiper)}
-            style={{ paddingBottom: "20px" }}
+            className="pb-10"
             breakpoints={{
-              0: {
-                // ✅ Ensures smooth mobile experience
-                slidesPerView: 1,
-                spaceBetween: 10,
-              },
-              320: {
-                slidesPerView: 1,
-                spaceBetween: 10,
-              },
-              768: {
-                slidesPerView: 1,
-                spaceBetween: 20,
-              },
-              1024: {
-                slidesPerView: 2,
-                spaceBetween: 20,
-              },
-              1200: {
-                slidesPerView: 3,
-                spaceBetween: 20,
-              },
+              0: { slidesPerView: 1, spaceBetween: 10 },
+              320: { slidesPerView: 1, spaceBetween: 10 },
+              768: { slidesPerView: 1, spaceBetween: 20 },
+              1024: { slidesPerView: 2, spaceBetween: 20 },
+              1200: { slidesPerView: 3, spaceBetween: 20 },
             }}
           >
             {products.map((product) => (
-              // console.log(product),
               <SwiperSlide
                 key={product._id}
-                style={{ display: "flex", justifyContent: "center" }}
+                className="flex justify-center"
                 onMouseEnter={() =>
                   isDesktop && swiperInstance?.autoplay.stop()
-                } // Stop autoplay only on desktop
+                }
                 onMouseLeave={() =>
                   isDesktop && swiperInstance?.autoplay.start()
-                } // Resume autoplay only on desktop
+                }
               >
-                <div style={wholeCardStyle}>
-                  <div style={topStyle}>{product.salt}</div>
-                  <div style={mainStyle}>
-                    <div style={leftRightCommonStyle}>
-                      <b>Regular</b>
-                      <img
-                        src={product.imageUrl || "default-image.jpg"}
-                        alt="Tablet"
-                        style={{ height: "40px", width: "100px" }}
-                      />
-                      <div className="space-y-4">
-                        <b>{product.drugName}</b>
-                        <p style={{ marginBottom: "8px", lineHeight: "1.5" }}>
-                          {product.manufacturer}
-                        </p>
-                        <p style={{ marginBottom: "4px", lineHeight: "1.2" }}>
-                          {product.category}
-                        </p>
-                        <p style={{ marginBottom: "4px", lineHeight: "1.2" }}>
-                          {product.size}
-                        </p>
-                        <p className="pb-2">MRP: ₹{product.mrp}</p>
-                      </div>
-                      <button
-                        className="bg-[#419ec8] hover:bg-[#3b9075] mb-2 mr-6 text-white px-4 py-2 border-none h-10 w-36 text-lg rounded-lg opacity-60 transition duration-300"
-                        onClick={() =>
-                          handleAddToCart(
-                            product._id,
-                            selectedVariant[product._id]
-                          )
-                        }
-                      >
-                        Add to Cart
-                      </button>
+                <div className="flex justify-center mb-2 items-center mx-auto w-full">
+                  <div className="flex flex-col h-[440px] w-[320px] sm:w-[340px] rounded-lg sm:shadow-[0_2px_1px_rgba(20,7,76,0.15),_1px_4px_20px_rgba(230,64,64,0.1),_0_4px_25px_rgba(236,40,59,0.1)] sm:hover:shadow-[0_5px_20px_rgba(228,76,76,0.2),_1px_5px_2px_rgba(230,64,64,0.15),_0_6px_30px_rgba(236,40,59,0.15)] transition-shadow duration-300 overflow-hidden bg-white">
+                    {/* Header */}
+                    <div className="bg-[#d9327a] text-white text-center py-1 px-2 font-medium text-base rounded-t-lg">
+                      {product.salt}
                     </div>
-                    
-                    <div style={rightStyle} className="mt-4">
-                      <b>Recommended</b>
-                      <div style={recommendedContainerStyle}>
-                        {product.alternateMedicines?.map((alt, index) => (
-                          <div
-                            key={index}
-                            onClick={() =>
-                              setSelectedVariant({
-                                ...selectedVariant,
-                                [product._id]: index,
-                              })
-                            }
-                            style={alternateMedicineStyle}
-                          >
-                            <img
-                              src={alt.manufacturerUrl || "default-image.jpg"}
-                              alt="Tablet"
-                              style={{ height: "40px", width: "100px", marginBottom: "40px" }}
-                            />
-                            <div className="font-bold">{alt.name}</div>
-                            <div className="    font-roboto text-lg">
-                              {alt.manufacturer}
-                            </div>
-                            <div className="font-roboto text-lg">
-                              {product.size}
-                            </div>
 
-                            <div
-                              className="font-bold pt-2 text-2xl"
-                              style={{ color: "rgb(12, 159, 12)", paddingTop: "20px" }}
-                            >
-                              ₹{alt.price}
+                    {/* Main content */}
+                    <div className="flex h-full w-full">
+                      {/* Left side - Regular */}
+                      <div className="w-1/2 bg-[rgb(242,249,253)] flex flex-col justify-between p-4">
+                        <div>
+                          <p className="font-bold mb-2">Regular</p>
+                          <img
+                            src={product.imageUrl || "default-image.jpg"}
+                            alt="Tablet"
+                            className="h-12 w-[100px] mb-3"
+                          />
+                          <div className="space-y-2">
+                            <p className="font-bold">{product.drugName}</p>
+                            <p className="text-sm leading-tight">
+                              {product.manufacturer}
+                            </p>
+                            <p className="text-sm leading-tight">
+                              {product.size}
+                            </p>
+                            <div className="text-gray-500">
+                              MRP: ₹
+                              <span className="line-through text-lg">
+                                {product.mrp}
+                              </span>
+                            </div>
+                            <div className="">
+                              Price:{" "}
+                              <span className="text-xl">₹{product.price}</span>
                             </div>
                           </div>
-                        ))}
+                        </div>
                       </div>
-                      
+
+                      {/* Right side - Recommended */}
+                      <div className="w-1/2 bg-[rgb(246,255,243)] rounded-br-lg flex flex-col h-full overflow-hidden">
+                        <p className="font-bold p-4 pb-2">Recommended</p>
+                        <div className="flex-1 overflow-y-auto px-4 pb-4">
+                          {product.alternateMedicines?.map((alt, index) => (
+                            <div
+                              key={index}
+                              onClick={() =>
+                                setSelectedVariant({
+                                  ...selectedVariant,
+                                  [product._id]: index,
+                                })
+                              }
+                              className="flex flex-col items-center mb-4 space-y-2 cursor-pointer"
+                            >
+                              <img
+                                src={alt.manufacturerUrl || "default-image.jpg"}
+                                alt="Tablet"
+                                className="h-10 w-[100px] mb-2"
+                              />
+                              <p className="font-bold text-center ">
+                                {alt.name}
+                              </p>
+                              <p className="text-center text-sm mt-1">
+                                {alt.manufacturer}
+                              </p>
+                              <p className="text-center text-sm mt-1">
+                                {product.size}
+                              </p>
+                              <div className="text-center text-gray-500 text-sm">
+                                MRP: ₹
+                                <span className="line-through text-lg ">{alt.mrp}</span>
+                              </div>
+                              <div className="text-center font-bold text-green-600 text-sm">
+                                Price:{" "}
+                                <span className="text-3xl">₹{alt.price}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex justify-center items-center">
+                    <button
+                      className="bg-[#419ec8] m-2 hover:bg-[#2f548c] text-white px-2 py-2 rounded-lg w-64 text-lg opacity-60 transition duration-300"
+                      onClick={() =>
+                        handleAddToCart(
+                          product._id,
+                          selectedVariant[product._id]
+                        )
+                      }
+                    >
+                      Add to Cart
+                    </button>
                     </div>
                   </div>
                 </div>
               </SwiperSlide>
             ))}
           </Swiper>
+          {/* <div className="swiper-pagination mt-2 flex justify-center">...</div> */}
+
           {products.length > 0 && (
-            <div className="my-swiper relative pb-3.5">
-              <div
-                id="swiper-button-prev"
-                className="hidden sm:flex absolute top-1/2 transform -translate-y-1/2 justify-center items-center w-12 h-12 bg-gray-200 text-gray-800 rounded-full shadow-lg cursor-pointer transition-all ease-in-out duration-200 z-10 left-1/2 sm:left-0 md:left-10 lg:left-20"
+            <>
+              <button
+                className="hidden sm:flex absolute left-0 top-1/2 transform -translate-y-1/2 justify-center items-center w-12 h-12 bg-gray-200 text-gray-800 rounded-full shadow-lg cursor-pointer z-10 md:left-4 lg:left-8"
                 onClick={handlePrev}
-                style={{ top: "-230px", left: "-16px" }}
+                style={{ marginLeft: "-50px" }}
               >
                 <span className="text-2xl">&#10094;</span>
-              </div>
-
-              <div
-                id="swiper-button-next"
-                className="hidden sm:flex absolute top-1/2 transform -translate-y-1/2 justify-center items-center w-12 h-12 bg-gray-200 text-gray-800 rounded-full shadow-lg cursor-pointer transition-all ease-in-out duration-200 z-10 right-1/2 sm:right-0 md:right-10 lg:right-20"
+              </button>
+              <button
+                className="hidden sm:flex absolute right-0 top-1/2 transform -translate-y-1/2 justify-center items-center w-12 h-12 bg-gray-200 text-gray-800 rounded-full shadow-lg cursor-pointer z-10 md:right-4 lg:right-8"
                 onClick={handleNext}
-                style={{ top: "-230px", right: "-16px" }}
+                style={{ marginRight: "-50px" }}
               >
                 <span className="text-2xl">&#10095;</span>
-              </div>
-            </div>
+              </button>
+            </>
           )}
         </div>
       )}

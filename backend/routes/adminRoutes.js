@@ -107,44 +107,67 @@ adminRoutes.get("/orders/:id", authorizeRoles("admin"), async (req, res) => {
 
 adminRoutes.post("/products", authorizeRoles("admin"), async (req, res) => {
   try {
-    const { name, image, description, type, brand, category, price, discount } =
-      req.body;
+    const {
+      drugName,
+      imageUrl,
+      size,
+      manufacturer,
+      category,
+      price,
+      salt,
+      margin,
+      alternateMedicines = [], // Default to empty array
+    } = req.body;
 
     // Validate required fields
-    if (!name || !category || !price) {
+    if (!drugName || !category || !price || !salt) {
       return res
         .status(400)
-        .json({ message: "Name, category, and price are required" });
+        .json({ message: "Drug Name, category, price, and salt are required" });
     }
 
     // Ensure price is a positive number
     if (price <= 0) {
-      return res
-        .status(400)
-        .json({ message: "Price must be greater than zero" });
+      return res.status(400).json({ message: "Price must be greater than zero" });
     }
 
-    // Create a new product
-    const newProduct = new Product({
-      name,
-      image,
-      description,
-      type,
-      brand,
+    // Calculate MRP (5% increase over price)
+    const mrp = parseFloat((price * 1.05).toFixed(2));
+
+    // Validate alternate medicines
+    const validatedAlternateMedicines = alternateMedicines.map((alt) => ({
+      name: alt.name || "Unknown",
+      manufacturer: alt.manufacturer || "Unknown",
+      manufacturerUrl: alt.manufacturerUrl || "",
+      price: alt.price > 0 ? alt.price : 0,
+      mrp: alt.mrp ? alt.mrp : parseFloat((alt.price * 1.05).toFixed(2)), // Ensure MRP for alternates
+      salt: alt.salt || salt, // Default to main medicine's salt
+    }));
+
+    // Create a new medicine product
+    const newMedicine = new Product({
+      drugName,
+      imageUrl,
+      size,
+      manufacturer,
       category,
       price,
-      discount: discount || 0, // Default discount to 0 if not provided
-      createdBy: req.user.id, // Track the user who created the product
+      mrp,
+      salt,
+      margin,
+      alternateMedicines: validatedAlternateMedicines,
+      createdBy: req.user.id, // Track admin user
     });
 
-    // Save the product
-    await newProduct.save();
-    res.status(201).json(newProduct);
+    // Save to database
+    await newMedicine.save();
+    res.status(201).json(newMedicine);
   } catch (error) {
-    console.error("Error creating product:", error);
-    res.status(500).json({ message: "Error creating product" });
+    console.error("Error creating medicine:", error);
+    res.status(500).json({ message: "Error creating medicine" });
   }
 });
+
 
 // Delete a product (Only for Admin)
 adminRoutes.delete(

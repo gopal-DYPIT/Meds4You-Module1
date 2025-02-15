@@ -96,6 +96,15 @@ const CartPage = () => {
       };
     });
   };
+  const updateMedicineSelection = (productId, isRecommended) => {
+    setSelectedMedicines((prev) => {
+      return {
+        ...prev,
+        [productId]: isRecommended ? "recommended" : "original",
+      };
+    });
+};
+
 
   const calculateTotal = () => {
     return cart
@@ -115,23 +124,58 @@ const CartPage = () => {
       .toFixed(2);
   };
 
+  const calculateMinimumSaving = () => {
+    let totalMRP = 0;
+    let totalPrice = 0;
+
+    cart.forEach((item) => {
+      const product = item?.productId;
+      if (product) {
+        totalMRP += (product.mrp || 0) * (item.quantity || 1);
+        totalPrice += (product.price || 0) * (item.quantity || 1);
+      }
+    });
+
+    return (totalMRP - totalPrice).toFixed(2);
+  };
+
+  const calculateMaximumSaving = () => {
+    let totalMRP = 0;
+    let totalRecommendedPrice = 0;
+
+    cart.forEach((item) => {
+      const product = item?.productId;
+      const alternate = product?.alternateMedicines?.[0]; // First alternative
+
+      if (product) {
+        totalMRP += (alternate.mrp || 0) * (item.quantity || 1);
+        totalRecommendedPrice += (alternate.price || 0) * (item.quantity || 1);
+      }
+    });
+
+    return (totalMRP - totalRecommendedPrice).toFixed(2);
+  };
+
   const handleCheckout = () => {
     const selectedProducts = cart.map((item) => ({
       ...item,
       selection: selectedMedicines[item.productId._id] || "original", // Default to original if not set
-      isRecommended: selectedMedicines[item.productId._id] === "recommended"
+      isRecommended: selectedMedicines[item.productId._id] === "recommended",
     }));
-  
-    const total = cart.reduce((sum, item) => {
-      const product = item.productId;
-      const isRecommended = selectedMedicines[product._id] === "recommended";
-      const price = isRecommended && product.alternateMedicines?.[0] 
-        ? product.alternateMedicines[0].price 
-        : product.price;
-      
-      return sum + (price * item.quantity);
-    }, 0).toFixed(2);
-  
+
+    const total = cart
+      .reduce((sum, item) => {
+        const product = item.productId;
+        const isRecommended = selectedMedicines[product._id] === "recommended";
+        const price =
+          isRecommended && product.alternateMedicines?.[0]
+            ? product.alternateMedicines[0].price
+            : product.price;
+
+        return sum + price * item.quantity;
+      }, 0)
+      .toFixed(2);
+
     navigate("/checkout", {
       state: {
         selectedProducts,
@@ -299,32 +343,50 @@ const CartPage = () => {
                     <tr className="bg-gray-50">
                       <th className="py-2 px-3 text-left">No.</th>
                       <th
-                        colSpan="6"
+                        colSpan="5"
                         className="py-2 px-3 text-left border-r border-gray-200 font-medium text-[16px]"
                       >
                         Selected Medicine
+                        <button
+                          className="m-4 bg-red-400 text-white px-3 py-1 rounded-md"
+                          onClick={() => {
+                            cart.forEach((item) =>
+                              updateMedicineSelection(item.productId._id, false)
+                            );
+                          }}
+                        >
+                          Minimum Savings: ₹{calculateMinimumSaving()}
+                        </button>
                       </th>
                       <th
-                        colSpan="5"
+                        colSpan="4"
                         className="py-2 px-6 text-left font-medium text-[16px] text-gray-600"
                       >
                         Recommended Medicine
+                        <button
+                          className="m-4 bg-green-400 text-white px-3 py-1 rounded-md"
+                          onClick={() => {
+                            cart.forEach((item) =>
+                              updateMedicineSelection(item.productId._id, true)
+                            );
+                          }}
+                        >
+                          Maximum Saving: ₹{calculateMaximumSaving()}
+                        </button>
                       </th>
                     </tr>
                     <tr className="bg-gray-100">
                       <th className="py-3 px-3 text-left">Sr.no.</th>
-                      <th className="py-3 px-5 text-left">Name</th>
-                      <th className="py-3 px-5 text-left">Manufacturer</th>
-                      <th className="py-3 px-5 text-left">Price/Unit (Rs.)</th>
+                      <th className="py-3 px-10 text-left">Name</th>
+                      <th className="py-3 text-left">Price/Unit</th>
                       <th className="py-3 px-6 text-left">Quantity</th>
                       <th className="py-3 px-5 text-left">Total (Rs.)</th>
-                      <th className="py-3 px-5 text-left border-r border-gray-200">
+                      <th className="py-3 px-4 text-left border-r border-gray-200">
                         Action
                       </th>
                       <th className="py-3 px-8 text-left">Name</th>
-                      <th className="py-3 px-5 text-left">Manufacturer</th>
+                      <th className="py-3 px-1 text-left">Price/Unit</th>
                       <th className="py-3 px-5 text-left">Quantity</th>
-                      <th className="py-3 px-5 text-left">Price/Unit (Rs.)</th>
                       <th className="py-3 px-5 text-left">Total (Rs.)</th>
                     </tr>
                   </thead>
@@ -343,7 +405,7 @@ const CartPage = () => {
 
                           {/* Selected Medicine Side - Always highlighted by default */}
                           <td
-                            className={`py-2 px-6 ${
+                            className={`py-4 px-2 ${
                               isOriginalSelected ? "bg-blue-50" : ""
                             }`}
                           >
@@ -363,22 +425,36 @@ const CartPage = () => {
                                 <div className="text-[16px] text-gray-900 font-medium">
                                   {product?.drugName}
                                 </div>
+                                <span className="text-xs text-gray-600">
+                                  {product?.manufacturer}
+                                </span>
                               </div>
                             </div>
                           </td>
-                          <td
+                          {/* <td
                             className={`py-2 px-6 text-[16px] ${
                               isOriginalSelected ? "bg-blue-50" : ""
                             }`}
                           >
                             {product?.manufacturer}
-                          </td>
+                          </td> */}
                           <td
-                            className={`py-2 px-6 text-[16px] ${
+                            className={`py-2 w-32 ${
                               isOriginalSelected ? "bg-blue-50" : ""
                             }`}
                           >
-                            {product?.price}
+                            <div className="text-sm pb-2">
+                              MRP:{" "}
+                              <span className="line-through">
+                                ₹{product?.mrp}
+                              </span>
+                            </div>
+                            <div className=" text-green-600">
+                              Price:{" "}
+                              <span className="text-lg font-bold">
+                                ₹{product?.price}
+                              </span>{" "}
+                            </div>
                           </td>
                           <td
                             className={`py-2 px-2 text-[16px] ${
@@ -458,12 +534,17 @@ const CartPage = () => {
                                       checked={isRecommendedSelected}
                                     />
                                   </div>
-                                  <div className="font-medium text-gray-900">
-                                    {alternate.name}
+                                  <div>
+                                    <div className="font-medium text-gray-900">
+                                      {alternate.name}
+                                    </div>
+                                    <span className="text-xs text-gray-600">
+                                      manufacturer
+                                    </span>
                                   </div>
                                 </div>
                               </td>
-                              <td
+                              {/* <td
                                 className={`py-2 px-10 text-[16px] ${
                                   isRecommendedSelected ? "bg-green-50" : ""
                                 }`}
@@ -473,6 +554,25 @@ const CartPage = () => {
                                   alt="Manufacturer"
                                   className="h-12 w-12 object-contain"
                                 />
+                              </td> */}
+
+                              <td
+                                className={`py-2 w-32 ${
+                                  isRecommendedSelected ? "bg-green-50" : ""
+                                }`}
+                              >
+                                <div className="text-sm pb-2">
+                                  MRP:{" "}
+                                  <span className="line-through">
+                                    ₹{alternate.mrp}
+                                  </span>
+                                </div>
+                                <div className=" text-green-600">
+                                  Price:{" "}
+                                  <span className="text-xl font-bold">
+                                    ₹{alternate.price}
+                                  </span>{" "}
+                                </div>
                               </td>
                               <td
                                 className={`py-2 px-10 text-[16px] ${
@@ -480,13 +580,6 @@ const CartPage = () => {
                                 }`}
                               >
                                 {item.quantity}
-                              </td>
-                              <td
-                                className={`py-2 px-6 text-[16px] ${
-                                  isRecommendedSelected ? "bg-green-50" : ""
-                                }`}
-                              >
-                                {alternate.price}
                               </td>
                               <td
                                 className={`py-2 px-6 text-[16px] ${
@@ -509,7 +602,7 @@ const CartPage = () => {
                     })}
                     {/* Total Row */}
                     <tr className="bg-gray-50 font-semibold">
-                      <td colSpan="11" className="py-4 px-6 text-right">
+                      <td colSpan="9" className="py-4 px-6 text-right">
                         Total Amount:
                       </td>
                       <td className="py-2 px-2 text-lg text-green-800">

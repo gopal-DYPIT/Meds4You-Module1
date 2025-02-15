@@ -19,9 +19,10 @@ const AdminDashboard = () => {
   const [loadingOrders, setLoadingOrders] = useState(true);
   const dispatch = useDispatch();
 
-  const [alternateProducts, setAlternateProducts] = useState([
-    { name: "", manufacturer: "", manufacturerUrl: "", price: 0 },
+  const [alternateMedicines, setAlternateMedicines] = useState([
+    { name: "", manufacturer: "", manufacturerUrl: "", price: 0, mrp: 0, salt: "" },
   ]);
+  
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const [authState, setAuthState] = useState(isAuthenticated);
 
@@ -107,32 +108,19 @@ const AdminDashboard = () => {
     navigate("/login"); // ✅ Redirect after logout
   };
 
-  const handleChangeAlternateProduct = (index, field, value) => {
-    const updatedAlternates = [...alternateProducts];
+  const handleChangeAlternateMedicine = (index, field, value) => {
+    const updatedAlternates = [...alternateMedicines];
     updatedAlternates[index][field] = value;
-    setAlternateProducts(updatedAlternates);
+    setAlternateMedicines(updatedAlternates);
   };
-
-  const addAlternateProduct = () => {
-    setAlternateProducts([
-      ...alternateProducts,
-      { name: "", manufacturer: "", manufacturerUrl: "", price: 0 },
-    ]);
-  };
-
-  const removeAlternateProduct = (index) => {
-    const updatedAlternates = alternateProducts.filter((_, i) => i !== index);
-    setAlternateProducts(updatedAlternates);
-  };
-
-  const validatePositiveNumber = (value) => {
+const validatePositiveNumber = (value) => {
     const num = parseFloat(value);
     return num > 0 && !isNaN(num);
   };
 
   const resetForm = () => {
     // Reset the fields for the main product form
-    setAlternateProducts([
+    setAlternateMedicines([
       { name: "", manufacturer: "", manufacturerUrl: "", price: 0 },
     ]);
 
@@ -140,9 +128,9 @@ const AdminDashboard = () => {
     document.getElementById("productForm").reset();
   };
 
-  const createProduct = async (newProduct) => {
-    const { price, mrp, margin } = newProduct;
-
+  const createMedicine = async (newProduct) => {
+    const { price, mrp, margin, category, salt } = newProduct;
+  
     // Validation: Ensure price, mrp, and margin are positive numbers
     if (
       !validatePositiveNumber(price) ||
@@ -152,30 +140,30 @@ const AdminDashboard = () => {
       toast.error("Price, MRP, and Margin must be positive numbers.");
       return;
     }
-
+  
     try {
       const formattedProduct = {
         drugName: newProduct.drugName.trim(),
         size: newProduct.size.trim(),
         imageUrl: newProduct.imageUrl.trim(),
         manufacturer: newProduct.manufacturer.trim(),
-        category: newProduct.category.trim(),
+        category: category.trim(),
         price: parseFloat(newProduct.price),
-        salt: newProduct.salt.trim(),
         mrp: parseFloat(newProduct.mrp),
+        salt: salt.trim(), // Main medicine salt
         margin: newProduct.margin
           ? parseFloat(newProduct.margin)
-          : newProduct.mrp - newProduct.price,
-        alternateMedicines: alternateProducts.map((alt) => ({
+          : parseFloat(newProduct.mrp) - parseFloat(newProduct.price),
+        alternateMedicines: alternateMedicines.map((alt) => ({
           name: alt.name.trim(),
           manufacturer: alt.manufacturer.trim(),
           manufacturerUrl: alt.manufacturerUrl.trim(),
           price: parseFloat(alt.price),
+          mrp: alt.mrp ? parseFloat(alt.mrp) : parseFloat(alt.price) * 1.05, // Default MRP if not provided
+          salt: alt.salt?.trim() || salt.trim(), // Use provided salt or default to main medicine's salt
         })),
       };
-
-      // console.log("Sending product data:", formattedProduct);
-
+  
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/products/createProduct`,
         formattedProduct,
@@ -183,25 +171,24 @@ const AdminDashboard = () => {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
       );
-
+  
       setProducts((prevProducts) => [...prevProducts, response.data]);
-      toast.success("Product created successfully!", {
+      toast.success("Medicine created successfully!", {
         position: "top-center",
       });
-
-      // Reset the form after successful product creation
+  
       resetForm();
     } catch (error) {
       console.error(
-        "Error creating product:",
+        "Error creating medicine:",
         error.response ? error.response.data : error.message
       );
       toast.error(
-        error.response?.data?.message ||
-          "Failed to create product. Please try again."
+        error.response?.data?.message || "Failed to create medicine. Please try again."
       );
     }
   };
+  
 
   const deleteProduct = async (id) => {
     try {
@@ -356,15 +343,15 @@ const AdminDashboard = () => {
         {activeSection === "createProduct" && (
           <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8">
             <h1 className="text-3xl font-bold mb-6 text-center">
-              Create Product
+              Create Medicine
             </h1>
             <form
-              id="productForm"
+              id="medicineForm"
               onSubmit={(e) => {
                 e.preventDefault();
                 const formData = new FormData(e.target);
-                const newProduct = Object.fromEntries(formData.entries());
-                createProduct(newProduct);
+                const newMedicine = Object.fromEntries(formData.entries());
+                createMedicine(newMedicine);
               }}
               className="grid grid-cols-1 lg:grid-cols-2 gap-6"
             >
@@ -377,6 +364,7 @@ const AdminDashboard = () => {
                   required
                   className="w-full p-3 border rounded-lg"
                 />
+
                 <label className="block font-medium">ImageUrl</label>
                 <input
                   type="text"
@@ -419,14 +407,6 @@ const AdminDashboard = () => {
                   className="w-full p-3 border rounded-lg"
                 />
 
-                <label className="block font-medium">Salt</label>
-                <input
-                  type="text"
-                  name="salt"
-                  required
-                  className="w-full p-3 border rounded-lg"
-                />
-
                 <label className="block font-medium">MRP</label>
                 <input
                   type="number"
@@ -434,6 +414,14 @@ const AdminDashboard = () => {
                   required
                   min="0.01"
                   step="0.01"
+                  className="w-full p-3 border rounded-lg"
+                />
+
+                <label className="block font-medium">Salt</label>
+                <input
+                  type="text"
+                  name="salt"
+                  required
                   className="w-full p-3 border rounded-lg"
                 />
 
@@ -449,14 +437,14 @@ const AdminDashboard = () => {
 
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold">Alternate Medicines</h3>
-                {alternateProducts.map((alt, index) => (
+                {alternateMedicines.map((alt, index) => (
                   <div key={index} className="space-y-2 p-4 border rounded-lg">
                     <label className="block font-medium">Name</label>
                     <input
                       type="text"
                       value={alt.name}
                       onChange={(e) =>
-                        handleChangeAlternateProduct(
+                        handleChangeAlternateMedicine(
                           index,
                           "name",
                           e.target.value
@@ -464,12 +452,13 @@ const AdminDashboard = () => {
                       }
                       className="w-full p-2 border rounded-lg"
                     />
+
                     <label className="block font-medium">Manufacturer</label>
                     <input
                       type="text"
                       value={alt.manufacturer}
                       onChange={(e) =>
-                        handleChangeAlternateProduct(
+                        handleChangeAlternateMedicine(
                           index,
                           "manufacturer",
                           e.target.value
@@ -477,6 +466,7 @@ const AdminDashboard = () => {
                       }
                       className="w-full p-2 border rounded-lg"
                     />
+
                     <label className="block font-medium">
                       Manufacturer URL
                     </label>
@@ -484,7 +474,7 @@ const AdminDashboard = () => {
                       type="text"
                       value={alt.manufacturerUrl}
                       onChange={(e) =>
-                        handleChangeAlternateProduct(
+                        handleChangeAlternateMedicine(
                           index,
                           "manufacturerUrl",
                           e.target.value
@@ -492,6 +482,7 @@ const AdminDashboard = () => {
                       }
                       className="w-full p-2 border rounded-lg"
                     />
+
                     <label className="block font-medium">Price</label>
                     <input
                       type="number"
@@ -499,7 +490,7 @@ const AdminDashboard = () => {
                       min="0.01"
                       step="0.01"
                       onChange={(e) =>
-                        handleChangeAlternateProduct(
+                        handleChangeAlternateMedicine(
                           index,
                           "price",
                           e.target.value
@@ -508,30 +499,59 @@ const AdminDashboard = () => {
                       className="w-full p-2 border rounded-lg"
                     />
 
-                    {/* Remove Button */}
-                    <button
+                    <label className="block font-medium">MRP</label>
+                    <input
+                      type="number"
+                      value={alt.mrp || ""}
+                      min="0.01"
+                      step="0.01"
+                      onChange={(e) =>
+                        handleChangeAlternateMedicine(
+                          index,
+                          "mrp",
+                          e.target.value
+                        )
+                      }
+                      className="w-full p-2 border rounded-lg"
+                    />
+
+                    <label className="block font-medium">Salt</label>
+                    <input
+                      type="text"
+                      value={alt.salt || ""}
+                      onChange={(e) =>
+                        handleChangeAlternateMedicine(
+                          index,
+                          "salt",
+                          e.target.value
+                        )
+                      }
+                      className="w-full p-2 border rounded-lg"
+                    />
+
+                    {/* <button
                       type="button"
-                      onClick={() => removeAlternateProduct(index)}
+                      onClick={() => removeAlternateMedicine(index)}
                       className="text-red-500 text-lg font-semibold hover:text-red-700"
                     >
                       ×
-                    </button>
+                    </button> */}
                   </div>
                 ))}
-                <button
+                {/* <button
                   type="button"
-                  onClick={addAlternateProduct}
+                  onClick={addAlternateMedicine}
                   className="w-full p-2 bg-blue-600 text-white rounded-lg"
                 >
                   Add Alternate Medicine
-                </button>
+                </button> */}
               </div>
 
               <button
                 type="submit"
                 className="w-full py-3 mt-6 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
-                Create Product
+                Create Medicine
               </button>
             </form>
           </div>
@@ -763,10 +783,7 @@ const AdminDashboard = () => {
                 {selectedOrderDetails.items.map((item, index) => (
                   <div key={index} className="border-t py-2">
                     <p>
-                      Product:{" "}
-                      {item.productId
-                        ? item.name
-                        : "No product name"}
+                      Product: {item.productId ? item.name : "No product name"}
                     </p>
                     <p>Price: ₹{item.price ? item.price.toFixed(2) : "N/A"}</p>
                     <p>Quantity: {item.quantity ? item.quantity : "N/A"}</p>
