@@ -195,116 +195,169 @@ const CartPage = () => {
   const MobileCartItem = ({ item, index }) => {
     const product = item?.productId;
     const alternate = product?.alternateMedicines?.[0];
-    const selection = selectedMedicines[product._id];
+    const selection = selectedMedicines[product._id] || "original"; // Default to "original"
     const isOriginalSelected = selection === "original";
     const isRecommendedSelected = selection === "recommended";
-
+  
     return (
-      <div className="bg-white rounded-lg shadow-md p-4 mb-4">
-        {/* Selected Medicine Section - Always Visible */}
-        <div className="border-b pb-4 mb-4">
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="font-semibold text-lg">
-              Selected Medicine #{index + 1}
-            </h3>
+      <div className="bg-white rounded-lg shadow-md mb-4 overflow-hidden">
+        {/* Header row with Selected/Recommended headers */}
+        <div className="flex bg-gray-50">
+          <div className="w-1/2 py-2 px-3 text-left border-r border-gray-200">
+            <span className="font-medium text-sm">Selected Medicine</span>
+          </div>
+          <div className="w-1/2 py-2 px-3 text-left">
+            <span className="font-medium text-sm text-gray-600">Recommended Medicine</span>
+          </div>
+        </div>
+        
+        {/* Item number row */}
+        <div className="flex bg-gray-100 border-t border-gray-200">
+          <div className="w-1/6 py-2 px-2 text-left text-sm">
+            Sr.{index + 1}
+          </div>
+          <div className="w-5/6"></div>
+        </div>
+        
+        {/* Main content row */}
+        <div className="flex border-t border-gray-200">
+          {/* Selected Medicine Side */}
+          <div className={`w-1/2 p-2 border-r border-gray-200 ${isOriginalSelected ? "bg-blue-50" : ""}`}>
+            <div className="flex items-start mb-2">
+              <input
+                type="checkbox"
+                name={`medicine-${product._id}`}
+                onChange={() => handleSelectionChange(product._id, false)}
+                checked={isOriginalSelected}
+                defaultChecked={true}
+                className="mt-1 mr-2"
+              />
+              <div>
+                <div className="text-sm text-gray-900 font-medium">{product?.drugName}</div>
+                <span className="text-xs text-gray-600">{product?.manufacturer}</span>
+              </div>
+            </div>
+            
+            <div className="mb-2">
+              <div className="text-xs pb-1">
+                MRP: <span className="line-through">₹{product?.mrp}</span>
+              </div>
+              <div className="text-green-600 text-xs">
+                Price: <span className="text-sm font-bold">₹{product?.price}</span>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-2 mb-2">
+              <button
+                onClick={() => handleQuantityChange(product._id, item.quantity - 1)}
+                className="flex items-center justify-center w-5 h-5 bg-gray-200 text-gray-700 rounded-full hover:bg-red-500 hover:text-white transition-all"
+              >
+                <span className="text-xs">−</span>
+              </button>
+              
+              <span className="text-xs">
+                <span className="text-gray-900 font-semibold">{item?.quantity || 0}</span>
+              </span>
+              
+              <button
+                onClick={() => handleQuantityChange(product._id, item.quantity + 1)}
+                className="flex items-center justify-center w-5 h-5 bg-gray-200 text-gray-700 rounded-full hover:bg-green-500 hover:text-white transition-all"
+              >
+                <span className="text-xs">+</span>
+              </button>
+            </div>
+            
+            <div className="text-xs mb-2">
+              Total: ₹{(product?.price * item.quantity).toFixed(2)}
+            </div>
+            
             <button
               onClick={() => handleDelete(product._id)}
-              className="text-red-500 text-sm"
+              className="text-red-500 text-xs font-semibold hover:text-red-700 transition-colors"
             >
               Remove
             </button>
           </div>
-
-          <div className="space-y-2">
-            <h4 className="font-medium text-md">{product?.drugName}</h4>
-            <p className="text-sm text-gray-600">
-              Manufacturer: {product?.manufacturer}
-            </p>
-            <p className="text-sm text-gray-600">
-              Price: ₹{product?.price}/unit
-            </p>
-            <div className="flex items-center space-x-3 py-2">
-              <button
-                onClick={() =>
-                  handleQuantityChange(product._id, item.quantity - 1)
-                }
-                className="w-6 h-6 bg-gray-200 rounded-full hover:bg-red-500 hover:text-white flex items-center justify-center"
-              >
-                −
-              </button>
-              <span>{item.quantity}</span>
-              <button
-                onClick={() =>
-                  handleQuantityChange(product._id, item.quantity + 1)
-                }
-                className="w-6 h-6 bg-gray-200 rounded-full hover:bg-green-500 hover:text-white flex items-center justify-center"
-              >
-                +
-              </button>
-            </div>
-            <p className="font-medium">
-              Total: ₹{(product?.price * item.quantity).toFixed(2)}
-            </p>
-          </div>
-        </div>
-
-        {/* Recommended Alternative Section */}
-        {alternate && (
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-medium text-gray-700">
-                Recommended Alternative
-              </h3>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">
-                  Switch to recommended
-                </span>
+          
+          {/* Alternative Medicine Side */}
+          {alternate ? (
+            <div className={`w-1/2 p-2 ${isRecommendedSelected ? "bg-green-50" : ""}`}>
+              <div className="flex items-start mb-2">
                 <input
                   type="checkbox"
+                  name={`medicine-${product._id}`}
+                  onChange={() => handleSelectionChange(product._id, true)}
                   checked={isRecommendedSelected}
-                  onChange={() =>
-                    handleSelectionChange(product._id, !isRecommendedSelected)
-                  }
-                  className="h-4 w-4 text-blue-600"
+                  className="mt-1 mr-2"
                 />
-              </div>
-            </div>
-
-            <div
-              className={`p-3 rounded-lg ${
-                isRecommendedSelected ? "bg-green-50" : "bg-gray-50"
-              }`}
-            >
-              <div className="space-y-2">
-                <h4 className="font-medium">{alternate.name}</h4>
-                <div className="flex justify-between items-center">
-                  <div className="space-y-1">
-                    <p className="text-sm text-gray-600">
-                      Price: ₹{alternate.price}/unit
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Quantity: {item.quantity}
-                    </p>
-                    <p className="font-medium text-green-600">
-                      Save: ₹
-                      {(
-                        (product?.price - alternate.price) *
-                        item.quantity
-                      ).toFixed(2)}
-                    </p>
-                  </div>
-                  <div className="w-16 h-16">
-                    <img
-                      src={alternate.manufacturerUrl}
-                      alt="Manufacturer"
-                      className="object-contain w-full h-full"
-                    />
-                  </div>
+                <div>
+                  <div className="text-sm font-medium text-gray-900">{alternate.name}</div>
+                  <span className="text-xs text-gray-600">manufacturer</span>
                 </div>
               </div>
+              
+              <div className="mb-2">
+                <div className="text-xs pb-1">
+                  MRP: <span className="line-through">₹{alternate.mrp}</span>
+                </div>
+                <div className="text-green-600 text-xs">
+                  Price: <span className="text-sm font-bold">₹{alternate.price}</span>
+                </div>
+              </div>
+              
+              <div className="text-xs mb-2">
+                Quantity: {item.quantity}
+              </div>
+              
+              <div className="text-xs">
+                Total: ₹{(alternate.price * item.quantity).toFixed(2)}
+              </div>
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="w-1/2 p-2 text-center text-xs text-gray-500 flex items-center justify-center">
+              No alternative available
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+  
+  // Main mobile cart component
+  const MobileCart = ({ cart }) => {
+    return (
+      <div className="block lg:hidden">
+        {/* Top buttons for minimum/maximum savings */}
+        <div className="flex justify-between mb-4">
+          <button
+            className="bg-red-400 text-white text-xs px-2 py-1 rounded-md"
+            onClick={() => {
+              cart.forEach((item) => updateMedicineSelection(item.productId._id, false));
+            }}
+          >
+            Min Savings: ₹{calculateMinimumSaving()}
+          </button>
+          
+          <button
+            className="bg-green-400 text-white text-xs px-2 py-1 rounded-md"
+            onClick={() => {
+              cart.forEach((item) => updateMedicineSelection(item.productId._id, true));
+            }}
+          >
+            Max Saving: ₹{calculateMaximumSaving()}
+          </button>
+        </div>
+        
+        {/* Cart items */}
+        {cart.map((item, index) => (
+          <MobileCartItem key={item.id} item={item} index={index} />
+        ))}
+        
+        {/* Total row */}
+        <div className="bg-gray-50 rounded-lg shadow-md p-3 flex justify-between items-center">
+          <span className="font-semibold text-sm">Total Amount:</span>
+          <span className="text-green-800 font-bold">₹ {calculateTotal()}</span>
+        </div>
       </div>
     );
   };
@@ -329,11 +382,7 @@ const CartPage = () => {
         ) : (
           <>
             {/* Mobile View */}
-            <div className="block lg:hidden">
-              {cart.map((item, index) => (
-                <MobileCartItem key={item.id} item={item} index={index} />
-              ))}
-            </div>
+            <MobileCart cart={cart} />
 
             {/* Desktop View */}
             <div className="hidden lg:block">
