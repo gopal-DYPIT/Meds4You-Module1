@@ -242,17 +242,19 @@ function Navbar() {
         >
           Home
         </Link>
-        <Link
-          to="/cart"
-          className="px-2 py-3 text-gray-700 hover:bg-gray-100 transition-colors duration-200 md:hidden"
-          onClick={() => setIsMenuOpen(false)}
-        >
-          <div className="flex items-center space-x-2">
-            <div className="w-6 h-6 bg-white rounded-full flex justify-center items-center shadow-md">
-              <img className="w-4 h-4" src={cartImage} alt="Cart" />
+        {isAuthenticated && (
+          <Link
+            to="/cart"
+            className="px-2 py-3 text-gray-700 hover:bg-gray-100 transition-colors duration-200 md:hidden"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            <div className="flex items-center space-x-2">
+              <div className="w-6 h-6 bg-white rounded-full flex justify-center items-center shadow-md">
+                <img className="w-4 h-4" src={cartImage} alt="Cart" />
+              </div>
             </div>
-          </div>
-        </Link>
+          </Link>
+        )}
 
         {/* Improved Hamburger Menu Button */}
         <button
