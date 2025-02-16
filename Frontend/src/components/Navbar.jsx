@@ -93,7 +93,7 @@ function Navbar() {
           <img
             src={companyicon}
             alt="Icon"
-            className="w-18 h-8 sm:w-32 sm:h-12"
+            className="w-12 h-6 sm:w-32 sm:h-12"
           />
         </Link>
 
@@ -124,55 +124,18 @@ function Navbar() {
             )}
           </form>
 
-          {/* {searchResults.length > 0 && (
-            <div className="absolute top-full left-0 mt-2 w-[90%] bg-white border border-gray-300 rounded-md shadow-lg overflow-y-auto z-50 transition-all ease-in-out duration-300 max-h-[35vh]">
-              {searchResults.map((result) => (
-                <div
-                  key={result._id}
-                  className="px-4 py-3 hover:bg-gray-100 cursor-pointer transition-colors border-b border-gray-100 last:border-0"
-                  onClick={() => {
-                    dispatch(setSearchResults([]));
-                    dispatch(setSearchQuery(""));
-                    navigate(`/medicine/${result._id}`);
-                  }}
-                >
-                  <div className="flex flex-col">
-                    <span className="text-sm font-semibold text-gray-900">
-                      {result.drugName}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {result.category}
-                    </span>
-                    {result.alternateMedicines?.length > 0 && (
-                      <div className="mt-1 text-xs text-gray-600">
-                        <strong>Alternates:</strong>{" "}
-                        {result.alternateMedicines.map((alt, index) => (
-                          <span key={index} className="text-gray-800">
-                            {alt.name}
-                            {index !== result.alternateMedicines.length - 1
-                              ? ", "
-                              : ""}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )} */}
           {showSearchResults && (
-            <div className="absolute sm:absolute top-[calc(100%+0.5rem)] left-[100px] sm:left-[450px] -translate-x-1/2 sm:right-auto mx-2 sm:mx-0 w-full sm:max-w-full max-w-xl bg-white border border-gray-200 rounded-xl shadow-2xl z-50 transition-all ease-in-out duration-300 max-h-[30vh] sm:max-h-[35vh] overflow-hidden">
+            <div className="absolute top-full left-0 w-full sm:left-1/2 sm:-translate-x-1/2 sm:w-auto sm:min-w-[500px] lg:min-w-[800px] z-50 mx-auto mt-1 bg-white border border-gray-200 rounded-xl shadow-2xl transition-all ease-in-out duration-300 max-h-[50vh] sm:max-h-[35vh] overflow-hidden">
               {/* Header - Stick to the top */}
-              <div className="sticky top-0 bg-gray-50 px-4 py-2 border-b border-gray-100 z-10">
-                <p className="text-xs text-gray-500 font-medium">
+              <div className="sticky top-0 bg-gray-50 px-2 sm:px-4 py-1 sm:py-2 border-b border-gray-100 z-10">
+                <p className="text-[10px] sm:text-xs text-gray-500 font-medium">
                   {searchResults.length}{" "}
                   {searchResults.length === 1 ? "result" : "results"} found
                 </p>
               </div>
 
               {/* Scrollable Search Results */}
-              <div className="overflow-y-auto max-h-[40vh] sm:max-h-[30vh] scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 rounded-lg shadow-md">
+              <div className="overflow-y-auto max-h-[40vh] sm:max-h-[30vh] scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                 {searchResults.map((result) => (
                   <div
                     key={result._id}
@@ -183,47 +146,54 @@ function Navbar() {
                       navigate(`/medicine/${result._id}`);
                     }}
                   >
-                    <div className="px-5 py-4 border-b border-gray-200 last:border-0 flex items-center gap-4 cursor-pointer">
+                    <div className="px-2 sm:px-5 py-2 sm:py-4 border-b border-gray-200 last:border-0 flex items-center gap-1 sm:gap-4 cursor-pointer">
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-semibold text-gray-900 truncate">
+                        <h4 className="text-xs sm:text-sm font-semibold text-gray-900 truncate">
                           {result.drugName}
                         </h4>
 
                         {/* Category Tag */}
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] sm:text-xs font-medium bg-blue-100 text-blue-800">
                           {result.category}
                         </span>
 
                         {/* Alternate Medicines */}
                         {result.alternateMedicines?.length > 0 && (
-                          <div className="mt-2 flex flex-wrap gap-1">
-                            <span className="text-xs text-gray-500 font-medium">
+                          <div className="mt-1 sm:mt-2 flex flex-wrap gap-1">
+                            <span className="text-[10px] sm:text-xs text-gray-500 font-medium">
                               Alternates:
                             </span>
                             <div className="flex flex-wrap gap-1">
-                              {result.alternateMedicines.map((alt, index) => (
-                                <span
-                                  key={index}
-                                  className="text-xs px-2 py-0.5 rounded-md bg-gray-200 text-gray-700 shadow-sm"
-                                >
-                                  {alt.name}
+                              {result.alternateMedicines
+                                .slice(0, 1)
+                                .map((alt, index) => (
+                                  <span
+                                    key={index}
+                                    className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-md bg-gray-200 text-gray-700 shadow-sm truncate max-w-[100px] sm:max-w-none"
+                                  >
+                                    {alt.name}
+                                  </span>
+                                ))}
+                              {result.alternateMedicines.length > 1 && (
+                                <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-md bg-gray-100 text-gray-600">
+                                  +{result.alternateMedicines.length - 1} more
                                 </span>
-                              ))}
+                              )}
                             </div>
                           </div>
                         )}
                       </div>
 
                       {/* External Link Icon */}
-                      <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                      <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 group-hover:text-blue-500 transition-colors flex-shrink-0" />
                     </div>
                   </div>
                 ))}
               </div>
 
               {/* Footer - Stick to the bottom */}
-              <div className="sticky bottom-0 bg-gradient-to-t from-white to-transparent py-2">
-                <div className="text-center text-xs text-gray-500">
+              <div className="sticky bottom-0 bg-gradient-to-t from-white to-transparent py-1 sm:py-2">
+                <div className="text-center text-[10px] sm:text-xs text-gray-500">
                   Click any result to view details
                 </div>
               </div>
@@ -259,7 +229,7 @@ function Navbar() {
         {/* Improved Hamburger Menu Button */}
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="sm:hidden p-2 rounded-md hover:bg-[#b3dcc7] transition-colors duration-200 focus:outline-none"
+          className="sm:hidden rounded-md hover:bg-[#b3dcc7] transition-colors duration-200 focus:outline-none"
           aria-label={isMenuOpen ? "Close menu" : "Open menu"}
         >
           {isMenuOpen ? (
