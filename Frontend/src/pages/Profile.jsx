@@ -6,6 +6,7 @@ import { loginSuccess, logout } from "../redux/slice/authSlice";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ManageReferrals from "./ManageReferrals";
 
 const Profile = () => {
   const dispatch = useDispatch();
@@ -26,7 +27,6 @@ const Profile = () => {
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [selectedSection, setSelectedSection] = useState("profileInfo");
   const [prescriptions, setPrescriptions] = useState([]);
-  const [referrerDetails, setReferrerDetails] = useState(null);
 
   useEffect(() => {
     const fetchPrescriptions = async () => {
@@ -84,26 +84,6 @@ const Profile = () => {
     verifyUser();
     fetchOrders();
   }, [token, dispatch]);
-
-  useEffect(() => {
-    if (user?.referralCode) {
-      axios
-        .get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/users//referral-details/${
-            user.referralCode
-          }`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        )
-        .then((response) => {
-          if (response.data.name && response.data.email) {
-            setReferrerDetails(response.data); // Store referral details in state
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching referral details:", error);
-        });
-    }
-  }, [user?.referralCode]);
 
   const handleAddAddress = async () => {
     if (
@@ -256,6 +236,16 @@ const Profile = () => {
           >
             My Prescriptions
           </button>
+          <button
+            onClick={() => setSelectedSection("manageReferrals")}
+            className={`w-full p-2 md:p-3 rounded-md transition ${
+              selectedSection === "manageReferrals"
+                ? "bg-gray-400"
+                : "bg-gray-300 hover:bg-gray-400"
+            }`}
+          >
+            My Referrals
+          </button>
           {/* Logout Button - Visible only on desktop */}
           <button
             onClick={handleLogout}
@@ -271,7 +261,7 @@ const Profile = () => {
         {selectedSection === "profileInfo" && (
           <div className="relative">
             {/* Referral Details - Positioned in top-right on larger screens, stacked on mobile */}
-            <div className="w-full md:w-64 p-4 border rounded-md bg-gray-100 shadow-md mb-4 md:mb-0 md:absolute md:top-0 md:right-0">
+            {/* <div className="w-full md:w-64 p-4 border rounded-md bg-gray-100 shadow-md mb-4 md:mb-0 md:absolute md:top-0 md:right-0">
               {user?.referralCode && referrerDetails ? (
                 <>
                   <h3 className="text-xl font-semibold mb-2">
@@ -289,7 +279,7 @@ const Profile = () => {
                   <strong>Referred By:</strong> N/A
                 </p>
               )}
-            </div>
+            </div> */}
 
             <h2 className="text-2xl md:text-3xl font-bold mb-4">
               User Profile
@@ -528,6 +518,10 @@ const Profile = () => {
               </ul>
             )}
           </div>
+        )}
+
+        {selectedSection === "manageReferrals" && (
+          <ManageReferrals userReferralCode={user.referralCode} />
         )}
       </div>
 

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { FaUser, FaEnvelope, FaLock, FaPhone } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify"; // Import toast
 import "react-toastify/dist/ReactToastify.css";
@@ -10,15 +10,24 @@ const SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
 function Signup() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const referralFromURL = searchParams.get("referral") || "";
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phoneNumber: "",
     password: "",
     confirmPassword: "",
-    referralCode: "",
+    referredBy: referralFromURL,
     termsAccepted: false,
   });
+
+  useEffect(() => {
+    // If there's a referral code in the URL, update state
+    if (referralFromURL) {
+      setFormData((prev) => ({ ...prev, referredBy: referralFromURL }));
+    }
+  }, [referralFromURL]);
 
   const [captchaValue, setCaptchaValue] = useState(null);
 
@@ -44,12 +53,12 @@ function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!captchaValue) {
-      toast.error("Please complete the CAPTCHA verification", {
-        position: "top-center",
-      });
-      return;
-    }
+    // if (!captchaValue) {
+    //   toast.error("Please complete the CAPTCHA verification", {
+    //     position: "top-center",
+    //   });
+    //   return;
+    // }
 
     if (!formData.termsAccepted) {
       toast.error("You must accept the Terms & Conditions", {
@@ -206,8 +215,8 @@ function Signup() {
             <FaUser className="absolute left-3 top-3 text-gray-500" />
             <input
               type="text"
-              name="referralCode"
-              value={formData.referralCode}
+              name="referredBy"
+              value={formData.referredBy}
               onChange={handleInputChange}
               placeholder="Referral Code (Optional)"
               className="w-full pl-10 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"

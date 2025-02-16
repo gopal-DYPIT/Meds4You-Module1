@@ -55,7 +55,7 @@ const CheckoutPage = () => {
     setSelectedAddress(address);
   };
 
-    const handlePlaceOrder = () => {
+  const handlePlaceOrder = () => {
     if (!selectedAddress) {
       setError("Please select an address to proceed.");
       toast.error("Please select an address.", { position: "top-center" });
@@ -99,20 +99,18 @@ const CheckoutPage = () => {
       });
   };
 
-
   // Mobile Order Summary Card Component
   const MobileOrderSummaryCard = ({ item, index }) => {
     const product = item?.productId;
     const alternate = product?.alternateMedicines?.[0];
-    const selection = item.selection || "original"; // Get selection from item
+    const selection = item.selection || "original";
     const isRecommended = selection === "recommended";
 
-    // Determine which medicine details to show based on selection
     const medicineToShow =
       isRecommended && alternate
         ? {
             name: alternate.name,
-            manufacturer: alternate.manufacturerUrl,
+            manufacturer: alternate.manufacturer,
             price: alternate.price,
             isImage: true,
           }
@@ -124,11 +122,11 @@ const CheckoutPage = () => {
           };
 
     return (
-      <div className="bg-white p-4 rounded-lg shadow-sm mb-4">
+      <div className="bg-white p-3 rounded-md shadow-sm mb-3 text-sm">
         <div className="flex justify-between items-center mb-2">
-          <span className="font-semibold">#{index + 1}</span>
+          <span className="font-medium text-gray-700">#{index + 1}</span>
           <span
-            className={`text-sm px-2 py-1 rounded ${
+            className={`px-2 py-0.5 rounded text-xs ${
               isRecommended
                 ? "bg-green-100 text-green-700"
                 : "bg-blue-100 text-blue-700"
@@ -138,41 +136,17 @@ const CheckoutPage = () => {
           </span>
         </div>
 
-        <div className="space-y-2">
-          <h3 className="font-medium">{medicineToShow.name}</h3>
+        <h3 className="font-semibold">{medicineToShow.name}</h3>
 
-          <div className="flex items-center space-x-2">
-            {medicineToShow.isImage ? (
-              <img
-                src={medicineToShow.manufacturer}
-                alt="Manufacturer"
-                className="h-8 w-12 object-contain"
-              />
-            ) : (
-              <span className="text-gray-600">
-                {medicineToShow.manufacturer}
-              </span>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div>
-              <p className="text-gray-600">Price/Unit:</p>
-              <p className="font-medium">₹{medicineToShow.price}</p>
-            </div>
-            <div>
-              <p className="text-gray-600">Quantity:</p>
-              <p className="font-medium">{item.quantity}</p>
-            </div>
-          </div>
-
-          <div className="border-t pt-2 mt-2">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Subtotal:</span>
-              <span className="font-semibold">
-                ₹{(medicineToShow.price * item.quantity).toFixed(2)}
-              </span>
-            </div>
+        <div className="flex items-center justify-between mt-2">
+          <span className="text-gray-500">{medicineToShow.manufacturer}</span>
+          <div className="text-right">
+            <p className="text-gray-600">
+              ₹{medicineToShow.price} x {item.quantity}
+            </p>
+            <p className="font-semibold text-lg">
+              ₹{(medicineToShow.price * item.quantity).toFixed(2)}
+            </p>
           </div>
         </div>
       </div>
@@ -204,7 +178,7 @@ const CheckoutPage = () => {
               isRecommended && alternate
                 ? {
                     name: alternate.name,
-                    manufacturer: alternate.manufacturerUrl,
+                    manufacturer: alternate.manufacturer,
                     price: alternate.price,
                     isImage: true,
                   }
@@ -219,17 +193,7 @@ const CheckoutPage = () => {
               <tr key={index} className="border-b">
                 <td className="py-4 px-4">{index + 1}</td>
                 <td className="py-4 px-4">{medicineToShow.name}</td>
-                <td className="py-4 px-4">
-                  {medicineToShow.isImage ? (
-                    <img
-                      src={medicineToShow.manufacturer}
-                      alt="Manufacturer"
-                      className="h-12 w-16 object-contain"
-                    />
-                  ) : (
-                    medicineToShow.manufacturer
-                  )}
-                </td>
+                <td className="py-4 px-4">{medicineToShow.manufacturer}</td>
                 <td className="py-4 px-4">
                   <span
                     className={`px-2 py-1 rounded text-sm ${
@@ -271,7 +235,7 @@ const CheckoutPage = () => {
   }
 
   return (
-    <div className="w-full min-h-screen bg-gray-50 py-10 px-4 pt-28">
+    <div className="w-full min-h-screen bg-gray-50 py-10 px-6 sm:px-12 pt-28">
       <div className="max-w-8xl mx-auto">
         <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 mb-6 sm:mb-8">
           Checkout
@@ -288,43 +252,60 @@ const CheckoutPage = () => {
           <h2 className="text-lg sm:text-xl font-bold mb-4">
             Select Shipping Address
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {addresses.map((address) => (
-              <div
-                key={address._id}
-                className={`border rounded-lg p-3 sm:p-4 cursor-pointer transition-all ${
-                  selectedAddress?._id === address._id
-                    ? "border-green-500 bg-green-50"
-                    : "border-gray-200 hover:border-green-400"
-                }`}
-                onClick={() => handleAddressSelect(address)}
-              >
-                <div className="flex items-start sm:items-center">
-                  <input
-                    type="radio"
-                    name="address"
-                    checked={selectedAddress?._id === address._id}
-                    onChange={() => handleAddressSelect(address)}
-                    className="w-4 h-4 mt-1 sm:mt-0 text-green-600"
-                  />
-                  <div className="ml-3 sm:ml-4">
-                    <h3 className="font-semibold">{address.street}</h3>
-                    <p className="text-sm sm:text-base text-gray-600">
-                      {address.city}, {address.state}
-                    </p>
-                    <p className="text-sm sm:text-base text-gray-600">
-                      {address.country}, {address.zipCode}
-                    </p>
-                    {address.isPrimary && (
-                      <span className="text-xs sm:text-sm text-green-600 font-medium">
-                        Default Address
-                      </span>
-                    )}
+
+          {addresses.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {addresses.map((address) => (
+                <div
+                  key={address._id}
+                  className={`border rounded-lg p-3 sm:p-4 cursor-pointer transition-all ${
+                    selectedAddress?._id === address._id
+                      ? "border-green-500 bg-green-50"
+                      : "border-gray-200 hover:border-green-400"
+                  }`}
+                  onClick={() => handleAddressSelect(address)}
+                >
+                  <div className="flex items-start sm:items-center">
+                    <input
+                      type="radio"
+                      name="address"
+                      checked={selectedAddress?._id === address._id}
+                      onChange={() => handleAddressSelect(address)}
+                      className="w-4 h-4 mt-1 sm:mt-0 text-green-600"
+                    />
+                    <div className="ml-3 sm:ml-4">
+                      <h3 className="font-semibold">{address.street}</h3>
+                      <p className="text-sm sm:text-base text-gray-600">
+                        {address.city}, {address.state}
+                      </p>
+                      <p className="text-sm sm:text-base text-gray-600">
+                        {address.country}, {address.zipCode}
+                      </p>
+                      {address.isPrimary && (
+                        <span className="text-xs sm:text-sm text-green-600 font-medium">
+                          Default Address
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            // Warning message when no addresses are available
+            <div className="text-center p-4 bg-red-50 border border-red-300 rounded-lg">
+              <p className="text-red-600 font-semibold">
+                No shipping address found. Please add an address from your
+                profile.
+              </p>
+              <button
+                onClick={() => (window.location.href = "/profile")} // Change URL as needed
+                className="mt-3 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+              >
+                Go to Profile
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Order Summary Section */}
