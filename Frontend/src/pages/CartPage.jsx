@@ -159,26 +159,43 @@ const CartPage = () => {
   const selectionSaving = () => {
     let totalMrp = 0;
     let totalPrice = 0;
+    let allRecommendedSelected = true; // Flag to check if all recommended are selected
 
     cart.forEach((item) => {
-      const product = item.productId;
+      const product = item?.productId;
+      const alternate = product?.alternateMedicines?.[0]; // First alternative
       const isRecommendedSelected =
         selectedMedicines[product._id] === "recommended";
+      const quantity = item.quantity || 1;
 
-      if (isRecommendedSelected && product.alternateMedicines?.[0]) {
-        // If the right-side (recommended) is selected
-        totalMrp += product.alternateMedicines[0].mrp * item.quantity;
-        totalPrice += product.alternateMedicines[0].price * item.quantity;
+      let mrp = 0;
+      let price = 0;
+
+      if (isRecommendedSelected && alternate) {
+        // If recommended is selected, use alternate medicine prices
+        mrp = parseFloat(alternate.mrp) || 0;
+        price = parseFloat(alternate.price) || 0;
       } else {
-        // If the left-side (original) is selected
-        totalMrp += product.mrp * item.quantity;
-        // console.log("totalMpr",totalMrp)
-        totalPrice += product.price * item.quantity;
-        // console.log("totalPrice",totalPrice)
+        // If original medicine is selected, use its prices
+        mrp = parseFloat(product?.mrp) || 0;
+        price = parseFloat(product?.price) || 0;
+        allRecommendedSelected = false; // If even one original medicine is selected, set flag to false
       }
+
+      totalMrp += mrp * quantity;
+      totalPrice += price * quantity;
     });
 
-    return (totalMrp - totalPrice).toFixed(2);
+    let calculatedSaving = (totalMrp - totalPrice).toFixed(2);
+
+    if (allRecommendedSelected) {
+      // If all recommended medicines are selected, return the max saving
+      calculatedSaving = calculateMaximumSaving();
+    }
+
+    console.log("Selection Saving:", calculatedSaving);
+
+    return parseFloat(calculatedSaving);
   };
 
   const calculateMissingOutSaving = () => {
@@ -248,102 +265,103 @@ const CartPage = () => {
 
     return (
       <div className="bg-white rounded-lg shadow-md mb-3 overflow-hidden">
-        {/* Item number and selection tabs */}
-        <div className="flex bg-gray-50 items-center text-xs">
-          <div className="px-2 py-1 text-gray-700">Sr.{index + 1}</div>
-          <div
-            className={`flex-1 py-2 text-center ${
-              isOriginalSelected ? "bg-blue-100 font-medium" : ""
-            }`}
-            onClick={() => handleSelectionChange(product._id, false)}
-          >
-            Selected Medicine
-          </div>
-          <div
-            className={`flex-1 py-2 text-center ${
-              isRecommendedSelected ? "bg-green-100 font-medium" : ""
-            }`}
-            onClick={() => handleSelectionChange(product._id, true)}
-          >
-            Recommended Alternative
-          </div>
+  {/* Top row with item number and tabs */}
+  <div className="flex bg-gray-50 border-b border-gray-200">
+    {/* Sr. No. and delete button column */}
+    <div className="flex flex-col items-center justify-center py-1 px-2 border-r border-gray-200">
+      <div className="text-xs text-gray-700">Sr.{index + 1}</div>
+      <button
+        onClick={() => handleDelete(product._id)}
+        className="text-red-500 flex items-center justify-center mt-1 hover:text-red-700"
+        aria-label="Remove item"
+      >
+        <Trash2 className="w-3 h-3" />
+      </button>
+    </div>
+    
+    {/* Selection tabs */}
+    <div 
+      className={`flex-1 py-2 text-center text-xs ${isOriginalSelected ? "bg-blue-100 font-medium" : ""}`}
+      onClick={() => handleSelectionChange(product._id, false)}
+    >
+      Selected Medicine
+    </div>
+    <div 
+      className={`flex-1 py-2 text-center text-xs ${isRecommendedSelected ? "bg-green-100 font-medium" : ""}`}
+      onClick={() => handleSelectionChange(product._id, true)}
+    >
+      Recommended Medicine
+    </div>
+  </div>
+
+  {/* Medicine details */}
+  <div className="p-3">
+    {isOriginalSelected ? (
+      <div>
+        <div className="text-sm font-medium">{product?.drugName}</div>
+        <div className="text-xs mt-1 text-gray-700">
+          (<span className="font-semibold">Mfr:</span>{" "}
+          {product?.manufacturer},
+          <span className="font-semibold"> MRP:</span>{" "}
+          <span className="line-through">₹{product?.mrp}</span>,
+          <span className="font-semibold text-green-600"> Price:</span> ₹
+          {product?.price})
         </div>
 
-        {/* Medicine details */}
-        <div className="p-3">
-          {isOriginalSelected ? (
-            <div>
-              <div className="text-sm font-medium">{product?.drugName}</div>
-              <div className="text-xs mt-1 text-gray-700">
-                (<span className="font-semibold">Mfr:</span>{" "}
-                {product?.manufacturer},
-                <span className="font-semibold"> MRP:</span>{" "}
-                <span className="line-through">₹{product?.mrp}</span>,
-                <span className="font-semibold text-green-600"> Price:</span> ₹
-                {product?.price})
-              </div>
+        {/* Quantity controls */}
+        <div className="flex items-center justify-between mt-2">
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() =>
+                handleQuantityChange(product._id, item.quantity - 1)
+              }
+              className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center hover:bg-red-500 hover:text-white"
+            >
+              −
+            </button>
+            <span className="text-sm font-medium">
+              {item?.quantity || 0}
+            </span>
+            <button
+              onClick={() =>
+                handleQuantityChange(product._id, item.quantity + 1)
+              }
+              className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center hover:bg-green-500 hover:text-white"
+            >
+              +
+            </button>
+          </div>
 
-              {/* Quantity controls */}
-              <div className="flex items-center justify-between mt-2">
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() =>
-                      handleQuantityChange(product._id, item.quantity - 1)
-                    }
-                    className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center hover:bg-red-500 hover:text-white"
-                  >
-                    −
-                  </button>
-                  <span className="text-sm font-medium">
-                    {item?.quantity || 0}
-                  </span>
-                  <button
-                    onClick={() =>
-                      handleQuantityChange(product._id, item.quantity + 1)
-                    }
-                    className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center hover:bg-green-500 hover:text-white"
-                  >
-                    +
-                  </button>
-                </div>
-
-                <div className="text-sm font-semibold">
-                  Total: ₹{(product?.price * item.quantity).toFixed(2)}
-                </div>
-              </div>
-
-              <button
-                onClick={() => handleDelete(product._id)}
-                className="text-red-500 text-xs font-semibold mt-2 hover:text-red-700"
-              >
-                Remove
-              </button>
-            </div>
-          ) : alternate ? (
-            <div>
-              <div className="text-sm font-medium">{alternate.name}</div>
-              <div className="text-xs mt-1 text-gray-700">
-                (<span className="font-semibold">Mfr:</span> manufacturer,
-                <span className="font-semibold"> MRP:</span>{" "}
-                <span className="line-through">₹{alternate.mrp}</span>,
-                <span className="font-semibold text-green-600"> Price:</span> ₹
-                {alternate.price})
-              </div>
-
-              <div className="flex justify-between mt-2">
-                <div className="text-sm">Qty: {item.quantity}</div>
-                <div className="text-sm font-semibold">
-                  Total: ₹{(alternate.price * item.quantity).toFixed(2)}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center text-sm text-gray-500 py-2">
-              No alternative available
-            </div>
-          )}
+          <div className="text-sm font-semibold">
+            Total: ₹{(product?.price * item.quantity).toFixed(2)}
+          </div>
         </div>
       </div>
+    ) : alternate ? (
+      <div>
+        <div className="text-sm font-medium">{alternate.name}</div>
+        <div className="text-xs mt-1 text-gray-700">
+          (<span className="font-semibold">Mfr:</span> manufacturer,
+          <span className="font-semibold"> MRP:</span>{" "}
+          <span className="line-through">₹{alternate.mrp}</span>,
+          <span className="font-semibold text-green-600"> Price:</span> ₹
+          {alternate.price})
+        </div>
+
+        <div className="flex justify-between mt-2">
+          <div className="text-sm">Qty: {item.quantity}</div>
+          <div className="text-sm font-semibold">
+            Total: ₹{(alternate.price * item.quantity).toFixed(2)}
+          </div>
+        </div>
+      </div>
+    ) : (
+      <div className="text-center text-sm text-gray-500 py-2">
+        No alternative available
+      </div>
+    )}
+  </div>
+</div>
     );
   };
 
@@ -372,7 +390,7 @@ const CartPage = () => {
               );
             }}
           >
-            Max Savings: ₹{calculateMaximumSaving()}
+            Click for Max Savings: ₹{calculateMaximumSaving()}
           </button>
         </div>
 
@@ -448,7 +466,8 @@ const CartPage = () => {
                             );
                           }}
                         >
-                          Maximum Saving: ₹{calculateMaximumSaving()}
+                          Click to get Maximum Saving: ₹
+                          {calculateMaximumSaving()}
                         </button>
                       </th>
                     </tr>

@@ -93,7 +93,7 @@ function Navbar() {
           <img
             src={companyicon}
             alt="Icon"
-            className="w-20 h-10 sm:w-32 sm:h-12"
+            className="w-18 h-8 sm:w-32 sm:h-12"
           />
         </Link>
 
@@ -238,9 +238,20 @@ function Navbar() {
         </div>
         <Link
           to="/"
-          className="text-black text-sm sm:text-base hover:text-blue-600 px-2 sm:px-4 py-1 sm:py-2"
+          className="text-black text-sm sm:text-base hover:text-blue-600 sm:px-4 py-1 sm:py-2"
         >
           Home
+        </Link>
+        <Link
+          to="/cart"
+          className="px-2 py-3 text-gray-700 hover:bg-gray-100 transition-colors duration-200 md:hidden"
+          onClick={() => setIsMenuOpen(false)}
+        >
+          <div className="flex items-center space-x-2">
+            <div className="w-6 h-6 bg-white rounded-full flex justify-center items-center shadow-md">
+              <img className="w-4 h-4" src={cartImage} alt="Cart" />
+            </div>
+          </div>
         </Link>
 
         {/* Improved Hamburger Menu Button */}
@@ -294,18 +305,7 @@ function Navbar() {
                 >
                   Profile
                 </Link>
-                <Link
-                  to="/cart"
-                  className="px-6 py-3 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <div className="flex items-center space-x-2">
-                    {/* <div className="w-6 h-6 bg-white rounded-full flex justify-center items-center shadow-md">
-                      <img className="w-4 h-4" src={cartImage} alt="Cart" />
-                    </div> */}
-                    <span>Cart</span>
-                  </div>
-                </Link>
+
                 <div className="flex pl-4 pt-4">
                   <button
                     className="w-32 sm:w-auto px-8 py-2 text-white bg-red-500 hover:bg-red-600 rounded-md shadow-md transition duration-200"
