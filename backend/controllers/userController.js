@@ -1,8 +1,8 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import Partner from "../models/partner.js";
-import Referrer from "../models/referrerSchema.js";
 import jwt from "jsonwebtoken";
+import { v4 as uuidv4 } from "uuid";
 
 // const register = async (req, res) => {
 //   try {
@@ -38,17 +38,27 @@ import jwt from "jsonwebtoken";
 // };
 const register = async (req, res) => {
   try {
-    const { phoneNumber, password, email, name, referralCode } = req.body;
+    const { phoneNumber, password, email, name, referredBy } = req.body;
 
     if (!phoneNumber || !password || !email || !name) {
-      return res.status(400).json({ message: "Please fill all required fields!" });
+      return res
+        .status(400)
+        .json({ message: "Please fill all required fields!" });
     }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser)
+      return res.status(400).json({ message: "Email already registered" });
+
+    const referralCode = uuidv4().slice(0, 8).toUpperCase();
 
     let referrer = null;
 
-    if (referralCode) {
+    if (referredBy) {
       // Check if the referral code exists in either Partner or Referrer collection
-      referrer = await Partner.findOne({ referralCode }) || await Referrer.findOne({ referralCode });
+      referrer =
+        (await Partner.findOne({ referralCode: referredBy })) ||
+        (await User.findOne({ referralCode: referredBy }));
 
       if (!referrer) {
         return res.status(400).json({ message: "Invalid referral code!" });
@@ -63,15 +73,14 @@ const register = async (req, res) => {
       email,
       name,
       role: "user",
-      referralCode: referralCode || null, // Store referral code in user data
+      referralCode,
+      referredBy,
     });
 
     await newUser.save();
 
     res.status(201).json({
-      message: `User registered successfully with phone number ${phoneNumber}`,
-    });
-
+      message: "User registered successfully", referralCode });
   } catch (err) {
     res.status(500).json({ message: "Internal Server Error" });
     console.error(err);
@@ -102,7 +111,7 @@ const login = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user._id, role: user.role},
+      { id: user._id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
@@ -118,5 +127,16 @@ const login = async (req, res) => {
       .json({ message: "Internal Server Error!", message: err.message });
   }
 };
+const getReferredUsers = async (req, res) => {
+  try {
+      const { referralCode } = req.params;
+      const referredUsers = await User.find({ referredBy: referralCode });
 
-export { register, login };
+      res.status(200).json({ referredUsers });
+  } catch (error) {
+      res.status(500).json({ message: "Error fetching referrals", error: error.message });
+  }
+};
+
+
+export { register, login, getReferredUsers };
