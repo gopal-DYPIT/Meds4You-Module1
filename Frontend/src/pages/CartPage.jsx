@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
@@ -103,8 +104,7 @@ const CartPage = () => {
         [productId]: isRecommended ? "recommended" : "original",
       };
     });
-};
-
+  };
 
   const calculateTotal = () => {
     return cart
@@ -140,7 +140,7 @@ const CartPage = () => {
   };
 
   const calculateMaximumSaving = () => {
-    let totalMRP = 0;
+    let totalLeftPrice = 0;
     let totalRecommendedPrice = 0;
 
     cart.forEach((item) => {
@@ -148,12 +148,59 @@ const CartPage = () => {
       const alternate = product?.alternateMedicines?.[0]; // First alternative
 
       if (product) {
-        totalMRP += (alternate.mrp || 0) * (item.quantity || 1);
+        totalLeftPrice += (product.price || 0) * (item.quantity || 1);
         totalRecommendedPrice += (alternate.price || 0) * (item.quantity || 1);
       }
     });
 
-    return (totalMRP - totalRecommendedPrice).toFixed(2);
+    return (totalLeftPrice - totalRecommendedPrice).toFixed(2);
+  };
+
+  const selectionSaving = () => {
+    let totalMrp = 0;
+    let totalPrice = 0;
+
+    cart.forEach((item) => {
+      const product = item.productId;
+      const isRecommendedSelected =
+        selectedMedicines[product._id] === "recommended";
+
+      if (isRecommendedSelected && product.alternateMedicines?.[0]) {
+        // If the right-side (recommended) is selected
+        totalMrp += product.alternateMedicines[0].mrp * item.quantity;
+        totalPrice += product.alternateMedicines[0].price * item.quantity;
+      } else {
+        // If the left-side (original) is selected
+        totalMrp += product.mrp * item.quantity;
+        // console.log("totalMpr",totalMrp)
+        totalPrice += product.price * item.quantity;
+        // console.log("totalPrice",totalPrice)
+      }
+    });
+
+    return (totalMrp - totalPrice).toFixed(2);
+  };
+
+  const calculateMissingOutSaving = () => {
+    let missingSaving = 0;
+
+    cart.forEach((item) => {
+      const product = item?.productId;
+      const alternate = product?.alternateMedicines?.[0]; // First alternative
+      const isRecommendedSelected =
+        selectedMedicines[product._id] === "recommended";
+
+      if (!isRecommendedSelected && alternate) {
+        // If the original medicine is selected, calculate the potential savings
+        const leftPrice = parseFloat(product.price) || 0;
+        const recommendedPrice = parseFloat(alternate.price) || 0;
+        const quantity = item.quantity || 1;
+
+        missingSaving += (leftPrice - recommendedPrice) * quantity;
+      }
+    });
+
+    return missingSaving.toFixed(2);
   };
 
   const handleCheckout = () => {
@@ -195,126 +242,103 @@ const CartPage = () => {
   const MobileCartItem = ({ item, index }) => {
     const product = item?.productId;
     const alternate = product?.alternateMedicines?.[0];
-    const selection = selectedMedicines[product._id] || "original"; // Default to "original"
+    const selection = selectedMedicines[product._id] || "original";
     const isOriginalSelected = selection === "original";
     const isRecommendedSelected = selection === "recommended";
-  
+
     return (
-      <div className="bg-white rounded-lg shadow-md mb-4 overflow-hidden">
-        {/* Header row with Selected/Recommended headers */}
-        <div className="flex bg-gray-50">
-          <div className="w-1/2 py-2 px-3 text-left border-r border-gray-200">
-            <span className="font-medium text-sm">Selected Medicine</span>
+      <div className="bg-white rounded-lg shadow-md mb-3 overflow-hidden">
+        {/* Item number and selection tabs */}
+        <div className="flex bg-gray-50 items-center text-xs">
+          <div className="px-2 py-1 text-gray-700">Sr.{index + 1}</div>
+          <div
+            className={`flex-1 py-2 text-center ${
+              isOriginalSelected ? "bg-blue-100 font-medium" : ""
+            }`}
+            onClick={() => handleSelectionChange(product._id, false)}
+          >
+            Selected Medicine
           </div>
-          <div className="w-1/2 py-2 px-3 text-left">
-            <span className="font-medium text-sm text-gray-600">Recommended Medicine</span>
+          <div
+            className={`flex-1 py-2 text-center ${
+              isRecommendedSelected ? "bg-green-100 font-medium" : ""
+            }`}
+            onClick={() => handleSelectionChange(product._id, true)}
+          >
+            Recommended Alternative
           </div>
         </div>
-        
-        {/* Item number row */}
-        <div className="flex bg-gray-100 border-t border-gray-200">
-          <div className="w-1/6 py-2 px-2 text-left text-sm">
-            Sr.{index + 1}
-          </div>
-          <div className="w-5/6"></div>
-        </div>
-        
-        {/* Main content row */}
-        <div className="flex border-t border-gray-200">
-          {/* Selected Medicine Side */}
-          <div className={`w-1/2 p-2 border-r border-gray-200 ${isOriginalSelected ? "bg-blue-50" : ""}`}>
-            <div className="flex items-start mb-2">
-              <input
-                type="checkbox"
-                name={`medicine-${product._id}`}
-                onChange={() => handleSelectionChange(product._id, false)}
-                checked={isOriginalSelected}
-                defaultChecked={true}
-                className="mt-1 mr-2"
-              />
-              <div>
-                <div className="text-sm text-gray-900 font-medium">{product?.drugName}</div>
-                <span className="text-xs text-gray-600">{product?.manufacturer}</span>
+
+        {/* Medicine details */}
+        <div className="p-3">
+          {isOriginalSelected ? (
+            <div>
+              <div className="text-sm font-medium">{product?.drugName}</div>
+              <div className="text-xs mt-1 text-gray-700">
+                (<span className="font-semibold">Mfr:</span>{" "}
+                {product?.manufacturer},
+                <span className="font-semibold"> MRP:</span>{" "}
+                <span className="line-through">₹{product?.mrp}</span>,
+                <span className="font-semibold text-green-600"> Price:</span> ₹
+                {product?.price})
               </div>
-            </div>
-            
-            <div className="mb-2">
-              <div className="text-xs pb-1">
-                MRP: <span className="line-through">₹{product?.mrp}</span>
+
+              {/* Quantity controls */}
+              <div className="flex items-center justify-between mt-2">
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() =>
+                      handleQuantityChange(product._id, item.quantity - 1)
+                    }
+                    className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center hover:bg-red-500 hover:text-white"
+                  >
+                    −
+                  </button>
+                  <span className="text-sm font-medium">
+                    {item?.quantity || 0}
+                  </span>
+                  <button
+                    onClick={() =>
+                      handleQuantityChange(product._id, item.quantity + 1)
+                    }
+                    className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center hover:bg-green-500 hover:text-white"
+                  >
+                    +
+                  </button>
+                </div>
+
+                <div className="text-sm font-semibold">
+                  Total: ₹{(product?.price * item.quantity).toFixed(2)}
+                </div>
               </div>
-              <div className="text-green-600 text-xs">
-                Price: <span className="text-sm font-bold">₹{product?.price}</span>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-2 mb-2">
+
               <button
-                onClick={() => handleQuantityChange(product._id, item.quantity - 1)}
-                className="flex items-center justify-center w-5 h-5 bg-gray-200 text-gray-700 rounded-full hover:bg-red-500 hover:text-white transition-all"
+                onClick={() => handleDelete(product._id)}
+                className="text-red-500 text-xs font-semibold mt-2 hover:text-red-700"
               >
-                <span className="text-xs">−</span>
-              </button>
-              
-              <span className="text-xs">
-                <span className="text-gray-900 font-semibold">{item?.quantity || 0}</span>
-              </span>
-              
-              <button
-                onClick={() => handleQuantityChange(product._id, item.quantity + 1)}
-                className="flex items-center justify-center w-5 h-5 bg-gray-200 text-gray-700 rounded-full hover:bg-green-500 hover:text-white transition-all"
-              >
-                <span className="text-xs">+</span>
+                Remove
               </button>
             </div>
-            
-            <div className="text-xs mb-2">
-              Total: ₹{(product?.price * item.quantity).toFixed(2)}
-            </div>
-            
-            <button
-              onClick={() => handleDelete(product._id)}
-              className="text-red-500 text-xs font-semibold hover:text-red-700 transition-colors"
-            >
-              Remove
-            </button>
-          </div>
-          
-          {/* Alternative Medicine Side */}
-          {alternate ? (
-            <div className={`w-1/2 p-2 ${isRecommendedSelected ? "bg-green-50" : ""}`}>
-              <div className="flex items-start mb-2">
-                <input
-                  type="checkbox"
-                  name={`medicine-${product._id}`}
-                  onChange={() => handleSelectionChange(product._id, true)}
-                  checked={isRecommendedSelected}
-                  className="mt-1 mr-2"
-                />
-                <div>
-                  <div className="text-sm font-medium text-gray-900">{alternate.name}</div>
-                  <span className="text-xs text-gray-600">manufacturer</span>
-                </div>
+          ) : alternate ? (
+            <div>
+              <div className="text-sm font-medium">{alternate.name}</div>
+              <div className="text-xs mt-1 text-gray-700">
+                (<span className="font-semibold">Mfr:</span> manufacturer,
+                <span className="font-semibold"> MRP:</span>{" "}
+                <span className="line-through">₹{alternate.mrp}</span>,
+                <span className="font-semibold text-green-600"> Price:</span> ₹
+                {alternate.price})
               </div>
-              
-              <div className="mb-2">
-                <div className="text-xs pb-1">
-                  MRP: <span className="line-through">₹{alternate.mrp}</span>
+
+              <div className="flex justify-between mt-2">
+                <div className="text-sm">Qty: {item.quantity}</div>
+                <div className="text-sm font-semibold">
+                  Total: ₹{(alternate.price * item.quantity).toFixed(2)}
                 </div>
-                <div className="text-green-600 text-xs">
-                  Price: <span className="text-sm font-bold">₹{alternate.price}</span>
-                </div>
-              </div>
-              
-              <div className="text-xs mb-2">
-                Quantity: {item.quantity}
-              </div>
-              
-              <div className="text-xs">
-                Total: ₹{(alternate.price * item.quantity).toFixed(2)}
               </div>
             </div>
           ) : (
-            <div className="w-1/2 p-2 text-center text-xs text-gray-500 flex items-center justify-center">
+            <div className="text-center text-sm text-gray-500 py-2">
               No alternative available
             </div>
           )}
@@ -322,41 +346,45 @@ const CartPage = () => {
       </div>
     );
   };
-  
+
   // Main mobile cart component
   const MobileCart = ({ cart }) => {
     return (
       <div className="block lg:hidden">
-        {/* Top buttons for minimum/maximum savings */}
-        <div className="flex justify-between mb-4">
+        {/* Savings buttons */}
+        <div className="flex justify-between mb-3">
           <button
-            className="bg-red-400 text-white text-xs px-2 py-1 rounded-md"
+            className="bg-red-400 text-white text-xs px-3 py-2 rounded-md flex-1 mr-2"
             onClick={() => {
-              cart.forEach((item) => updateMedicineSelection(item.productId._id, false));
+              cart.forEach((item) =>
+                updateMedicineSelection(item.productId._id, false)
+              );
             }}
           >
             Min Savings: ₹{calculateMinimumSaving()}
           </button>
-          
+
           <button
-            className="bg-green-400 text-white text-xs px-2 py-1 rounded-md"
+            className="bg-green-500 text-white text-xs px-3 py-2 rounded-md flex-1 ml-2"
             onClick={() => {
-              cart.forEach((item) => updateMedicineSelection(item.productId._id, true));
+              cart.forEach((item) =>
+                updateMedicineSelection(item.productId._id, true)
+              );
             }}
           >
-            Max Saving: ₹{calculateMaximumSaving()}
+            Max Savings: ₹{calculateMaximumSaving()}
           </button>
         </div>
-        
+
         {/* Cart items */}
         {cart.map((item, index) => (
           <MobileCartItem key={item.id} item={item} index={index} />
         ))}
-        
+
         {/* Total row */}
-        <div className="bg-gray-50 rounded-lg shadow-md p-3 flex justify-between items-center">
-          <span className="font-semibold text-sm">Total Amount:</span>
-          <span className="text-green-800 font-bold">₹ {calculateTotal()}</span>
+        <div className="bg-gray-50 rounded-lg shadow-md p-3 flex justify-between items-center mt-3">
+          <span className="font-semibold">Total Amount:</span>
+          <span className="text-green-800 font-bold">₹{calculateTotal()}</span>
         </div>
       </div>
     );
@@ -392,7 +420,7 @@ const CartPage = () => {
                     <tr className="bg-gray-50">
                       <th className="py-2 px-3 text-left">No.</th>
                       <th
-                        colSpan="5"
+                        colSpan="4"
                         className="py-2 px-3 text-left border-r border-gray-200 font-medium text-[16px]"
                       >
                         Selected Medicine
@@ -429,10 +457,10 @@ const CartPage = () => {
                       <th className="py-3 px-10 text-left">Name</th>
                       <th className="py-3 text-left">Price/Unit</th>
                       <th className="py-3 px-6 text-left">Quantity</th>
-                      <th className="py-3 px-5 text-left">Total (Rs.)</th>
-                      <th className="py-3 px-4 text-left border-r border-gray-200">
+                      <th className="py-3 px-6 text-left">Total (Rs.)</th>
+                      {/* <th className="py-3 px-4 text-left border-r border-gray-200">
                         Action
-                      </th>
+                      </th> */}
                       <th className="py-3 px-8 text-left">Name</th>
                       <th className="py-3 px-1 text-left">Price/Unit</th>
                       <th className="py-3 px-5 text-left">Quantity</th>
@@ -545,22 +573,16 @@ const CartPage = () => {
                             </div>
                           </td>
                           <td
-                            className={`py-2 px-3 text-[16px] ${
+                            className={`py-2 px-5 w-32 border-r border-gray-200  text-[16px] ${
                               isOriginalSelected ? "bg-blue-50" : ""
                             }`}
                           >
                             {(product?.price * item.quantity).toFixed(2)}
-                          </td>
-                          <td
-                            className={`py-2 px-4 border-r border-gray-200 text-[16px] ${
-                              isOriginalSelected ? "bg-blue-50" : ""
-                            }`}
-                          >
                             <button
                               onClick={() => handleDelete(product._id)}
-                              className="text-red-500 font-semibold hover:text-red-700 transition-colors"
+                              className="text-red-500 hover:text-red-700 transition-colors p-2"
                             >
-                              Remove
+                              <Trash2 className="w-5 h-5" />
                             </button>
                           </td>
 
@@ -651,7 +673,7 @@ const CartPage = () => {
                     })}
                     {/* Total Row */}
                     <tr className="bg-gray-50 font-semibold">
-                      <td colSpan="9" className="py-4 px-6 text-right">
+                      <td colSpan="8" className="py-4 px-6 text-right">
                         Total Amount:
                       </td>
                       <td className="py-2 px-2 text-lg text-green-800">
@@ -665,18 +687,35 @@ const CartPage = () => {
 
             {/* Checkout Button */}
 
-            <div className="mt-8 flex justify-center">
+            <div className="mt-8 flex flex-col items-center sm:flex-row sm:justify-center gap-4 bg-white p-6 rounded-lg shadow-md">
+              <div className="text-sm sm:text-base text-gray-600 font-semibold flex-1 text-center sm:text-left">
+                <span className="text-red-500">*</span> Missing out saving:
+                <span className="text-gray-800 font-bold">
+                  {" "}
+                  ₹{calculateMissingOutSaving()}
+                </span>
+              </div>
+
               <button
                 onClick={handleCheckout}
                 disabled={cart.length === 0}
-                className={`${
+                className={`px-8 py-3 rounded-lg font-semibold text-white transition-all duration-300 shadow-md ${
                   cart.length === 0
-                    ? "bg-gray-400"
-                    : "bg-green-600 hover:bg-green-700"
-                } text-white px-8 py-3 rounded-lg transition-colors`}
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-green-600 hover:bg-green-700 active:scale-95"
+                }`}
               >
-                Proceed to Checkout: ₹ {calculateTotal()}
+                Proceed to Checkout: ₹{calculateTotal()}
               </button>
+
+              <div className="text-sm sm:text-base text-gray-600 font-semibold flex-1 text-center sm:text-right">
+                <span className="text-green-500">*</span> Savings based on
+                current selection:
+                <span className="text-gray-800 font-bold">
+                  {" "}
+                  ₹{selectionSaving()}
+                </span>
+              </div>
             </div>
           </>
         )}
