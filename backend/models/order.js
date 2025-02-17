@@ -24,6 +24,7 @@ const orderSchema = new Schema(
         },
       },
     ],
+    prescriptionUrl: { type: String, required: true },
     totalAmount: { type: Number, required: true },
     paymentStatus: {
       type: String,

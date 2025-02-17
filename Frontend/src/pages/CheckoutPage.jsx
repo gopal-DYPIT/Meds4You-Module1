@@ -4,9 +4,11 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
+import UploadPrescriptionAtUpload from "../components/uploadPrescriptionAtOrder";
 
 const CheckoutPage = () => {
   const [addresses, setAddresses] = useState([]);
+  const [prescriptionUrl, setPrescriptionUrl] = useState(null);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -18,6 +20,10 @@ const CheckoutPage = () => {
   const selectedProducts = location.state?.selectedProducts || [];
   // console.log(selectedProducts);
   const totalAmount = location.state?.total || "0.00";
+
+  const handleUploadSuccess = (url) => {
+    setPrescriptionUrl(url);
+  };
 
   useEffect(() => {
     if (token) {
@@ -56,6 +62,11 @@ const CheckoutPage = () => {
   };
 
   const handlePlaceOrder = () => {
+    if (!prescriptionUrl) {
+      toast.error("Please upload a prescription before adding to cart.");
+      return;
+    }
+
     if (!selectedAddress) {
       setError("Please select an address to proceed.");
       toast.error("Please select an address.", { position: "top-center" });
@@ -74,7 +85,8 @@ const CheckoutPage = () => {
         {
           address: selectedAddress,
           products: selectedProducts, // ✅ Ensure this contains valid products
-          totalAmount: totalAmount, // ✅ Ensure correct total amount
+          totalAmount: totalAmount,
+          prescriptionUrl: prescriptionUrl, // ✅ Ensure correct total amount
         },
         {
           headers: {
@@ -99,35 +111,43 @@ const CheckoutPage = () => {
       });
   };
 
+  
+  
+
   // Mobile Order Summary Card Component
   const MobileOrderSummaryCard = ({ item, index }) => {
     const product = item?.productId;
     const alternate = product?.alternateMedicines?.[0];
     const selection = item.selection || "original";
     const isRecommended = selection === "recommended";
-  
-    const medicineToShow = isRecommended && alternate
-      ? {
-          name: alternate.name,
-          manufacturer: alternate.manufacturer,
-          price: alternate.price,
-          isImage: true,
-        }
-      : {
-          name: product?.drugName,
-          manufacturer: product?.manufacturer,
-          price: product?.price,
-          isImage: false,
-        };
-  
+
+    const medicineToShow =
+      isRecommended && alternate
+        ? {
+            name: alternate.name,
+            manufacturer: alternate.manufacturer,
+            price: alternate.price,
+            isImage: true,
+          }
+        : {
+            name: product?.drugName,
+            manufacturer: product?.manufacturer,
+            price: product?.price,
+            isImage: false,
+          };
+
     return (
       <div className="bg-white px-3 py-2 rounded-md shadow-sm mb-2 text-xs">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-gray-500">#{index + 1}</span>
-            <span className={`px-1.5 py-0.5 rounded ${
-              isRecommended ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"
-            }`}>
+            <span
+              className={`px-1.5 py-0.5 rounded ${
+                isRecommended
+                  ? "bg-green-100 text-green-700"
+                  : "bg-blue-100 text-blue-700"
+              }`}
+            >
               {isRecommended ? "R" : "S"}
             </span>
           </div>
@@ -135,7 +155,7 @@ const CheckoutPage = () => {
             ₹{(medicineToShow.price * item.quantity).toFixed(2)}
           </div>
         </div>
-        
+
         <div className="flex items-center justify-between mt-1">
           <div className="truncate flex-1">
             <span className="font-medium">{medicineToShow.name}</span>
@@ -324,20 +344,22 @@ const CheckoutPage = () => {
           <DesktopOrderTable />
         </div>
 
+        <UploadPrescriptionAtUpload onUploadSuccess={handleUploadSuccess} token={token}/>
+
         {/* Place Order Button */}
         <div className="flex justify-center px-4 sm:px-0">
           <button
             onClick={handlePlaceOrder}
-            disabled={!selectedAddress}
+            disabled={!selectedAddress || !prescriptionUrl}
             className={`
-              w-full sm:w-auto px-6 sm:px-8 py-3 rounded-lg text-white text-base sm:text-lg font-semibold
-              transition-all duration-300
-              ${
-                selectedAddress
-                  ? "bg-green-600 hover:bg-green-700"
-                  : "bg-gray-400 cursor-not-allowed"
-              }
-            `}
+      w-full sm:w-auto px-6 sm:px-8 py-3 rounded-lg text-white text-base sm:text-lg font-semibold
+      transition-all duration-300
+      ${
+        selectedAddress && prescriptionUrl
+          ? "bg-green-600 hover:bg-green-700"
+          : "bg-gray-400 cursor-not-allowed"
+      }
+    `}
           >
             Place Order: ₹ {totalAmount}
           </button>

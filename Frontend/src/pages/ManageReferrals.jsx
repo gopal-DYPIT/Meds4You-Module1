@@ -81,7 +81,9 @@ const ManageReferrals = ({ userReferralCode }) => {
       <div className="mt-3 p-2">
         <h1 className="font-semibold text-sm">My Referral Customer List</h1>
         {loading ? (
-          <p className="text-gray-500 text-center text-sm">Loading referrals...</p>
+          <p className="text-gray-500 text-center text-sm">
+            Loading referrals...
+          </p>
         ) : referrals.length > 0 ? (
           <>
             {/* Desktop Table View */}
@@ -102,6 +104,9 @@ const ManageReferrals = ({ userReferralCode }) => {
                       Phone Number
                     </th>
                     <th className="py-2 px-3 text-left font-medium text-gray-700">
+                      Date
+                    </th>
+                    <th className="py-2 px-3 text-left font-medium text-gray-700">
                       Last Transaction Date
                     </th>
                   </tr>
@@ -109,13 +114,34 @@ const ManageReferrals = ({ userReferralCode }) => {
                 <tbody>
                   {referrals.map((user, index) => (
                     <tr key={index} className="border-b border-gray-200">
+                      {console.log(user)}
                       <td className="py-2 px-3 text-gray-600">{index + 1}</td>
                       <td className="py-2 px-3 text-gray-600">{user.name}</td>
                       <td className="py-2 px-3 text-gray-600">{user.email}</td>
-                      <td className="py-2 px-3 text-gray-600">{user.phoneNumber}</td>
+                      <td className="py-2 px-3 text-gray-600">
+                        {user.phoneNumber}
+                      </td>
+                      <td className="py-2 px-3 text-gray-600">
+                        {user.updatedAt
+                          ? new Date(user.updatedAt).toLocaleDateString(
+                              "en-GB",
+                              {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "2-digit",
+                              }
+                            )
+                          : "N/A"}
+                      </td>
                       <td className="py-2 px-3 text-gray-600">
                         {user.lastTransactionDate
-                          ? new Date(user.lastTransactionDate).toLocaleDateString()
+                          ? new Date(
+                              user.lastTransactionDate
+                            ).toLocaleDateString("en-GB", {
+                              day: "2-digit",
+                              month: "2-digit",
+                              year: "2-digit",
+                            })
                           : "N/A"}
                       </td>
                     </tr>
@@ -138,7 +164,9 @@ const ManageReferrals = ({ userReferralCode }) => {
                   <div className="flex justify-between items-baseline">
                     <div className="truncate flex-1">
                       <div className="text-xs text-gray-500">Name:</div>
-                      <div className="text-sm font-medium truncate">{user.name}</div>
+                      <div className="text-sm font-medium truncate">
+                        {user.name}
+                      </div>
                     </div>
                     <div className="text-right ml-2">
                       <div className="text-xs text-gray-500">Email:</div>
@@ -148,9 +176,21 @@ const ManageReferrals = ({ userReferralCode }) => {
 
                   <div className="flex justify-between items-baseline mt-2">
                     <div className="text-xs text-gray-500">Phone:</div>
-                    <div className="text-sm font-semibold">{user.phoneNumber}</div>
+                    <div className="text-sm font-semibold">
+                      {user.phoneNumber}
+                    </div>
                   </div>
 
+                  <div className="text-xs text-gray-500 mt-1">
+                    Date:{" "}
+                    {user.updatedAt
+                      ? new Date(user.updatedAt).toLocaleDateString("en-GB", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "2-digit",
+                        })
+                      : "N/A"}
+                  </div>
                   <div className="text-xs text-gray-500 mt-1">
                     Last Transaction:{" "}
                     {user.lastTransactionDate
@@ -162,7 +202,9 @@ const ManageReferrals = ({ userReferralCode }) => {
             </div>
           </>
         ) : (
-          <p className="text-gray-500 text-center text-sm">No referrals found.</p>
+          <p className="text-gray-500 text-center text-sm">
+            No referrals found.
+          </p>
         )}
       </div>
     </div>

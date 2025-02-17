@@ -1,5 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
+import upload from "../middlewares/uploadMiddleware.js";
 import Order from "../models/order.js";
 import Cart from "../models/cart.js";
 import { authorizeRoles } from "../middlewares/authMiddleware.js";
@@ -118,9 +119,10 @@ router.get(
 );
 
 router.post("/create", authorizeRoles("user"), async (req, res) => {
-  const { address, products} = req.body;
+  const { address, products, prescriptionUrl } = req.body;
 
   if (!address) return res.status(400).json({ error: "Address is required" });
+  if(!prescriptionUrl) return res.status(400).json({ error: "Prescription is required" });
 
   try {
     const userId = req.user.id;
@@ -151,12 +153,16 @@ router.post("/create", authorizeRoles("user"), async (req, res) => {
     });
 
     // ✅ Calculate total amount based on selected medicines
-    const totalAmount = orderItems.reduce((total, item) => total + item.price * item.quantity, 0);
+    const totalAmount = orderItems.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0
+    );
 
     // ✅ Create order
     const order = await Order.create({
       userId,
       items: orderItems,
+      prescriptionUrl,
       totalAmount,
       paymentStatus: "pending",
       orderStatus: "pending",
@@ -165,10 +171,11 @@ router.post("/create", authorizeRoles("user"), async (req, res) => {
     res.status(200).json({ orderId: order._id, totalAmount });
   } catch (error) {
     console.error("Error creating order:", error);
-    res.status(500).json({ error: "Failed to create order", details: error.message });
+    res
+      .status(500)
+      .json({ error: "Failed to create order", details: error.message });
   }
 });
-
 
 router.post(
   "/payment-success",
@@ -224,7 +231,6 @@ router.get("/latest", authorizeRoles("user"), async (req, res) => {
     res.status(500).json({ error: "Failed to fetch latest order" });
   }
 });
-
 
 router.put(
   "/orders/:orderId/status",
@@ -292,8 +298,7 @@ router.get("/order-history", authorizeRoles("user"), async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const orders = await Order.find({ userId })
-      .sort({ createdAt: -1 });
+    const orders = await Order.find({ userId }).sort({ createdAt: -1 });
 
     // ✅ Return stored product details from order instead of populating productId
     const formattedOrders = orders.map((order) => ({
@@ -317,5 +322,30 @@ router.get("/order-history", authorizeRoles("user"), async (req, res) => {
   }
 });
 
+router.post(
+  "/upload-prescription/",
+  authorizeRoles("user"), // Ensure that only logged-in users can upload
+  upload.single("prescription"), // Handle file upload with multer
+  async (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded." });
+    }
+
+    try {
+      // Construct the file URL
+      const domain = process.env.DOMAIN || "meds4you.in"; // Fallback domain
+      const fileUrl = `https://${domain}/uploads/${req.file.filename}`;
+
+      // Respond with the file URL
+      res.status(200).json({
+        success: true,
+        fileUrl: fileUrl, // Send back the URL for the uploaded prescription file
+      });
+    } catch (error) {
+      console.error("❌ Error uploading prescription:", error);
+      res.status(500).json({ error: "Error uploading prescription." });
+    }
+  }
+);
 
 export default router;

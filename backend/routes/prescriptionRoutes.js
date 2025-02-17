@@ -8,7 +8,7 @@ dotenv.config();
 const router = express.Router(); 
 
 router.post(
-  "/upload",
+  "/upload", 
   authorizeRoles("user"),
   upload.single("prescription"),
   async (req, res) => {

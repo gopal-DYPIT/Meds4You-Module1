@@ -189,7 +189,7 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-36 flex flex-col md:flex-row mt-24 md:mt-0">
       {/* Sidebar */}
-      <div className="w-full md:w-1/4 bg-[#f3ddef] p-3 md:p-6 rounded-lg mb-4 md:mb-0 md:mr-4">
+      <div className="w-full md:w-1/4 bg-pink-100 p-3 md:p-6 rounded-lg mb-4 md:mb-0 md:mr-4">
         {/* Header - Compact on mobile */}
         <div className="text-lg md:text-2xl font-roboto font-semibold mb-2 md:mb-6">
           Hello! {user ? user.name : "Not Logged In"}
@@ -260,8 +260,8 @@ const Profile = () => {
             onClick={() => setSelectedSection("profileInfo")}
             className={`w-full p-3 rounded-md transition ${
               selectedSection === "profileInfo"
-                ? "bg-[#64c3ef] text-white"
-                : "bg-[#e5eff5] hover:bg-[#a0d8f5]"
+                ? "bg-[#3ab6ef] text-white"
+                : "bg-[#fefdfd] hover:bg-[#a0d8f5]"
             }`}
           >
             User Profile
@@ -270,8 +270,8 @@ const Profile = () => {
             onClick={() => setSelectedSection("manageAddress")}
             className={`w-full p-3 rounded-md transition ${
               selectedSection === "manageAddress"
-                ? "bg-[#64c3ef] text-white"
-                : "bg-[#e5eff5] hover:bg-[#a0d8f5]"
+                ? "bg-[#3ab6ef] text-white"
+                : "bg-[#fefdfd] hover:bg-[#a0d8f5]"
             }`}
           >
             Manage Address
@@ -280,8 +280,8 @@ const Profile = () => {
             onClick={() => setSelectedSection("orderHistory")}
             className={`w-full p-3 rounded-md transition ${
               selectedSection === "orderHistory"
-                ? "bg-[#64c3ef] text-white"
-                : "bg-[#e5eff5] hover:bg-[#a0d8f5]"
+                ? "bg-[#3ab6ef] text-white"
+                : "bg-[#fefdfd] hover:bg-[#a0d8f5]"
             }`}
           >
             Order History
@@ -290,8 +290,8 @@ const Profile = () => {
             onClick={() => setSelectedSection("managePrescriptions")}
             className={`w-full p-3 rounded-md transition ${
               selectedSection === "managePrescriptions"
-                ? "bg-[#64c3ef] text-white"
-                : "bg-[#e5eff5] hover:bg-[#a0d8f5]"
+                ? "bg-[#3ab6ef] text-white"
+                : "bg-[#fefdfd] hover:bg-[#a0d8f5]"
             }`}
           >
             My Prescriptions
@@ -300,15 +300,15 @@ const Profile = () => {
             onClick={() => setSelectedSection("manageReferrals")}
             className={`w-full p-3 rounded-md transition ${
               selectedSection === "manageReferrals"
-                ? "bg-[#64c3ef] text-white"
-                : "bg-[#e5eff5] hover:bg-[#a0d8f5]"
+                ? "bg-[#3ab6ef] text-white"
+                : "bg-[#fefdfd] hover:bg-[#a0d8f5]"
             }`}
           >
             My Referrals
           </button>
           <button
             onClick={handleLogout}
-            className="text-lg font-semibold w-32 p-2 transition text-red-500 hover:text-red-600"
+            className="text-lg font-semibold w-32 p-2 transition bg-red-600 text-white rounded-md hover:bg-red-700"
           >
             Logout
           </button>
