@@ -122,7 +122,8 @@ router.post("/create", authorizeRoles("user"), async (req, res) => {
   const { address, products, prescriptionUrl } = req.body;
 
   if (!address) return res.status(400).json({ error: "Address is required" });
-  if(!prescriptionUrl) return res.status(400).json({ error: "Prescription is required" });
+  if (!prescriptionUrl)
+    return res.status(400).json({ error: "Prescription is required" });
 
   try {
     const userId = req.user.id;
@@ -168,6 +169,11 @@ router.post("/create", authorizeRoles("user"), async (req, res) => {
       orderStatus: "pending",
     });
 
+    const cart = await Cart.findOneAndUpdate(
+      { userId },
+      { $set: { items: [] } }, // Empty the items array
+      { new: true }
+    );
     res.status(200).json({ orderId: order._id, totalAmount });
   } catch (error) {
     console.error("Error creating order:", error);

@@ -19,6 +19,20 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpg|jpeg|png|gif|heic/i; // Add 'heic' to the allowed types
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+
+    if (extname && mimetype) {
+      return cb(null, true); // Accept the file
+    } else {
+      cb(new Error('File type not allowed')); // Reject the file
+    }
+  }
+});
+
 
 export default upload;

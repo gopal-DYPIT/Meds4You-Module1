@@ -100,6 +100,8 @@ const CheckoutPage = () => {
           autoClose: 2000,
         });
 
+
+        window.history.pushState(null, "", window.location.href);
         setTimeout(() => {
           navigate("/order-summary"); // ✅ Redirect user to their profile/orders page
         }, 3000);
@@ -111,8 +113,17 @@ const CheckoutPage = () => {
       });
   };
 
-  
-  
+  useEffect(() => {
+    // Disable back navigation after order placement by intercepting the back button
+    window.onpopstate = () => {
+      window.history.go(1); // This prevents going back to the previous page
+    };
+
+    // Cleanup when component is unmounted or the user navigates away
+    return () => {
+      window.onpopstate = null;
+    };
+  }, []);
 
   // Mobile Order Summary Card Component
   const MobileOrderSummaryCard = ({ item, index }) => {
@@ -344,7 +355,10 @@ const CheckoutPage = () => {
           <DesktopOrderTable />
         </div>
 
-        <UploadPrescriptionAtUpload onUploadSuccess={handleUploadSuccess} token={token}/>
+        <UploadPrescriptionAtUpload
+          onUploadSuccess={handleUploadSuccess}
+          token={token}
+        />
 
         {/* Place Order Button */}
         <div className="flex justify-center px-4 sm:px-0">
