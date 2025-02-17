@@ -30,9 +30,15 @@ const CheckoutStepper = () => {
             <StepLabel
               sx={{
                 "& .MuiStepIcon-root": {
-                  color: index <= activeStep ? "#d84c89" : "gray",
+                  color: index < activeStep ? "#d84c89" : (index === activeStep ? "#d84c89" : "gray"),
                   transition: "color 0.3s ease, transform 0.3s ease", 
                   fontSize: "1.5rem", // Mobile icon size
+                  "&.Mui-active": {
+                    color: "#d84c89", // Ensure active step is in pink
+                  },
+                  "&.Mui-completed": {
+                    color: "#d84c89", // Ensure completed steps are in pink
+                  }
                 },
                 "& .MuiStepLabel-label": {
                   fontWeight: 600,
