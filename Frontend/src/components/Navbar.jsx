@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import cartImage from "../assets/cart.png";
 import companyicon from "../assets/CompanyLogo.png";
 import { ExternalLink } from "lucide-react";
+import { Home, ShoppingCart } from "lucide-react";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -93,11 +94,11 @@ function Navbar() {
           <img
             src={companyicon}
             alt="Icon"
-            className="w-12 h-6 sm:w-32 sm:h-12"
+            className="w-24 ml-[-10px] sm:mr-2 h-8 sm:w-32 sm:h-12"
           />
         </Link>
 
-        <div className="flex-grow mx-4 relative">
+        <div className="flex-grow mr-2 relative">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -110,7 +111,7 @@ function Navbar() {
               placeholder="Search your Medicines"
               value={searchQuery}
               onChange={(e) => dispatch(setSearchQuery(e.target.value))}
-              className="w-full px-8 py-2 rounded-full border border-gray-300 focus:outline-none focus:border-blue-500 transition-all duration-300 ease-in-out placeholder:text-sm sm:placeholder:p-4 sm:placeholder:text-base"
+              className="w-full px-8 py-1 sm:py-2 rounded-full border border-gray-300 focus:outline-none focus:border-blue-500 transition-all duration-300 ease-in-out placeholder:text-xs sm:placeholder:p-4 sm:placeholder:text-base"
             />
 
             {searchQuery && (
@@ -206,42 +207,55 @@ function Navbar() {
             </div>
           )}
         </div>
-        <Link
-          to="/"
-          className="text-black text-sm sm:text-base hover:text-blue-600 sm:px-4 py-1 sm:py-2"
-        >
-          Home
-        </Link>
-        {isAuthenticated && (
-          <Link
-            to="/cart"
-            className="px-2 py-3 text-gray-700 hover:bg-gray-100 transition-colors duration-200 md:hidden"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 bg-white rounded-full flex justify-center items-center shadow-md">
-                <img className="w-4 h-4" src={cartImage} alt="Cart" />
-              </div>
+        <div className="flex items-center space-x-1 ">
+          {/* Home Icon */}
+          <div className="flex items-center space-x-2">
+            {/* Home Icon - Visible only on Small Screens (Mobile) */}
+            <div className="sm:hidden">
+              <Link to="/" className="text-[#d9337b] hover:text-blue-600">
+                <Home className="w-6 h-6" />
+              </Link>
             </div>
-          </Link>
-        )}
+
+            {/* Home Text - Visible only on Medium Screens and Above */}
+            <div className="hidden sm:block">
+              <Link
+                to="/"
+                className="text-black text-base hover:text-blue-600 p-2 mr-3"
+              >
+                Home
+              </Link>
+            </div>
+          </div>
+
+          {/* Cart Icon (Only if authenticated) */}
+          {isAuthenticated && (
+            <Link
+              to="/cart"
+              className="text-[#d9337b] sm:hidden mb-[-2px] hover:text-blue-600 transition-colors duration-200 p-1 rounded-md"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <ShoppingCart className="w-6 h-6" />
+            </Link>
+          )}
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="sm:hidden rounded-md text-[#d9337b]  hover:text-blue-600 transition-colors duration-200 focus:outline-none"
+            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+          >
+            {isMenuOpen ? (
+              <HiX className="w-6 h-6" />
+            ) : (
+              <HiMenu className="w-6 h-6" />
+            )}
+          </button>
+        </div>
 
         {/* Improved Hamburger Menu Button */}
-        <button
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="sm:hidden rounded-md hover:bg-[#b3dcc7] transition-colors duration-200 focus:outline-none"
-          aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-        >
-          {isMenuOpen ? (
-            <HiX className="w-6 h-6" />
-          ) : (
-            <HiMenu className="w-6 h-6" />
-          )}
-        </button>
 
         {/* Improved Mobile Menu with Animation */}
         <div
-          className={`mobile-menu-container sm:hidden fixed top-[4rem] right-0 w-64 h-screen bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
+          className={`mobile-menu-container sm:hidden fixed top-[4rem] right-0 w-48 h-screen bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
             isMenuOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >

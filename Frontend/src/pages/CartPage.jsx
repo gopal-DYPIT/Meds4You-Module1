@@ -265,103 +265,109 @@ const CartPage = () => {
 
     return (
       <div className="bg-white rounded-lg shadow-md mb-3 overflow-hidden">
-  {/* Top row with item number and tabs */}
-  <div className="flex bg-gray-50 border-b border-gray-200">
-    {/* Sr. No. and delete button column */}
-    <div className="flex flex-col items-center justify-center py-1 px-2 border-r border-gray-200">
-      <div className="text-xs text-gray-700">Sr.{index + 1}</div>
-      <button
-        onClick={() => handleDelete(product._id)}
-        className="text-red-500 flex items-center justify-center mt-1 hover:text-red-700"
-        aria-label="Remove item"
-      >
-        <Trash2 className="w-3 h-3" />
-      </button>
-    </div>
-    
-    {/* Selection tabs */}
-    <div 
-      className={`flex-1 py-2 text-center text-xs ${isOriginalSelected ? "bg-blue-100 font-medium" : ""}`}
-      onClick={() => handleSelectionChange(product._id, false)}
-    >
-      Selected Medicine
-    </div>
-    <div 
-      className={`flex-1 py-2 text-center text-xs ${isRecommendedSelected ? "bg-green-100 font-medium" : ""}`}
-      onClick={() => handleSelectionChange(product._id, true)}
-    >
-      Recommended Medicine
-    </div>
-  </div>
-
-  {/* Medicine details */}
-  <div className="p-3">
-    {isOriginalSelected ? (
-      <div>
-        <div className="text-sm font-medium">{product?.drugName}</div>
-        <div className="text-xs mt-1 text-gray-700">
-          (<span className="font-semibold">Mfr:</span>{" "}
-          {product?.manufacturer},
-          <span className="font-semibold"> MRP:</span>{" "}
-          <span className="line-through">₹{product?.mrp}</span>,
-          <span className="font-semibold text-green-600"> Price:</span> ₹
-          {product?.price})
-        </div>
-
-        {/* Quantity controls */}
-        <div className="flex items-center justify-between mt-2">
-          <div className="flex items-center space-x-2">
+        {/* Top row with item number and tabs */}
+        <div className="flex bg-gray-50 border-b border-gray-200">
+          {/* Sr. No. and delete button column */}
+          <div className="flex flex-col items-center justify-center py-1 px-2 border-r border-gray-200">
+            <div className="text-xs text-gray-700">Sr.{index + 1}</div>
             <button
-              onClick={() =>
-                handleQuantityChange(product._id, item.quantity - 1)
-              }
-              className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center hover:bg-red-500 hover:text-white"
+              onClick={() => handleDelete(product._id)}
+              className="text-red-500 flex items-center justify-center mt-1 hover:text-red-700"
+              aria-label="Remove item"
             >
-              −
-            </button>
-            <span className="text-sm font-medium">
-              {item?.quantity || 0}
-            </span>
-            <button
-              onClick={() =>
-                handleQuantityChange(product._id, item.quantity + 1)
-              }
-              className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center hover:bg-green-500 hover:text-white"
-            >
-              +
+              <Trash2 className="w-3 h-3" />
             </button>
           </div>
 
-          <div className="text-sm font-semibold">
-            Total: ₹{(product?.price * item.quantity).toFixed(2)}
+          {/* Swapped Selection tabs */}
+          <div
+            className={`flex-1 py-2 text-center text-xs ${
+              isRecommendedSelected ? "bg-green-100 font-medium" : ""
+            }`}
+            onClick={() => handleSelectionChange(product._id, true)}
+          >
+            Recommended Medicine
           </div>
-        </div>
-      </div>
-    ) : alternate ? (
-      <div>
-        <div className="text-sm font-medium">{alternate.name}</div>
-        <div className="text-xs mt-1 text-gray-700">
-          (<span className="font-semibold">Mfr:</span> manufacturer,
-          <span className="font-semibold"> MRP:</span>{" "}
-          <span className="line-through">₹{alternate.mrp}</span>,
-          <span className="font-semibold text-green-600"> Price:</span> ₹
-          {alternate.price})
+          <div
+            className={`flex-1 py-2 text-center text-xs ${
+              isOriginalSelected ? "bg-blue-100 font-medium" : ""
+            }`}
+            onClick={() => handleSelectionChange(product._id, false)}
+          >
+            Selected Medicine
+          </div>
         </div>
 
-        <div className="flex justify-between mt-2">
-          <div className="text-sm">Qty: {item.quantity}</div>
-          <div className="text-sm font-semibold">
-            Total: ₹{(alternate.price * item.quantity).toFixed(2)}
-          </div>
+        {/* Medicine details */}
+        <div className="p-3">
+          {isRecommendedSelected ? (
+            alternate ? (
+              <div>
+                <div className="text-sm font-medium">{alternate.name}</div>
+                <div className="text-xs mt-1 text-gray-700">
+                  (<span className="font-semibold">Mfr:</span> manufacturer,
+                  <span className="font-semibold"> MRP:</span>{" "}
+                  <span className="line-through">₹{alternate.mrp}</span>,
+                  <span className="font-semibold text-green-600"> Price:</span>{" "}
+                  ₹{alternate.price})
+                </div>
+
+                <div className="flex justify-between mt-2">
+                  <div className="text-sm">Qty: {item.quantity}</div>
+                  <div className="text-sm font-semibold">
+                    Total: ₹{(alternate.price * item.quantity).toFixed(2)}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center text-sm text-gray-500 py-2">
+                No alternative available
+              </div>
+            )
+          ) : (
+            <div>
+              <div className="text-sm font-medium">{product?.drugName}</div>
+              <div className="text-xs mt-1 text-gray-700">
+                (<span className="font-semibold">Mfr:</span>{" "}
+                {product?.manufacturer},
+                <span className="font-semibold"> MRP:</span>{" "}
+                <span className="line-through">₹{product?.mrp}</span>,
+                <span className="font-semibold text-green-600"> Price:</span> ₹
+                {product?.price})
+              </div>
+
+              {/* Quantity controls */}
+              <div className="flex items-center justify-between mt-2">
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() =>
+                      handleQuantityChange(product._id, item.quantity - 1)
+                    }
+                    className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center hover:bg-red-500 hover:text-white"
+                  >
+                    −
+                  </button>
+                  <span className="text-sm font-medium">
+                    {item?.quantity || 0}
+                  </span>
+                  <button
+                    onClick={() =>
+                      handleQuantityChange(product._id, item.quantity + 1)
+                    }
+                    className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center hover:bg-green-500 hover:text-white"
+                  >
+                    +
+                  </button>
+                </div>
+
+                <div className="text-sm font-semibold">
+                  Total: ₹{(product?.price * item.quantity).toFixed(2)}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
-    ) : (
-      <div className="text-center text-sm text-gray-500 py-2">
-        No alternative available
-      </div>
-    )}
-  </div>
-</div>
     );
   };
 
@@ -369,21 +375,10 @@ const CartPage = () => {
   const MobileCart = ({ cart }) => {
     return (
       <div className="block lg:hidden">
-        {/* Savings buttons */}
+        {/* Savings buttons - swapped order */}
         <div className="flex justify-between mb-3">
           <button
-            className="bg-red-400 text-white text-xs px-3 py-2 rounded-md flex-1 mr-2"
-            onClick={() => {
-              cart.forEach((item) =>
-                updateMedicineSelection(item.productId._id, false)
-              );
-            }}
-          >
-            Min Savings: ₹{calculateMinimumSaving()}
-          </button>
-
-          <button
-            className="bg-green-500 text-white text-xs px-3 py-2 rounded-md flex-1 ml-2"
+            className="bg-green-500 text-white text-xs px-3 py-2 rounded-md flex-1 mr-2"
             onClick={() => {
               cart.forEach((item) =>
                 updateMedicineSelection(item.productId._id, true)
@@ -391,6 +386,17 @@ const CartPage = () => {
             }}
           >
             Click for Max Savings: ₹{calculateMaximumSaving()}
+          </button>
+
+          <button
+            className="bg-red-400 text-white text-xs px-3 py-2 rounded-md flex-1 ml-2"
+            onClick={() => {
+              cart.forEach((item) =>
+                updateMedicineSelection(item.productId._id, false)
+              );
+            }}
+          >
+            Min Savings: ₹{calculateMinimumSaving()}
           </button>
         </div>
 
@@ -439,22 +445,6 @@ const CartPage = () => {
                       <th className="py-2 px-3 text-left">No.</th>
                       <th
                         colSpan="4"
-                        className="py-2 px-3 text-left border-r border-gray-200 font-medium text-[16px]"
-                      >
-                        Selected Medicine
-                        <button
-                          className="m-4 bg-red-400 text-white px-3 py-1 rounded-md"
-                          onClick={() => {
-                            cart.forEach((item) =>
-                              updateMedicineSelection(item.productId._id, false)
-                            );
-                          }}
-                        >
-                          Minimum Savings: ₹{calculateMinimumSaving()}
-                        </button>
-                      </th>
-                      <th
-                        colSpan="4"
                         className="py-2 px-6 text-left font-medium text-[16px] text-gray-600"
                       >
                         Recommended Medicine
@@ -470,20 +460,35 @@ const CartPage = () => {
                           {calculateMaximumSaving()}
                         </button>
                       </th>
+                      <th
+                        colSpan="4"
+                        className="py-2 px-3 text-left border-l border-gray-200 font-medium text-[16px]"
+                      >
+                        Selected Medicine
+                        <button
+                          className="m-4 bg-red-400 text-white px-3 py-1 rounded-md"
+                          onClick={() => {
+                            cart.forEach((item) =>
+                              updateMedicineSelection(item.productId._id, false)
+                            );
+                          }}
+                        >
+                          Minimum Savings: ₹{calculateMinimumSaving()}
+                        </button>
+                      </th>
                     </tr>
                     <tr className="bg-gray-100">
                       <th className="py-3 px-3 text-left">Sr.no.</th>
-                      <th className="py-3 px-10 text-left">Name</th>
-                      <th className="py-3 text-left">Price/Unit</th>
-                      <th className="py-3 px-6 text-left">Quantity</th>
-                      <th className="py-3 px-6 text-left">Total (Rs.)</th>
-                      {/* <th className="py-3 px-4 text-left border-r border-gray-200">
-                        Action
-                      </th> */}
-                      <th className="py-3 px-8 text-left">Name</th>
+                      <th className="py-3 px-4 text-left">Name</th>
                       <th className="py-3 px-1 text-left">Price/Unit</th>
                       <th className="py-3 px-5 text-left">Quantity</th>
-                      <th className="py-3 px-5 text-left">Total (Rs.)</th>
+                      <th className="py-3 px-5 text-left border-r border-gray-200">
+                        Total (Rs.)
+                      </th>
+                      <th className="py-3 px-8 text-left">Name</th>
+                      <th className="py-3 px-10 text-left">Price/Unit</th>
+                      <th className="py-3 px-10 text-left">Quantity</th>
+                      <th className="py-3 px-6 text-left">Total (Rs.)</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -491,15 +496,94 @@ const CartPage = () => {
                       const product = item?.productId;
                       const alternate = product?.alternateMedicines?.[0];
                       const selection =
-                        selectedMedicines[product._id] || "original"; // Default to "original"
+                        selectedMedicines[product._id] || "original";
                       const isOriginalSelected = selection === "original";
                       const isRecommendedSelected = selection === "recommended";
 
                       return (
                         <tr key={item.id} className="border-t border-gray-200">
-                          <td className="py-2 px-4 text-[16px]">{index + 1}</td>
+                          <td className="py-2 px-4 text-[18px]">
+                            {index + 1}
+                            <button
+                              onClick={() => handleDelete(product._id)}
+                              className="text-red-500 hover:text-red-700 transition-colors p-2 mt-2"
+                            >
+                              <Trash2 className="w-5 h-5" />
+                            </button>
+                          </td>
 
-                          {/* Selected Medicine Side - Always highlighted by default */}
+                          {/* Recommended Medicine Side */}
+                          {alternate ? (
+                            <>
+                              <td
+                                className={`py-2 px-4 text-[16px] ${
+                                  isRecommendedSelected ? "bg-green-50" : ""
+                                }`}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <div>
+                                    <input
+                                      type="radio"
+                                      name={`medicine-${product._id}`}
+                                      onChange={() =>
+                                        handleSelectionChange(product._id, true)
+                                      }
+                                      checked={isRecommendedSelected}
+                                    />
+                                  </div>
+                                  <div>
+                                    <div className="font-medium text-gray-900">
+                                      {alternate.name}
+                                    </div>
+                                    <span className="text-xs text-gray-600">
+                                      manufacturer
+                                    </span>
+                                  </div>
+                                </div>
+                              </td>
+                              <td
+                                className={`py-2 px-2 ${
+                                  isRecommendedSelected ? "bg-green-50" : ""
+                                }`}
+                              >
+                                <div className="text-sm pb-2">
+                                  MRP:{" "}
+                                  <span className="line-through">
+                                    ₹{alternate.mrp}
+                                  </span>
+                                </div>
+                                <div className="text-green-600">
+                                  Price:{" "}
+                                  <span className="text-xl font-bold">
+                                    ₹{alternate.price}
+                                  </span>
+                                </div>
+                              </td>
+                              <td
+                                className={`py-2 px-10 text-[16px] ${
+                                  isRecommendedSelected ? "bg-green-50" : ""
+                                }`}
+                              >
+                                {item.quantity}
+                              </td>
+                              <td
+                                className={`py-2 px-6 text-[16px] border-r border-gray-200 ${
+                                  isRecommendedSelected ? "bg-green-50" : ""
+                                }`}
+                              >
+                                {(alternate.price * item.quantity).toFixed(2)}
+                              </td>
+                            </>
+                          ) : (
+                            <td
+                              colSpan="4"
+                              className="py-2 px-3 text-center text-gray-500 border-r border-gray-200"
+                            >
+                              No alternative available
+                            </td>
+                          )}
+
+                          {/* Selected Medicine Side */}
                           <td
                             className={`py-4 px-2 ${
                               isOriginalSelected ? "bg-blue-50" : ""
@@ -527,15 +611,8 @@ const CartPage = () => {
                               </div>
                             </div>
                           </td>
-                          {/* <td
-                            className={`py-2 px-6 text-[16px] ${
-                              isOriginalSelected ? "bg-blue-50" : ""
-                            }`}
-                          >
-                            {product?.manufacturer}
-                          </td> */}
                           <td
-                            className={`py-2 w-32 ${
+                            className={`py-2 px-10 ${
                               isOriginalSelected ? "bg-blue-50" : ""
                             }`}
                           >
@@ -545,15 +622,15 @@ const CartPage = () => {
                                 ₹{product?.mrp}
                               </span>
                             </div>
-                            <div className=" text-green-600">
+                            <div className="text-green-600">
                               Price:{" "}
                               <span className="text-lg font-bold">
                                 ₹{product?.price}
-                              </span>{" "}
+                              </span>
                             </div>
                           </td>
                           <td
-                            className={`py-2 px-2 text-[16px] ${
+                            className={`py-2 px-6 text-[16px] ${
                               isOriginalSelected ? "bg-blue-50" : ""
                             }`}
                           >
@@ -570,13 +647,11 @@ const CartPage = () => {
                               >
                                 <span className="text-xs font-semibold">−</span>
                               </button>
-
                               <span className="text-xs font-medium text-gray-600">
                                 <span className="text-gray-900 font-semibold pl-0">
                                   {item?.quantity || 0}
                                 </span>
                               </span>
-
                               <button
                                 onClick={() =>
                                   handleQuantityChange(
@@ -592,101 +667,12 @@ const CartPage = () => {
                             </div>
                           </td>
                           <td
-                            className={`py-2 px-5 w-32 border-r border-gray-200  text-[16px] ${
+                            className={`py-2 px-5 w-32 text-[16px] ${
                               isOriginalSelected ? "bg-blue-50" : ""
                             }`}
                           >
                             {(product?.price * item.quantity).toFixed(2)}
-                            <button
-                              onClick={() => handleDelete(product._id)}
-                              className="text-red-500 hover:text-red-700 transition-colors p-2"
-                            >
-                              <Trash2 className="w-5 h-5" />
-                            </button>
                           </td>
-
-                          {/* Alternative Medicine Side */}
-                          {alternate ? (
-                            <>
-                              <td
-                                className={`py-2 px-6 text-[16px] ${
-                                  isRecommendedSelected ? "bg-green-50" : ""
-                                }`}
-                              >
-                                <div className="flex items-center gap-2">
-                                  <div>
-                                    <input
-                                      type="radio"
-                                      name={`medicine-${product._id}`}
-                                      onChange={() =>
-                                        handleSelectionChange(product._id, true)
-                                      }
-                                      checked={isRecommendedSelected}
-                                    />
-                                  </div>
-                                  <div>
-                                    <div className="font-medium text-gray-900">
-                                      {alternate.name}
-                                    </div>
-                                    <span className="text-xs text-gray-600">
-                                      manufacturer
-                                    </span>
-                                  </div>
-                                </div>
-                              </td>
-                              {/* <td
-                                className={`py-2 px-10 text-[16px] ${
-                                  isRecommendedSelected ? "bg-green-50" : ""
-                                }`}
-                              >
-                                <img
-                                  src={alternate.manufacturerUrl}
-                                  alt="Manufacturer"
-                                  className="h-12 w-12 object-contain"
-                                />
-                              </td> */}
-
-                              <td
-                                className={`py-2 w-32 ${
-                                  isRecommendedSelected ? "bg-green-50" : ""
-                                }`}
-                              >
-                                <div className="text-sm pb-2">
-                                  MRP:{" "}
-                                  <span className="line-through">
-                                    ₹{alternate.mrp}
-                                  </span>
-                                </div>
-                                <div className=" text-green-600">
-                                  Price:{" "}
-                                  <span className="text-xl font-bold">
-                                    ₹{alternate.price}
-                                  </span>{" "}
-                                </div>
-                              </td>
-                              <td
-                                className={`py-2 px-10 text-[16px] ${
-                                  isRecommendedSelected ? "bg-green-50" : ""
-                                }`}
-                              >
-                                {item.quantity}
-                              </td>
-                              <td
-                                className={`py-2 px-6 text-[16px] ${
-                                  isRecommendedSelected ? "bg-green-50" : ""
-                                }`}
-                              >
-                                {(alternate.price * item.quantity).toFixed(2)}
-                              </td>
-                            </>
-                          ) : (
-                            <td
-                              colSpan="5"
-                              className="py-2 px-3 text-center text-gray-500"
-                            >
-                              No alternative available
-                            </td>
-                          )}
                         </tr>
                       );
                     })}
@@ -708,10 +694,11 @@ const CartPage = () => {
 
             <div className="mt-8 flex flex-col items-center sm:flex-row sm:justify-center gap-4 bg-white p-6 rounded-lg shadow-md">
               <div className="text-sm sm:text-base text-gray-600 font-semibold flex-1 text-center sm:text-left">
-                <span className="text-red-500">*</span> Missing out saving:
+                <span className="text-green-500">*</span> Savings based on
+                current selection:
                 <span className="text-gray-800 font-bold">
                   {" "}
-                  ₹{calculateMissingOutSaving()}
+                  ₹{selectionSaving()}
                 </span>
               </div>
 
@@ -728,11 +715,10 @@ const CartPage = () => {
               </button>
 
               <div className="text-sm sm:text-base text-gray-600 font-semibold flex-1 text-center sm:text-right">
-                <span className="text-green-500">*</span> Savings based on
-                current selection:
+                <span className="text-red-500">*</span> Missing out saving:
                 <span className="text-gray-800 font-bold">
                   {" "}
-                  ₹{selectionSaving()}
+                  ₹{calculateMissingOutSaving()}
                 </span>
               </div>
             </div>

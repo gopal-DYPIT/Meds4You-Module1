@@ -89,8 +89,8 @@ const MedicineCarousel = ({ products, addToCart, isLoading }) => {
                   isDesktop && swiperInstance?.autoplay.start()
                 }
               >
-                <div className="flex justify-center mb-2 items-center mx-auto w-full">
-                  <div className="flex flex-col h-[440px] w-[320px] sm:w-[340px] rounded-lg sm:shadow-[0_2px_1px_rgba(20,7,76,0.15),_1px_4px_20px_rgba(230,64,64,0.1),_0_4px_25px_rgba(236,40,59,0.1)] sm:hover:shadow-[0_5px_20px_rgba(228,76,76,0.2),_1px_5px_2px_rgba(230,64,64,0.15),_0_6px_30px_rgba(236,40,59,0.15)] transition-shadow duration-300 overflow-hidden bg-white">
+                <div className="flex justify-center pr-4 mb-2 items-center mx-auto w-full">
+                  <div className="flex flex-col h-[480px] sm:h-[460px] w-[320px] sm:w-[340px] rounded-lg sm:shadow-[0_2px_1px_rgba(20,7,76,0.15),_1px_4px_20px_rgba(230,64,64,0.1),_0_4px_25px_rgba(236,40,59,0.1)] sm:hover:shadow-[0_5px_20px_rgba(228,76,76,0.2),_1px_5px_2px_rgba(230,64,64,0.15),_0_6px_30px_rgba(236,40,59,0.15)] transition-shadow duration-300 overflow-hidden bg-white">
                     {/* Header */}
                     <div className="bg-[#d9327a] text-white text-center py-1 px-2 font-medium text-base rounded-t-lg">
                       {product.salt}
@@ -142,27 +142,27 @@ const MedicineCarousel = ({ products, addToCart, isLoading }) => {
                                   [product._id]: index,
                                 })
                               }
-                              className="flex flex-col items-center mb-4 space-y-2 cursor-pointer"
+                              className="flex flex-col items-left mb-4 space-y-2 cursor-pointer"
                             >
                               <img
                                 src={alt.manufacturerUrl || "default-image.jpg"}
                                 alt="Tablet"
                                 className="h-10 w-[100px] mb-2"
                               />
-                              <p className="font-bold text-center ">
+                              <p className="font-bold text-left ">
                                 {alt.name}
                               </p>
-                              <p className="text-center text-sm mt-1">
+                              <p className="text-left text-sm mt-1">
                                 {alt.manufacturer}
                               </p>
-                              <p className="text-center text-sm mt-1">
+                              <p className="text-left text-sm mt-1">
                                 {product.size}
                               </p>
-                              <div className="text-center text-gray-500 text-sm">
+                              <div className="text-left text-gray-500 text-sm">
                                 MRP: ₹
                                 <span className="line-through text-lg ">{alt.mrp}</span>
                               </div>
-                              <div className="text-center font-bold text-green-600 text-sm">
+                              <div className="text-left font-bold text-green-600 text-sm">
                                 Price:{" "}
                                 <span className="text-3xl">₹{alt.price}</span>
                               </div>

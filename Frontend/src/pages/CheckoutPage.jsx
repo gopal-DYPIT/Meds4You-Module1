@@ -105,48 +105,41 @@ const CheckoutPage = () => {
     const alternate = product?.alternateMedicines?.[0];
     const selection = item.selection || "original";
     const isRecommended = selection === "recommended";
-
-    const medicineToShow =
-      isRecommended && alternate
-        ? {
-            name: alternate.name,
-            manufacturer: alternate.manufacturer,
-            price: alternate.price,
-            isImage: true,
-          }
-        : {
-            name: product?.drugName,
-            manufacturer: product?.manufacturer,
-            price: product?.price,
-            isImage: false,
-          };
-
+  
+    const medicineToShow = isRecommended && alternate
+      ? {
+          name: alternate.name,
+          manufacturer: alternate.manufacturer,
+          price: alternate.price,
+          isImage: true,
+        }
+      : {
+          name: product?.drugName,
+          manufacturer: product?.manufacturer,
+          price: product?.price,
+          isImage: false,
+        };
+  
     return (
-      <div className="bg-white p-3 rounded-md shadow-sm mb-3 text-sm">
-        <div className="flex justify-between items-center mb-2">
-          <span className="font-medium text-gray-700">#{index + 1}</span>
-          <span
-            className={`px-2 py-0.5 rounded text-xs ${
-              isRecommended
-                ? "bg-green-100 text-green-700"
-                : "bg-blue-100 text-blue-700"
-            }`}
-          >
-            {isRecommended ? "Recommended" : "Selected"}
-          </span>
+      <div className="bg-white px-3 py-2 rounded-md shadow-sm mb-2 text-xs">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-gray-500">#{index + 1}</span>
+            <span className={`px-1.5 py-0.5 rounded ${
+              isRecommended ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"
+            }`}>
+              {isRecommended ? "R" : "S"}
+            </span>
+          </div>
+          <div className="text-right font-medium">
+            ₹{(medicineToShow.price * item.quantity).toFixed(2)}
+          </div>
         </div>
-
-        <h3 className="font-semibold">{medicineToShow.name}</h3>
-
-        <div className="flex items-center justify-between mt-2">
-          <span className="text-gray-500">{medicineToShow.manufacturer}</span>
-          <div className="text-right">
-            <p className="text-gray-600">
-              ₹{medicineToShow.price} x {item.quantity}
-            </p>
-            <p className="font-semibold text-lg">
-              ₹{(medicineToShow.price * item.quantity).toFixed(2)}
-            </p>
+        
+        <div className="flex items-center justify-between mt-1">
+          <div className="truncate flex-1">
+            <span className="font-medium">{medicineToShow.name}</span>
+            <span className="text-gray-500 ml-1">x{item.quantity}</span>
           </div>
         </div>
       </div>

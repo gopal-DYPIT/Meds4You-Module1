@@ -21,6 +21,7 @@ import ReferralRegister from "./pages/SalesProgram/ReferralRegister";
 import PartnerRegister from "./pages/SalesProgram/PartnerRegister";
 import CommonLogin from "./auth/Login/CommonLogin";
 import NotFound from "./pages/NotFound";
+import CheckoutStepper from "./components/CheckOutStepper";
 
 function AppContent() {
   const location = useLocation();
@@ -39,10 +40,14 @@ function AppContent() {
     location.pathname.startsWith(route)
   );
 
+   // Define routes where stepper should be shown
+   const stepperRoutes = ["/cart", "/checkout", "/payment", "/delivery"];
+   const shouldShowStepper = stepperRoutes.includes(location.pathname);
+
   return (
     <>
       {shouldShowLayout && <Navbar onSearch={handleSearch} />}
-
+      {shouldShowStepper && <CheckoutStepper />} 
       <ScrollToTop />
       <Routes>
         {/* Public Routes (accessible by non-logged-in users) */}
