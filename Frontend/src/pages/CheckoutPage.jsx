@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 
 const CheckoutPage = () => {
   const [addresses, setAddresses] = useState([]);
@@ -343,7 +343,6 @@ const CheckoutPage = () => {
           </button>
         </div>
       </div>
-      <ToastContainer />
     </div>
   );
 };

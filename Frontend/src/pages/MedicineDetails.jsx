@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; 
 
 const MedicineDetails = () => {
@@ -165,8 +165,6 @@ const MedicineDetails = () => {
           </div>
         </div>
       )}
-
-      <ToastContainer />
     </div>
   );
 };

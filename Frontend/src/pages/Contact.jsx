@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import emailjs from "@emailjs/browser";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import the styles
 
 const ContactUs = () => {
@@ -166,8 +166,6 @@ const ContactUs = () => {
         </div>
       </div>
 
-      {/* Toast Notification Container */}
-      <ToastContainer position="top-center" />
     </div>
   );
 };

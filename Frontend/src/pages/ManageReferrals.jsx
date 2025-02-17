@@ -56,27 +56,12 @@ const ManageReferrals = ({ userReferralCode }) => {
   const signupLink = `https://meds4you.in/register?referral=${userReferralCode}`;
 
   return (
-    <div className="max-w-3xl mx-auto rounded-xl">
-      <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-        My Referrals
-      </h2>
-
-      {/* Referral Code Section */}
-      <div className="flex items-center justify-between p-2 border rounded-lg">
-        <span className="text-sm font-semibold text-gray-800 bg-gray-200 px-3 py-1 rounded">
-          {userReferralCode}
-        </span>
-        <button
-          onClick={() => copyToClipboard(userReferralCode, setCopiedCode)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition"
-        >
-          {copiedCode ? <Check size={16} /> : <Copy size={16} />}
-          {copiedCode ? "Copied!" : "Copy"}
-        </button>
-      </div>
+    <div className="max-w-3xl rounded-xl p-3 mx-auto">
+      <h2 className="text-xl font-semibold text-gray-800 mb-3">My Referrals</h2>
 
       {/* Signup Link Section */}
-      <div className="flex items-center gap-3 p-2 mt-4 border rounded-lg bg-white shadow-sm">
+      <div className="flex flex-col sm:flex-row items-center gap-2 p-2 mt-3 bg-white rounded-md shadow-sm">
+        <h2 className="text-xs sm:text-sm">Referral link to share</h2>
         <input
           type="text"
           value={signupLink}
@@ -85,7 +70,7 @@ const ManageReferrals = ({ userReferralCode }) => {
         />
         <button
           onClick={() => copyToClipboard(signupLink, setCopiedLink)}
-          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition"
+          className="flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition"
         >
           {copiedLink ? <Check size={16} /> : <Copy size={16} />}
           {copiedLink ? "Copied!" : "Copy"}
@@ -93,28 +78,91 @@ const ManageReferrals = ({ userReferralCode }) => {
       </div>
 
       {/* Referrals List */}
-      <div className="mt-6">
+      <div className="mt-3 p-2">
+        <h1 className="font-semibold text-sm">My Referral Customer List</h1>
         {loading ? (
-          <p className="text-gray-500 text-center">Loading referrals...</p>
+          <p className="text-gray-500 text-center text-sm">Loading referrals...</p>
         ) : referrals.length > 0 ? (
-          <ul className="space-y-4">
-            {referrals.map((user, index) => (
-              <li
-                key={index}
-                className="p-4 rounded-lg bg-gray-50"
-              >
-                <p className="text-gray-900 font-medium">{user.name}</p>
-                <p className="text-sm text-gray-600">
-                  <strong>Email:</strong> {user.email}
-                </p>
-                <p className="text-sm text-gray-600">
-                  <strong>Phone:</strong> {user.phoneNumber}
-                </p>
-              </li>
-            ))}
-          </ul>
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto p-2">
+              <table className="min-w-full table-auto text-sm">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="py-2 px-3 text-left font-medium text-gray-700">
+                      Sr. No.
+                    </th>
+                    <th className="py-2 px-3 text-left font-medium text-gray-700">
+                      Name
+                    </th>
+                    <th className="py-2 px-3 text-left font-medium text-gray-700">
+                      Email
+                    </th>
+                    <th className="py-2 px-3 text-left font-medium text-gray-700">
+                      Phone Number
+                    </th>
+                    <th className="py-2 px-3 text-left font-medium text-gray-700">
+                      Last Transaction Date
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {referrals.map((user, index) => (
+                    <tr key={index} className="border-b border-gray-200">
+                      <td className="py-2 px-3 text-gray-600">{index + 1}</td>
+                      <td className="py-2 px-3 text-gray-600">{user.name}</td>
+                      <td className="py-2 px-3 text-gray-600">{user.email}</td>
+                      <td className="py-2 px-3 text-gray-600">{user.phoneNumber}</td>
+                      <td className="py-2 px-3 text-gray-600">
+                        {user.lastTransactionDate
+                          ? new Date(user.lastTransactionDate).toLocaleDateString()
+                          : "N/A"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden">
+              {referrals.map((user, index) => (
+                <div
+                  key={index}
+                  className="bg-white rounded-md shadow-sm mb-2 p-2 border border-gray-100"
+                >
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-xs text-gray-500">#{index + 1}</span>
+                  </div>
+
+                  <div className="flex justify-between items-baseline">
+                    <div className="truncate flex-1">
+                      <div className="text-xs text-gray-500">Name:</div>
+                      <div className="text-sm font-medium truncate">{user.name}</div>
+                    </div>
+                    <div className="text-right ml-2">
+                      <div className="text-xs text-gray-500">Email:</div>
+                      <div className="text-sm font-semibold">{user.email}</div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-baseline mt-2">
+                    <div className="text-xs text-gray-500">Phone:</div>
+                    <div className="text-sm font-semibold">{user.phoneNumber}</div>
+                  </div>
+
+                  <div className="text-xs text-gray-500 mt-1">
+                    Last Transaction:{" "}
+                    {user.lastTransactionDate
+                      ? new Date(user.lastTransactionDate).toLocaleDateString()
+                      : "N/A"}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         ) : (
-          <p className="text-gray-500 text-center">No referrals found.</p>
+          <p className="text-gray-500 text-center text-sm">No referrals found.</p>
         )}
       </div>
     </div>

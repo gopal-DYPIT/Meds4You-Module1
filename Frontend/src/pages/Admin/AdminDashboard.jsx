@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 
@@ -796,7 +796,6 @@ const validatePositiveNumber = (value) => {
         {activeSection === "managePrescription" && <ManagePrescriptions />}
         {activeSection === "managePartner" && <ManagePartners />}
       </main>
-      <ToastContainer />
     </div>
   );
 };

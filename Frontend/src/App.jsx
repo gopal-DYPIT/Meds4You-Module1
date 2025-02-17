@@ -82,7 +82,11 @@ function AppContent() {
         <Route path="*" element={<NotFound />} />
       </Routes>
       {shouldShowLayout && <Footer />}
-      <ToastContainer position="top-center" autoClose={3000} />
+      <ToastContainer 
+        position="top-center" 
+        autoClose={3000} 
+        style={{ marginTop: '80px' }} // Add margin-top to avoid overlap with Navbar
+      />
     </>
   );
 }

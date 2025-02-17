@@ -4,7 +4,7 @@ import { FileText } from "lucide-react";
 import axios from "axios";
 import { loginSuccess, logout } from "../redux/slice/authSlice";
 import { useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ManageReferrals from "./ManageReferrals";
 
@@ -171,10 +171,10 @@ const Profile = () => {
 
       setAddresses(sortedAddresses);
 
-      toast.success("Default address set successfully!", {
-        position: "top-center",
-        autoClose: 2000,
-      });
+      // toast.success("Default address set successfully!", {
+      //   position: "top-center",
+      //   autoClose: 2000,
+      // });
     } catch (error) {
       toast.error("Error setting primary address.");
     }
@@ -189,67 +189,126 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-36 flex flex-col md:flex-row mt-24 md:mt-0">
       {/* Sidebar */}
-      <div className="w-full md:w-1/4 bg-gray-200 p-4 md:p-6 rounded-lg mb-4 md:mb-0 md:mr-4">
-        <div className="text-xl font-semibold text-gray-800 mb-4 md:mb-6">
+      <div className="w-full md:w-1/4 bg-[#f3ddef] p-3 md:p-6 rounded-lg mb-4 md:mb-0 md:mr-4">
+        {/* Header - Compact on mobile */}
+        <div className="text-lg md:text-2xl font-roboto font-semibold mb-2 md:mb-6">
           Hello! {user ? user.name : "Not Logged In"}
         </div>
 
-        {/* Buttons - Updated for better wrapping on tablets */}
-        <div className="grid grid-cols-2 md:grid-cols-1 gap-2 md:gap-4">
+        {/* Navigation - Horizontal scroll on mobile, vertical on desktop */}
+        <div className="md:hidden flex overflow-x-auto pb-2 gap-2 scrollbar-hide">
+          {/* Mobile buttons */}
+
           <button
             onClick={() => setSelectedSection("profileInfo")}
-            className={`w-full p-2 md:p-3 rounded-md transition ${
+            className={`whitespace-nowrap px-3 py-2 rounded-md text-sm transition ${
               selectedSection === "profileInfo"
-                ? "bg-gray-400"
-                : "bg-gray-300 hover:bg-gray-400"
+                ? "bg-[#64c3ef] text-white"
+                : "bg-[#e5eff5] hover:bg-[#a0d8f5]"
+            }`}
+          >
+            Profile
+          </button>
+          <button
+            onClick={() => setSelectedSection("manageAddress")}
+            className={`whitespace-nowrap px-3 py-2 rounded-md text-sm transition ${
+              selectedSection === "manageAddress"
+                ? "bg-[#64c3ef] text-white"
+                : "bg-[#e5eff5] hover:bg-[#a0d8f5]"
+            }`}
+          >
+            Address
+          </button>
+          <button
+            onClick={() => setSelectedSection("orderHistory")}
+            className={`whitespace-nowrap px-3 py-2 rounded-md text-sm transition ${
+              selectedSection === "orderHistory"
+                ? "bg-[#64c3ef] text-white"
+                : "bg-[#e5eff5] hover:bg-[#a0d8f5]"
+            }`}
+          >
+            Orders
+          </button>
+          <button
+            onClick={() => setSelectedSection("managePrescriptions")}
+            className={`whitespace-nowrap px-3 py-2 rounded-md text-sm transition ${
+              selectedSection === "managePrescriptions"
+                ? "bg-[#64c3ef] text-white"
+                : "bg-[#e5eff5] hover:bg-[#a0d8f5]"
+            }`}
+          >
+            Prescriptions
+          </button>
+          <button
+            onClick={() => setSelectedSection("manageReferrals")}
+            className={`whitespace-nowrap px-3 py-2 rounded-md text-sm transition ${
+              selectedSection === "manageReferrals"
+                ? "bg-[#64c3ef] text-white"
+                : "bg-[#e5eff5] hover:bg-[#a0d8f5]"
+            }`}
+          >
+            Referrals
+          </button>
+        </div>
+        <span className="md:hidden text-sm text-gray-600 italic pl-2">
+          Swipe for more
+        </span>
+
+        {/* Desktop Navigation */}
+        <div className="hidden md:grid md:grid-cols-1 gap-4">
+          <button
+            onClick={() => setSelectedSection("profileInfo")}
+            className={`w-full p-3 rounded-md transition ${
+              selectedSection === "profileInfo"
+                ? "bg-[#64c3ef] text-white"
+                : "bg-[#e5eff5] hover:bg-[#a0d8f5]"
             }`}
           >
             User Profile
           </button>
           <button
             onClick={() => setSelectedSection("manageAddress")}
-            className={`w-full p-2 md:p-3 rounded-md transition ${
+            className={`w-full p-3 rounded-md transition ${
               selectedSection === "manageAddress"
-                ? "bg-gray-400"
-                : "bg-gray-300 hover:bg-gray-400"
+                ? "bg-[#64c3ef] text-white"
+                : "bg-[#e5eff5] hover:bg-[#a0d8f5]"
             }`}
           >
             Manage Address
           </button>
           <button
             onClick={() => setSelectedSection("orderHistory")}
-            className={`w-full p-2 md:p-3 rounded-md transition ${
+            className={`w-full p-3 rounded-md transition ${
               selectedSection === "orderHistory"
-                ? "bg-gray-400"
-                : "bg-gray-300 hover:bg-gray-400"
+                ? "bg-[#64c3ef] text-white"
+                : "bg-[#e5eff5] hover:bg-[#a0d8f5]"
             }`}
           >
             Order History
           </button>
           <button
             onClick={() => setSelectedSection("managePrescriptions")}
-            className={`w-full p-2 md:p-3 rounded-md transition ${
+            className={`w-full p-3 rounded-md transition ${
               selectedSection === "managePrescriptions"
-                ? "bg-gray-400"
-                : "bg-gray-300 hover:bg-gray-400"
+                ? "bg-[#64c3ef] text-white"
+                : "bg-[#e5eff5] hover:bg-[#a0d8f5]"
             }`}
           >
             My Prescriptions
           </button>
           <button
             onClick={() => setSelectedSection("manageReferrals")}
-            className={`w-full p-2 md:p-3 rounded-md transition ${
+            className={`w-full p-3 rounded-md transition ${
               selectedSection === "manageReferrals"
-                ? "bg-gray-400"
-                : "bg-gray-300 hover:bg-gray-400"
+                ? "bg-[#64c3ef] text-white"
+                : "bg-[#e5eff5] hover:bg-[#a0d8f5]"
             }`}
           >
             My Referrals
           </button>
-          {/* Logout Button - Visible only on desktop */}
           <button
             onClick={handleLogout}
-            className="hidden md:block w-full p-2 md:p-3 rounded-md transition bg-red-500 text-white hover:bg-red-600 mt-4"
+            className="text-lg font-semibold w-32 p-2 transition text-red-500 hover:text-red-600"
           >
             Logout
           </button>
@@ -260,31 +319,10 @@ const Profile = () => {
       <div className="flex-1 bg-white p-4 md:p-6 rounded-lg">
         {selectedSection === "profileInfo" && (
           <div className="relative">
-            {/* Referral Details - Positioned in top-right on larger screens, stacked on mobile */}
-            {/* <div className="w-full md:w-64 p-4 border rounded-md bg-gray-100 shadow-md mb-4 md:mb-0 md:absolute md:top-0 md:right-0">
-              {user?.referralCode && referrerDetails ? (
-                <>
-                  <h3 className="text-xl font-semibold mb-2">
-                    Referred By ({referrerDetails.type})
-                  </h3>
-                  <p>
-                    <strong>Name:</strong> {referrerDetails.name}
-                  </p>
-                  <p>
-                    <strong>Email:</strong> {referrerDetails.email}
-                  </p>
-                </>
-              ) : (
-                <p>
-                  <strong>Referred By:</strong> N/A
-                </p>
-              )}
-            </div> */}
-
             <h2 className="text-2xl md:text-3xl font-bold mb-4">
               User Profile
             </h2>
-            <div className="space-y-4">
+            <div className="space-y-4 p-4">
               <p>
                 <strong>Name:</strong> {user ? user.name : "N/A"}
               </p>
@@ -317,46 +355,59 @@ const Profile = () => {
 
         {selectedSection === "manageAddress" && (
           <div>
-            <h2 className="text-xl font-bold mb-4">Your Addresses</h2>
-            <div className="space-y-4">
-              {addresses
-                .slice() // Create a copy to avoid mutating state directly
-                .sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0)) // Sort to keep the primary address on top
-                .map((address) => (
-                  <div
-                    key={address._id}
-                    className="bg-gray-50 p-4 rounded-md shadow-md"
-                  >
-                    <p className="font-semibold">
-                      {address.isPrimary ? "Default Address" : ""}
-                    </p>
-                    <p className="text-sm md:text-base my-2">
-                      {address.street}, {address.city}, {address.state} -{" "}
-                      {address.zipCode}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {!address.isPrimary && (
+            <h2 className="text-2xl font-bold mb-4">Your Addresses</h2>
+            <div className="space-y-4 p-4">
+              {addresses.length === 0 ? (
+                <div>
+                  <p className="text-lg text-gray-600">
+                    No addresses found. Add a new address.
+                  </p>
+                </div>
+              ) : (
+                addresses
+                  .slice() // Create a copy to avoid mutating state directly
+                  .sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0)) // Sort to keep the primary address on top
+                  .map((address) => (
+                    <div
+                      key={address._id}
+                      className="bg-gray-50 p-3 rounded-md shadow-md mb-3"
+                    >
+                      {/* Address Title */}
+                      <p className="font-semibold text-xs sm:text-sm">
+                        {address.isPrimary ? "Default Address" : ""}
+                      </p>
+
+                      {/* Address Details */}
+                      <p className="text-xs sm:text-sm my-1">
+                        {address.street}, {address.city}, {address.state} -{" "}
+                        {address.zipCode}
+                      </p>
+
+                      {/* Action Buttons */}
+                      <div className="flex flex-wrap gap-2 justify-between">
+                        {!address.isPrimary && (
+                          <button
+                            onClick={() => handleSetPrimaryAddress(address._id)}
+                            className="bg-blue-500 text-white py-1 px-3 rounded-md text-xs sm:text-sm hover:bg-blue-600"
+                          >
+                            Set as Default
+                          </button>
+                        )}
                         <button
-                          onClick={() => handleSetPrimaryAddress(address._id)}
-                          className="bg-blue-500 text-white py-1 px-4 rounded-md text-sm hover:bg-blue-600"
+                          onClick={() => handleDeleteAddress(address._id)}
+                          className="bg-red-500 text-white py-1 px-3 rounded-md text-xs sm:text-sm hover:bg-red-600"
                         >
-                          Set as Default
+                          Delete
                         </button>
-                      )}
-                      <button
-                        onClick={() => handleDeleteAddress(address._id)}
-                        className="bg-red-500 text-white py-1 px-4 rounded-md text-sm hover:bg-red-600"
-                      >
-                        Delete
-                      </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+              )}
             </div>
 
             <button
               onClick={() => setShowAddressForm(!showAddressForm)}
-              className="w-44 bg-blue-500 text-white py-2 rounded-md mt-4 hover:bg-blue-600"
+              className="m-2 w-44 bg-blue-500 text-white py-2 rounded-md mt-4 hover:bg-blue-600"
             >
               {showAddressForm ? "Cancel" : "Add New Address"}
             </button>
@@ -422,53 +473,124 @@ const Profile = () => {
         )}
 
         {selectedSection === "orderHistory" && (
-          <div className="max-w-4xl mx-auto p-4 sm:p-6 bg-white rounded-lg shadow-lg">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">
+          <div className="max-w-4xl bg-white">
+            <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-4">
               Order History
             </h2>
+
             {orderHistory.length === 0 ? (
               <p className="text-gray-500">No orders found.</p>
             ) : (
-              <ul className="divide-y divide-gray-200">
-                {orderHistory.map((order) => (
-                  <li
-                    key={order._id}
-                    className="py-4 border border-gray-200 rounded-lg p-4 sm:p-6 shadow-sm"
-                  >
-                    <p className="font-medium text-gray-900">
-                      Order ID: {order._id}
-                    </p>
-                    <p className="text-gray-700">
-                      <strong>Total:</strong> ₹{order.totalAmount.toFixed(2)}
-                    </p>
-                    <p className="text-gray-700">
-                      <strong>Status:</strong> {order.orderStatus}
-                    </p>
-                    <ul className="mt-2 space-y-2">
-                      {order.items.map((item) => (
-                        <li key={item.productId} className="text-gray-600">
-                          {item.productDetails.drugName} (Qty: {item.quantity})
-                          - ₹{item.price.toFixed(2)}
-                        </li>
+              <>
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto p-4">
+                  <table className="min-w-full table-auto">
+                    <thead>
+                      <tr className="bg-gray-100">
+                        <th className="py-3 px-4 text-left text-sm font-medium text-gray-700">
+                          Sr. No.
+                        </th>
+                        <th className="py-3 px-4 text-left text-sm font-medium text-gray-700">
+                          Order ID
+                        </th>
+                        <th className="py-3 px-4 text-left text-sm font-medium text-gray-700">
+                          Date
+                        </th>
+                        <th className="py-3 px-4 text-left text-sm font-medium text-gray-700">
+                          Total
+                        </th>
+                        <th className="py-3 px-4 text-left text-sm font-medium text-gray-700">
+                          Status
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {orderHistory.map((order, index) => (
+                        <tr
+                          key={order._id}
+                          className="border-b border-gray-200"
+                        >
+                          <td className="py-3 px-4 text-sm text-gray-600">
+                            {index + 1}
+                          </td>
+                          <td className="py-3 px-4 text-sm text-gray-600">
+                            {order._id}
+                          </td>
+                          <td className="py-3 px-4 text-sm text-gray-600">
+                            {new Date(order.createdAt).toLocaleDateString()}
+                          </td>
+                          <td className="py-3 px-4 text-sm text-gray-600">
+                            ₹{order.totalAmount.toFixed(2)}
+                          </td>
+                          <td className="py-3 px-4 text-sm text-gray-600">
+                            {order.orderStatus}
+                          </td>
+                        </tr>
                       ))}
-                    </ul>
-                  </li>
-                ))}
-              </ul>
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden">
+                  {orderHistory.map((order, index) => (
+                    <div
+                      key={order._id}
+                      className="bg-white rounded-lg shadow-sm mb-2 p-3 border border-gray-100"
+                    >
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-xs text-gray-500">
+                          #{index + 1}
+                        </span>
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full ${
+                            order.orderStatus === "Delivered"
+                              ? "bg-green-100 text-green-700"
+                              : order.orderStatus === "Processing"
+                              ? "bg-blue-100 text-blue-700"
+                              : "bg-yellow-100 text-yellow-700"
+                          }`}
+                        >
+                          {order.orderStatus}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between items-baseline">
+                        <div className="truncate flex-1">
+                          <div className="text-xs text-gray-500">Order ID:</div>
+                          <div className="text-sm font-medium truncate">
+                            {order._id}
+                          </div>
+                        </div>
+                        <div className="text-right ml-2">
+                          <div className="text-xs text-gray-500">Amount:</div>
+                          <div className="text-sm font-semibold">
+                            ₹{order.totalAmount.toFixed(2)}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="text-xs text-gray-500 mt-1">
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         )}
 
         {selectedSection === "managePrescriptions" && (
-          <div className="max-w-4xl mx-auto p-4 sm:p-6 bg-white rounded-lg shadow-lg">
+          <div className="max-w-4xl bg-white">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">
               My Prescriptions
             </h2>
 
             {prescriptions.length === 0 ? (
-              <p className="text-gray-500">No prescriptions uploaded.</p>
+              <p className="text-gray-500 p-4">No prescriptions uploaded.</p>
             ) : (
-              <ul className="divide-y divide-gray-200">
+              <ul className="divide-y divide-gray-200 p-4">
                 {prescriptions.map((prescription) => {
                   // Check if the file is an image
                   const isImage = prescription.fileUrl?.match(
@@ -525,7 +647,7 @@ const Profile = () => {
         )}
       </div>
 
-      <ToastContainer />
+      {/* <ToastContainer /> */}
     </div>
   );
 };

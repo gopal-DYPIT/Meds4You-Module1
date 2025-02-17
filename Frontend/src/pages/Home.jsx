@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import MedicineCarousel from "../components/MedicineCarousel";
 import CategoryFilter from "../components/CategoryFilter";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay, Navigation } from "swiper/modules";
@@ -227,7 +227,6 @@ const Home = () => {
           </div>
         </section>
 
-        <ToastContainer />
       </div>
     </div>
   );

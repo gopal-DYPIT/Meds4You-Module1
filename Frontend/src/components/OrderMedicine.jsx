@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
+import { toast} from "react-toastify";
 
 const OrderMedicine = () => {
   const [file, setFile] = useState(null);
@@ -352,7 +352,6 @@ const OrderMedicine = () => {
           </div>
         )}
       </div>
-      <ToastContainer />
     </div>
   );
 };

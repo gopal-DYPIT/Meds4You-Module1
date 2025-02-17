@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import FAQPartner from "./FAQ-Partner";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import ReCAPTCHA from "react-google-recaptcha";
 
 const SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
@@ -385,7 +385,6 @@ const PartnerRegister = () => {
           </div>
         </div>
       </div>
-      <ToastContainer />
     </div>
   );
 };
