@@ -1,22 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import axios from "axios";
 import MedicineCarousel from "../components/MedicineCarousel";
 import CategoryFilter from "../components/CategoryFilter";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination, Autoplay, Navigation } from "swiper/modules";
+import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import SearchBar from "../components/SearchBar";
 
-const Home = () => {
+const Home = ({ isScrolled }) => {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("Diabetes");
-
   const testimonials = [
     {
       name: "Amit K.",
@@ -81,7 +80,7 @@ const Home = () => {
         autoClose: 3000,
       });
       return;
-    } 
+    }
 
     try {
       await axios.post(
@@ -111,14 +110,23 @@ const Home = () => {
 
   return (
     <div>
-      <div className="mx-auto max-w-7xl mt-20 sm:mt-22 px-4">
+      <div className="mx-auto max-w-7xl mt-16 sm:mt-22 px-4">
         {/* Header Section */}
-        <div className="text-center bg-blue-100 py-4 sm:py-16">
-          <h1 className="text-2xl sm:text-4xl font-bold mb-0 text-gray-800 sm:mb-2">
-            Your Partner in Affordable Healthcare
-          </h1>
+        <div className="bg-blue-100 py-4 sm:py-6">
+          {/* Reduced padding */}
+          <div className="text-center">
+            <h1 className="text-2xl items-center sm:text-4xl font-bold mb-2 mt-6 text-gray-800">
+              {/* Reduced bottom margin */}
+              Your Partner in Affordable Healthcare
+            </h1>
+          </div>
+
+          <div className="mt-[-60px] m-4 pr-6 sm:mb-6 w-full">
+            <SearchBar />
+          </div>
         </div>
 
+        {/* Category Filter */}
         <div className="flex justify-start ml-4 sm:ml-11 mt-0 sm:mb-[4px]  sm:mt-[20px]">
           <CategoryFilter
             selectedCategory={selectedCategory}
@@ -128,7 +136,11 @@ const Home = () => {
 
         {/* Medicine Carousel */}
         <div className="px-0 sm:px-8 mt-[-6rem] mb-0 sm:mb-8 sm:mt-[-6rem] ">
-          <MedicineCarousel products={products} addToCart={addToCart} isLoading={isLoading}/>
+          <MedicineCarousel
+            products={products}
+            addToCart={addToCart}
+            isLoading={isLoading}
+          />
         </div>
 
         {/* Why Choose Us */}
@@ -226,7 +238,6 @@ const Home = () => {
             ))}
           </div>
         </section>
-
       </div>
     </div>
   );

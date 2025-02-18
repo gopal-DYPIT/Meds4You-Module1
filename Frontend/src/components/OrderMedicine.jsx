@@ -130,7 +130,7 @@ const OrderMedicine = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-[#FFF0F5] px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl bg-white shadow-2xl rounded-2xl p-6 sm:p-8 text-center">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
             Order Medicine by Prescription

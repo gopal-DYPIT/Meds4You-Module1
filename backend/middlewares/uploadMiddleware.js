@@ -22,7 +22,7 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
-    const allowedTypes = /jpg|jpeg|png|gif|heic/i; // Add 'heic' to the allowed types
+    const allowedTypes = /jpg|jpeg|png|gif|heic|pdf/i; // Added 'pdf' to allowed types
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
 
@@ -33,6 +33,7 @@ const upload = multer({
     }
   }
 });
+
 
 
 export default upload;

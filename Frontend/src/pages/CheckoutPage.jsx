@@ -8,6 +8,8 @@ import UploadPrescriptionAtUpload from "../components/uploadPrescriptionAtOrder"
 
 const CheckoutPage = () => {
   const [addresses, setAddresses] = useState([]);
+  const [file, setFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [prescriptionUrl, setPrescriptionUrl] = useState(null);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -21,8 +23,13 @@ const CheckoutPage = () => {
   // console.log(selectedProducts);
   const totalAmount = location.state?.total || "0.00";
 
-  const handleUploadSuccess = (url) => {
-    setPrescriptionUrl(url);
+  // const handleUploadSuccess = (url) => {
+  //   setPrescriptionUrl(url);
+  // };
+
+  const handleFileSelect = (selectedFile) => {
+    setFile(selectedFile); // Set the file when it's selected
+    // console.log("Selected file:", selectedFile);
   };
 
   useEffect(() => {
@@ -61,9 +68,11 @@ const CheckoutPage = () => {
     setSelectedAddress(address);
   };
 
-  const handlePlaceOrder = () => {
-    if (!prescriptionUrl) {
-      toast.error("Please upload a prescription before adding to cart.");
+  const handlePlaceOrder = async () => {
+    if (!file) {
+      toast.error(
+        "Please select a prescription file before placing the order."
+      );
       return;
     }
 
@@ -79,38 +88,69 @@ const CheckoutPage = () => {
       return;
     }
 
-    axios
-      .post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/orders/create`,
-        {
-          address: selectedAddress,
-          products: selectedProducts, // ✅ Ensure this contains valid products
-          totalAmount: totalAmount,
-          prescriptionUrl: prescriptionUrl, // ✅ Ensure correct total amount
-        },
+    // Upload the prescription first
+    const formData = new FormData();
+    formData.append("prescription", file);
+    setIsUploading(true)
+
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/orders/upload-prescription/`,
+        formData,
         {
           headers: {
+            "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${token}`,
           },
         }
-      )
-      .then((response) => {
-        toast.success("Order placed successfully!", {
-          position: "top-center",
-          autoClose: 2000,
-        });
+      );
 
+      console.log("File uploaded:", response.data);
 
-        window.history.pushState(null, "", window.location.href);
-        setTimeout(() => {
-          navigate("/order-summary"); // ✅ Redirect user to their profile/orders page
-        }, 3000);
-      })
-      .catch((err) => {
-        setError("Failed to place order");
-        toast.error("Failed to place order", { position: "top-center" });
-        console.error("Failed to place order:", err);
+      if (response.data.success) {
+        setPrescriptionUrl(response.data.fileUrl); // Store the uploaded file URL
+
+        // Now proceed to place the order
+        axios
+          .post(
+            `${import.meta.env.VITE_BACKEND_URL}/api/orders/create`,
+            {
+              address: selectedAddress,
+              products: selectedProducts,
+              totalAmount: totalAmount,
+              prescriptionUrl: response.data.fileUrl, // Pass the uploaded prescription URL
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          )
+          .then((orderResponse) => {
+            toast.success("Order placed successfully!", {
+              position: "top-center",
+              autoClose: 2000,
+            });
+            window.history.pushState(null, "", window.location.href);
+            setTimeout(() => {
+              navigate("/order-summary");
+            }, 3000);
+          })
+          .catch((err) => {
+            setError("Failed to place order");
+            toast.error("Failed to place order", { position: "top-center" });
+            console.error("Failed to place order:", err);
+          });
+      }
+    } catch (error) {
+      toast.error("Error uploading prescription. Please try again.", {
+        position: "top-center",
+        autoClose: 3000,
       });
+      console.error("Error uploading prescription:", error);
+    } finally {
+      setIsUploading(false); // Reset uploading state
+    }
   };
 
   useEffect(() => {
@@ -148,7 +188,7 @@ const CheckoutPage = () => {
           };
 
     return (
-      <div className="bg-white px-3 py-2 rounded-md shadow-sm mb-2 text-xs">
+      <div className=" px-3 py-2 rounded-md shadow-sm mb-2 text-xs">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-gray-500">#{index + 1}</span>
@@ -356,7 +396,7 @@ const CheckoutPage = () => {
         </div>
 
         <UploadPrescriptionAtUpload
-          onUploadSuccess={handleUploadSuccess}
+          onFileSelect={handleFileSelect}
           token={token}
         />
 
@@ -364,12 +404,12 @@ const CheckoutPage = () => {
         <div className="flex justify-center px-4 sm:px-0">
           <button
             onClick={handlePlaceOrder}
-            disabled={!selectedAddress || !prescriptionUrl}
+            disabled={!selectedAddress || !file}
             className={`
       w-full sm:w-auto px-6 sm:px-8 py-3 rounded-lg text-white text-base sm:text-lg font-semibold
       transition-all duration-300
       ${
-        selectedAddress && prescriptionUrl
+        selectedAddress && file
           ? "bg-green-600 hover:bg-green-700"
           : "bg-gray-400 cursor-not-allowed"
       }

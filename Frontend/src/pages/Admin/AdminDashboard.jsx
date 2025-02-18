@@ -267,7 +267,7 @@ const validatePositiveNumber = (value) => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen">
       <aside className="w-64 bg-gray-800 text-white p-6">
         <h2 className="text-2xl font-semibold">Admin Dashboard</h2>
         <nav className="mt-8">

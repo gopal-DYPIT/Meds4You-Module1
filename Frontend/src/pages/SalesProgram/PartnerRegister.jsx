@@ -33,7 +33,11 @@ const PartnerRegister = () => {
   };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, type, checked, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === "checkbox" ? checked : value,
+    });
   };
 
   const handleFileUpload = async (e, type) => {
@@ -73,6 +77,13 @@ const PartnerRegister = () => {
 
     if (!captchaValue) {
       toast.error("Please complete the CAPTCHA verification", {
+        position: "top-center",
+      });
+      return;
+    }
+
+    if (!formData.termsAccepted) {
+      toast.error("You must accept the Terms & Conditions", {
         position: "top-center",
       });
       return;
@@ -130,7 +141,7 @@ const PartnerRegister = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white pt-24">
+    <div className="min-h-screen pt-24">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-6 sm:mb-8">
@@ -367,6 +378,26 @@ const PartnerRegister = () => {
                       sitekey={SITE_KEY}
                       onChange={handleCaptchaChange}
                     />
+                  </div>
+
+                  {/* Terms & Conditions Checkbox */}
+                  <div className="mb-4 flex items-center">
+                    <input
+                      type="checkbox"
+                      name="termsAccepted"
+                      checked={formData.termsAccepted}
+                      onChange={handleChange}
+                      className="mr-2"
+                    />
+                    <label className="text-sm text-gray-700">
+                      I accept the{" "}
+                      <a
+                        href="/terms-condition"
+                        className="text-blue-600 hover:underline"
+                      >
+                        Terms & Conditions
+                      </a>
+                    </label>
                   </div>
                   {/* Submit */}
                   <button

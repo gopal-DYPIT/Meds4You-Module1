@@ -187,7 +187,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 md:p-36 flex flex-col md:flex-row mt-24 md:mt-0">
+    <div className="min-h-screen p-4 md:p-36 flex flex-col md:flex-row mt-24 md:mt-0">
       {/* Sidebar */}
       <div className="w-full md:w-1/4 bg-pink-100 p-3 md:p-6 rounded-lg mb-4 md:mb-0 md:mr-4">
         {/* Header - Compact on mobile */}
@@ -316,7 +316,7 @@ const Profile = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 bg-white p-4 md:p-6 rounded-lg">
+      <div className="flex-1 bg-[#fff] p-4 md:p-6 rounded-lg  shadow-lg">
         {selectedSection === "profileInfo" && (
           <div className="relative">
             <h2 className="text-2xl md:text-3xl font-bold mb-4">

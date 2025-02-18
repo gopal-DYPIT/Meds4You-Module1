@@ -70,43 +70,24 @@ const ContactUs = () => {
   };
 
   return (
-    <div className="flex flex-col items-center min-h-screen justify-center w-full h-full bg-[#FFF0F5]  py-10">
-      <h1 className="text-3xl font-bold text-gray-700 mb-5">
+    <div className="flex mt-14 sm:mt-32 flex-col items-center justify-center w-full h-full py-10 shadow-lg">
+      <h1 className=" text-xl sm:text-3xl font-bold text-gray-700 mb-5">
         We Deliver Happiness! ❤
       </h1>
       <div className="flex flex-wrap bg-white shadow-lg rounded-lg overflow-hidden w-11/12 md:w-3/4 lg:w-2/3">
         {/* Contact Information */}
-        <div className="w-full md:w-1/2 bg-red-400 text-white p-8">
+        <div className="w-full md:w-1/2 bg-[#d9327a] text-white p-8">
           <h2 className="text-xl font-bold mb-4">Contact Information</h2>
           <p className="mb-2">
             📞 <span className="ml-2 text-base">+91 8484883367</span>
           </p>
           <p className="mb-2">
-            📧 <span className="ml-2 text-base">meds4you01@gmail.com</span>
+            📧 <span className="ml-2 text-base">care@meds4you.in</span>
           </p>
-          {/* <p className="mb-4">
-            📍
-            <span className="ml-2">
-              10/8/8, K. no. 10&11, 1st Floor, 25th A Cross, 24th Main Rd,
-              Sector 2, HSR Layout, Bengaluru, Karnataka 560102
-            </span>
-          </p> */}
-          {/* Social Media Links */}
-          {/* <div className="flex space-x-4 mt-4">
-            <a href="#" className="text-white hover:text-gray-200">
-              <i className="fab fa-whatsapp text-2xl"></i>
-            </a>
-            <a href="#" className="text-white hover:text-gray-200">
-              <i className="fab fa-instagram text-2xl"></i>
-            </a>
-            <a href="#" className="text-white hover:text-gray-200">
-              <i className="fas fa-times text-2xl"></i>
-            </a>
-          </div> */}
         </div>
 
         {/* Contact Form */}
-        <div className="w-full md:w-1/2 p-8">
+        <div className="w-full md:w-1/2 p-8 bg-[#e5edf7]">
           <h2 className="text-xl font-bold mb-4">
             We are happy to hear from you
           </h2>

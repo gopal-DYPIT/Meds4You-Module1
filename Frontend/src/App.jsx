@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import Login from "./auth/Login/Login";
 import Signup from "./auth/Signup/Signup";
@@ -22,6 +22,7 @@ import PartnerRegister from "./pages/SalesProgram/PartnerRegister";
 import CommonLogin from "./auth/Login/CommonLogin";
 import NotFound from "./pages/NotFound";
 import CheckoutStepper from "./components/CheckOutStepper";
+import TermsCondition from "./components/TermsCondition";
 
 function AppContent() {
   const location = useLocation();
@@ -35,24 +36,59 @@ function AppContent() {
     return null; // Prevents React from rendering anything
   }
 
-  const noLayoutRoutes = ["/admin", "/uploads","*"];
+  const noLayoutRoutes = ["/admin", "/uploads", "*"];
   const shouldShowLayout = !noLayoutRoutes.some((route) =>
     location.pathname.startsWith(route)
   );
 
-   // Define routes where stepper should be shown
-   const stepperRoutes = ["/cart", "/checkout", "/payment", "/delivery"];
-   const shouldShowStepper = stepperRoutes.includes(location.pathname);
+  // Define routes where stepper should be shown
+  const stepperRoutes = ["/cart", "/checkout", "/payment", "/delivery"];
+  const shouldShowStepper = stepperRoutes.includes(location.pathname);
+
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollThreshold = isMobile ? 150 : 50; // Set different thresholds for mobile and desktop
+      if (window.scrollY > scrollThreshold) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    const checkIfMobile = () => {
+      if (window.innerWidth <= 768) {
+        setIsMobile(true); // Mobile devices (screen width <= 768px)
+      } else {
+        setIsMobile(false);
+      }
+    };
+
+    // Initialize on mount
+    checkIfMobile();
+
+    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("resize", checkIfMobile); // To recheck on resize
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", checkIfMobile);
+    };
+  }, [isMobile]);
 
   return (
     <>
-      {shouldShowLayout && <Navbar onSearch={handleSearch} />}
-      {shouldShowStepper && <CheckoutStepper />} 
+      {shouldShowLayout && (
+        <Navbar onSearch={handleSearch} isScrolled={isScrolled} />
+      )}
+      {shouldShowStepper && <CheckoutStepper />}
       <ScrollToTop />
       <Routes>
         {/* Public Routes (accessible by non-logged-in users) */}
         <Route element={<ProtectedRoute publicOnly={true} />}>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Home isScrolled={isScrolled}/>} />
           <Route path="/login" element={<Login />} />
           <Route path="/login/program" element={<CommonLogin />} />
           <Route path="/register" element={<Signup />} />
@@ -62,6 +98,7 @@ function AppContent() {
           <Route path="/infoOrder" element={<OrderMedicine />} />
           <Route path="/register/referral" element={<ReferralRegister />} />
           <Route path="/register/partner" element={<PartnerRegister />} />
+          <Route path="/terms-condition" element={<TermsCondition />} />
         </Route>
 
         {/* Protected Routes for Admin */}
@@ -77,15 +114,14 @@ function AppContent() {
           <Route path="/checkout" element={<CheckoutPage />} />
         </Route>
 
-
         {/* Other routes */}
         <Route path="*" element={<NotFound />} />
       </Routes>
       {shouldShowLayout && <Footer />}
-      <ToastContainer 
-        position="top-center" 
-        autoClose={3000} 
-        style={{ marginTop: '80px' }} // Add margin-top to avoid overlap with Navbar
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        style={{ marginTop: "80px" }} // Add margin-top to avoid overlap with Navbar
       />
     </>
   );

@@ -6,7 +6,7 @@ const ReferralRegister = () => {
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated); // Get auth state from Redux
 
   return (
-    <div className="min-h-screen bg-white pt-24">
+    <div className="min-h-scree pt-24">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-900 text-center mb-8">

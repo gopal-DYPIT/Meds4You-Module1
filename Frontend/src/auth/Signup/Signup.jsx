@@ -238,7 +238,7 @@ function Signup() {
             />
             <label className="text-sm text-gray-700">
               I accept the{" "}
-              <a href="#" className="text-blue-600 hover:underline">
+              <a href="/terms-condition" className="text-blue-600 hover:underline">
                 Terms & Conditions
               </a>
             </label>

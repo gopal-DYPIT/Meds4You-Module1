@@ -2,7 +2,7 @@ import React from "react";
 
 const Footer = () => {
   return (
-    <footer className="bg-white py-10 px-2 sm:py-16 sm:ml-20">
+    <footer className="bg-white py-10 px-2 sm:py-16 ">
       <div className="container mx-auto max-w-screen-xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-left px-4 sm:px-8">
         {/* Company Section */}
         <div>
@@ -24,14 +24,14 @@ const Footer = () => {
             </li>
             <li>
               <a
-                href="/privacy-policy"
+                href="/terms-condition"
                 className="text-gray-600 hover:text-blue-500 text-sm transition duration-200"
               >
                 Privacy Policy
               </a>
             </li>
             <li className="text-gray-600 hover:text-blue-500 transition duration-300">
-              <a href="#">Terms and Conditions</a>
+              <a href="/terms-condition">Terms and Conditions</a>
             </li>
           </ul>
         </div>
@@ -59,8 +59,8 @@ const Footer = () => {
           <h3 className="text-xl font-semibold text-gray-800 mb-3">
             Contact Us
           </h3>
-          <p className="text-gray-600 text-sm">meds4you01@gmail.com</p>
-          <p className="text-gray-600 text-sm font-semibold pt-2">
+          <p className="text-gray-600 text-sm">care@meds4you.in</p>
+          <p className="text-gray-600 text-sm font-semibold pt-2">WhatsApp
             +91 8484883367
           </p>
           <p className="text-gray-600 text-sm pt-2">Available 24/7</p>
