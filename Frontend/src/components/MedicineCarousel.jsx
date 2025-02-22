@@ -99,12 +99,14 @@ const MedicineCarousel = ({ products, addToCart, isLoading }) => {
                     {/* Main content */}
                     <div className="flex h-full w-full">
                       {/* Left side - Regular */}
+                      <div>{console.log("products", products)}</div>
+
                       <div className="w-1/2 bg-[rgb(242,249,253)] flex flex-col justify-between p-4">
                         <div>
                           <p className="font-bold mb-2">Regular</p>
                           <img
                             src={product.imageUrl || "default-image.jpg"}
-                            alt="Tablet"
+                            alt="Tablet 1"
                             className="h-12 w-[100px] mb-3"
                           />
                           <div className="space-y-2">
@@ -156,7 +158,7 @@ const MedicineCarousel = ({ products, addToCart, isLoading }) => {
                                 {alt.manufacturer}
                               </p>
                               <p className="text-left text-sm mt-1">
-                                {product.size}
+                                {alt.size_1}
                               </p>
                               <div className="text-left text-gray-500 text-sm">
                                 MRP: ₹

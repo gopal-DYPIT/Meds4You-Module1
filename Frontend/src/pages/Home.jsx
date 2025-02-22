@@ -15,7 +15,7 @@ const Home = ({ isScrolled }) => {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState("Diabetes");
+  const [selectedCategory, setSelectedCategory] = useState("Diabetics");
   const testimonials = [
     {
       name: "Amit K.",

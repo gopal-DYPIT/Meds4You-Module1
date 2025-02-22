@@ -9,7 +9,7 @@ const CategoryFilter = ({ selectedCategory, setSelectedCategory }) => {
 
   const categories = [
     { value: "TopSellers", label: "Top Sellers" },
-    { value: "Diabetes", label: "Diabetes" },
+    { value: "Diabetics", label: "Diabetes" },
     { value: "heart-care", label: "Heart Care" },
     { value: "skin-care", label: "Skin Care" },
     { value: "vitamins-and-minerals", label: "Vitamins & Minerals" },
