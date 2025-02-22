@@ -132,7 +132,7 @@ function Navbar({ isScrolled }) {
               className="px-6 py-3 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
               onClick={() => setIsMenuOpen(false)}
             >
-              How to order
+              Order by prescription
             </Link>
             <Link
               to="/contact"
@@ -208,7 +208,7 @@ function Navbar({ isScrolled }) {
             to="/infoOrder"
             className="text-black text-base hover:text-blue-600"
           >
-            How to order
+            Order by prescription
           </Link>
           <Link
             to="/contact"

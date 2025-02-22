@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import FAQPartner from "./FAQ-Partner";
 import { toast } from "react-toastify";
@@ -7,6 +8,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 const SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
 const PartnerRegister = () => {
+  const navigate = useNavigate();
   const [captchaValue, setCaptchaValue] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -75,12 +77,12 @@ const PartnerRegister = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!captchaValue) {
-      toast.error("Please complete the CAPTCHA verification", {
-        position: "top-center",
-      });
-      return;
-    }
+    // if (!captchaValue) {
+    //   toast.error("Please complete the CAPTCHA verification", {
+    //     position: "top-center",
+    //   });
+    //   return;
+    // }
 
     if (!formData.termsAccepted) {
       toast.error("You must accept the Terms & Conditions", {
@@ -134,6 +136,27 @@ const PartnerRegister = () => {
         formData
       );
       alert(response.data.message);
+
+      // // Clear form data
+      // setFormData({
+      //   name: "",
+      //   email: "",
+      //   phone: "",
+      //   password: "",
+      //   confirmPassword: "",
+      //   aadharUrl: "",
+      //   panUrl: "",
+      //   // Bank Details
+      //   bankAccountNumber: "",
+      //   ifscCode: "",
+      //   bankName: "",
+      //   accountHolderName: "",
+      // });
+
+      // // Clear CAPTCHA
+      // setCaptchaValue(null);
+
+
     } catch (error) {
       console.error("Registration error:", error);
       alert("Error submitting registration. Please try again.");
@@ -407,6 +430,14 @@ const PartnerRegister = () => {
                     Join Program
                   </button>
                 </form>
+              </div>
+              <div>
+                <button
+                  onClick={() => navigate("/login/partner")}
+                  className="text-blue-600 underline cursor-pointer bg-transparent border-none p-0 m-0"
+                >
+                  Login after Approval
+                </button>
               </div>
             </div>
           </div>

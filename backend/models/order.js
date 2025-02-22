@@ -49,8 +49,34 @@ const orderSchema = new Schema(
       default: "pending",
     },
     updatedBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
+    orderNumber: { type: String, unique: true },
   },
   { timestamps: true }
 );
+
+
+// Pre-save hook to generate order number before saving
+orderSchema.pre("save", async function (next) {
+  if (!this.orderNumber) {
+    const orderType = "O1"; // Define order type dynamically if needed
+
+    // Generate date in DDMMYY format
+    const now = new Date();
+    const dateStr = `${String(now.getDate()).padStart(2, '0')}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getFullYear()).slice(2)}`;
+
+    // Fetch today's order count to generate a unique ID
+    const count = await model("Order").countDocuments({
+      createdAt: { 
+        $gte: new Date().setHours(0, 0, 0, 0), 
+        $lt: new Date().setHours(23, 59, 59, 999) 
+      }
+    });
+
+    const uniqueId = String(count).padStart(6, '0'); // Start from 000000
+
+    this.orderNumber = `ORD(${orderType})(${dateStr})(${uniqueId})`;
+  }
+  next();
+});
 
 export default model("Order", orderSchema);

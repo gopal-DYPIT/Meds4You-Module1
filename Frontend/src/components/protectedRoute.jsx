@@ -1,6 +1,6 @@
 import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from "jwt-decode";
 
 const ProtectedRoute = ({ allowedRoles, publicOnly }) => {
   const token = localStorage.getItem("token");
@@ -17,25 +17,21 @@ const ProtectedRoute = ({ allowedRoles, publicOnly }) => {
 
   try {
     const decodedToken = jwtDecode(token);
-    const currentTime = Date.now() / 1000; // Convert current time to seconds
+    const currentTime = Date.now() / 1000; // Convert to seconds
 
-    // Check if token has expired
+    // Check if the token has expired
     if (decodedToken.exp < currentTime) {
       localStorage.removeItem("token");
       return <Navigate to="/login" replace />;
     }
 
-    // If the user is an admin, they can only access the admin route
-    if (decodedToken.role === "admin" && allowedRoles && !allowedRoles.includes(decodedToken.role)) {
-      return <Navigate to="/admin" replace />;
-    }
+    const userRole = decodedToken.role || decodedToken.userType; // Handle both `role` and `userType`
 
-    // If the user does not have the required role, redirect to a default page (e.g., Home)
-    if (allowedRoles && !allowedRoles.includes(decodedToken.role)) {
+    // Redirect based on roles
+    if (allowedRoles && !allowedRoles.includes(userRole)) {
       return <Navigate to="/" replace />;
     }
 
-    // For valid tokens with correct roles, render the protected route
     return <Outlet />;
   } catch (error) {
     console.error("JWT Decode Error:", error);
@@ -45,3 +41,4 @@ const ProtectedRoute = ({ allowedRoles, publicOnly }) => {
 };
 
 export default ProtectedRoute;
+  

@@ -19,10 +19,10 @@ import OrderSummary from "./pages/OrderSummary";
 import ScrollToTop from "./components/ScrollToTop";
 import ReferralRegister from "./pages/SalesProgram/ReferralRegister";
 import PartnerRegister from "./pages/SalesProgram/PartnerRegister";
-import CommonLogin from "./auth/Login/CommonLogin";
 import NotFound from "./pages/NotFound";
 import CheckoutStepper from "./components/CheckOutStepper";
 import TermsCondition from "./components/TermsCondition";
+import PartnerDashboard from "./pages/PartnerDashboard";
 
 function AppContent() {
   const location = useLocation();
@@ -36,7 +36,7 @@ function AppContent() {
     return null; // Prevents React from rendering anything
   }
 
-  const noLayoutRoutes = ["/admin", "/uploads", "*"];
+  const noLayoutRoutes = ["/admin", "/uploads", "*", "/partner-dashboard"];
   const shouldShowLayout = !noLayoutRoutes.some((route) =>
     location.pathname.startsWith(route)
   );
@@ -88,9 +88,8 @@ function AppContent() {
       <Routes>
         {/* Public Routes (accessible by non-logged-in users) */}
         <Route element={<ProtectedRoute publicOnly={true} />}>
-          <Route path="/" element={<Home isScrolled={isScrolled}/>} />
+          <Route path="/" element={<Home isScrolled={isScrolled} />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/login/program" element={<CommonLogin />} />
           <Route path="/register" element={<Signup />} />
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/products/:id" element={<MedicineDetails />} />
@@ -112,6 +111,11 @@ function AppContent() {
           <Route path="/order-summary" element={<OrderSummary />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
+        </Route>
+
+        {/* Partner Protected Routes */}
+        <Route element={<ProtectedRoute allowedRoles={["partner"]} />}>
+          <Route path="/partner-dashboard" element={<PartnerDashboard />} />
         </Route>
 
         {/* Other routes */}

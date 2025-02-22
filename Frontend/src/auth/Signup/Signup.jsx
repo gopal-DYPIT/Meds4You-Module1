@@ -53,12 +53,12 @@ function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!captchaValue) {
-      toast.error("Please complete the CAPTCHA verification", {
-        position: "top-center",
-      });
-      return;
-    }
+    // if (!captchaValue) {
+    //   toast.error("Please complete the CAPTCHA verification", {
+    //     position: "top-center",
+    //   });
+    //   return;
+    // }
 
     if (!formData.termsAccepted) {
       toast.error("You must accept the Terms & Conditions", {

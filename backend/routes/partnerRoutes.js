@@ -1,7 +1,7 @@
 import express from "express";
 import upload from "../middlewares/uploadMiddleware.js";
 import { authorizeRoles } from "../middlewares/authMiddleware.js";
-import PendingPartner from "../models/partnerApprovals.js";
+import { v4 as uuidv4 } from "uuid";
 import Partner from "../models/partner.js";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
@@ -59,51 +59,73 @@ router.post("/upload/pan", upload.single("pan"), async (req, res) => {
 // Partner Registration Route
 router.post("/register", async (req, res) => {
   try {
-    const { name, email, phone, password, aadharUrl, panUrl, bankAccountNumber, ifscCode, bankName, accountHolderName } = req.body;
+    const {
+      name,
+      email,
+      phone,
+      password,
+      aadharUrl,
+      panUrl,
+      bankAccountNumber,
+      ifscCode,
+      bankName,
+      accountHolderName,
+      referralCode,
+    } = req.body;
 
     // Validate required fields
-    if (!name || !email || !phone || !password || !aadharUrl || !panUrl || !bankAccountNumber || !ifscCode || !bankName || !accountHolderName) {
+    if (
+      !name ||
+      !email ||
+      !phone ||
+      !password ||
+      !aadharUrl ||
+      !panUrl ||
+      !bankAccountNumber ||
+      !ifscCode ||
+      !bankName ||
+      !accountHolderName
+    ) {
       return res.status(400).json({ error: "All fields are required." });
     }
 
     // Check if partner already exists
-    const existingPartner = await PendingPartner.findOne({ email });
+    const existingPartner = await Partner.findOne({ email });
     if (existingPartner) {
-      return res.status(400).json({ error: "Partner request already exists." });
+      return res.status(400).json({ error: "Partner already exists." });
     }
 
     // Hash password before storing
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Save bank details properly inside `bankDetails`
-    const newPendingPartner = new PendingPartner({
+    const newPartner = new Partner({
       name,
       email,
       phone,
       password: hashedPassword,
       aadharUrl,
       panUrl,
-      bankDetails: {  // ✅ Wrapping bank details inside an object
+      bankDetails: {
         accountNumber: bankAccountNumber,
         ifscCode,
         bankName,
         accountHolderName,
       },
+      referralCode: referralCode || uuidv4().slice(0, 8).toUpperCase(),
+      isVerified: false, // Partner needs admin approval
     });
 
-    await newPendingPartner.save();
+    await newPartner.save();
     res.status(201).json({
       success: true,
-      message: "Partner request submitted successfully. Awaiting admin approval.",
+      message: "Partner registered successfully. Awaiting admin approval.",
     });
-
   } catch (error) {
     console.error("❌ Error registering partner:", error);
     res.status(500).json({ error: "Error registering partner." });
   }
 });
-
-
 
 router.post("/login", async (req, res) => {
   try {
@@ -121,6 +143,14 @@ router.post("/login", async (req, res) => {
     if (!user) {
       console.log("❌ User not found in database");
       return res.status(404).json({ error: "User not found." });
+    }
+
+    // Check if the account is verified
+    if (!user.isVerified) {
+      console.log("❌ User not verified!");
+      return res
+        .status(403)
+        .json({ error: "Account not verified. Awaiting admin approval." });
     }
 
     // Compare password
@@ -150,8 +180,8 @@ router.post("/login", async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        phone: user.phone || null, // ✅ Include phone number if available
-        cashback: user.cashback || 0, // ✅ Include cashback if available
+        phone: user.phone || null,
+        cashback: user.cashback || 0,
         referralCode: user.referralCode || null,
       },
     });

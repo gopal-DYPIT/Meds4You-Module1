@@ -7,7 +7,6 @@ import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import pkg from "bcryptjs";
 import referNum from "../models/referNum.js";
-import PendingRequest from "../models/partnerApprovals.js";
 import Partner from "../models/partner.js";
 const { hash } = pkg;
 
@@ -35,6 +34,54 @@ adminRoutes.get("/orders", authorizeRoles("admin"), async (req, res) => {
     res.status(500).json({ message: "Error fetching orders" });
   }
 });
+
+
+
+//Approve Users
+// Get all pending users for admin approval
+adminRoutes.get("/users/pending", authorizeRoles("admin"), async (req, res) => {
+  try {
+    const pendingUsers = await User.find({ isApproved: false });
+    res.status(200).json(pendingUsers);
+  } catch (error) {
+    console.error("Error fetching pending users:", error);
+    res.status(500).json({ message: "Error fetching pending users" });
+  }
+});
+
+// Approve a user
+adminRoutes.put("/users/:id/approve", authorizeRoles("admin"), async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.isApproved = true;
+    await user.save();
+    res.json({ message: "User approved successfully!", user });
+  } catch (error) {
+    console.error("Error approving user:", error);
+    res.status(500).json({ message: "Error approving user" });
+  }
+});
+
+// Reject a user
+adminRoutes.delete("/users/:id/reject", authorizeRoles("admin"), async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json({ message: "User rejected and removed successfully" });
+  } catch (error) {
+    console.error("Error rejecting user:", error);
+    res.status(500).json({ message: "Error rejecting user" });
+  }
+});
+
+
+//orders
 
 adminRoutes.put(
   "/orders/:id/status",
@@ -235,10 +282,10 @@ adminRoutes.get(
   authorizeRoles("admin"),
   async (req, res) => {
     try {
-      const pendingPartners = await PendingRequest.find();
+      const pendingPartners = await Partner.find({ isVerified: false });
       res.status(200).json(pendingPartners);
     } catch (error) {
-      console.error("❌ Error fetching pending partners:", error);
+      console.error("\u274C Error fetching pending partners:", error);
       res.status(500).json({ message: "Error fetching pending partners" });
     }
   }
@@ -249,88 +296,61 @@ adminRoutes.put(
   authorizeRoles("admin"),
   async (req, res) => {
     try {
-      // Find the pending partner request
-      const pendingPartner = await PendingRequest.findById(req.params.id);
-      if (!pendingPartner) {
-        return res
-          .status(404)
-          .json({ message: "Pending partner request not found" });
+      const partner = await Partner.findById(req.params.id);
+      if (!partner) {
+        return res.status(404).json({ message: "Partner not found" });
       }
 
       // Ensure bank details exist before approving
       if (
-        !pendingPartner.bankDetails ||
-        !pendingPartner.bankDetails.accountNumber ||
-        !pendingPartner.bankDetails.ifscCode ||
-        !pendingPartner.bankDetails.bankName ||
-        !pendingPartner.bankDetails.accountHolderName
+        !partner.bankDetails ||
+        !partner.bankDetails.accountNumber ||
+        !partner.bankDetails.ifscCode ||
+        !partner.bankDetails.bankName ||
+        !partner.bankDetails.accountHolderName
       ) {
-        return res
-          .status(400)
-          .json({
-            message: "Bank details are incomplete. Cannot approve the request.",
-          });
+        return res.status(400).json({
+          message: "Bank details are incomplete. Cannot approve the request.",
+        });
       }
 
-      // Hash the password before saving
-      const hashedPassword = await bcrypt.hash(pendingPartner.password, 10);
-      const referralCode = await generateReferralCode(pendingPartner.name);
-
-      // Create a new partner in the Partner collection
-      const newPartner = new Partner({
-        name: pendingPartner.name,
-        email: pendingPartner.email,
-        phone: pendingPartner.phone,
-        password: hashedPassword, // Store hashed password
-        referralCode,
-        aadharUrl: pendingPartner.aadharUrl,
-        panUrl: pendingPartner.panUrl,
-        cashBack: 0, // Default cashback
-        bankDetails: {
-          accountNumber: pendingPartner.bankDetails.accountNumber,
-          ifscCode: pendingPartner.bankDetails.ifscCode,
-          bankName: pendingPartner.bankDetails.bankName,
-          accountHolderName: pendingPartner.bankDetails.accountHolderName,
-        },
-        createdAt: pendingPartner.createdAt,
-        updatedAt: Date.now(),
-      });
-
-      await newPartner.save(); // Save to Partner collection
-
-      // Remove from pending requests
-      await PendingRequest.findByIdAndDelete(req.params.id);
+      partner.isVerified = true;
+      await partner.save();
 
       res.json({
         message: "Partner approved successfully! Now they can log in.",
-        partner: newPartner,
+        partner,
       });
     } catch (error) {
-      console.error("❌ Error approving partner:", error);
+      console.error("\u274C Error approving partner:", error);
       res.status(500).json({ message: "Error approving partner" });
     }
   }
 );
 
-adminRoutes.delete(
+adminRoutes.put(
   "/partners/:id/reject",
   authorizeRoles("admin"),
   async (req, res) => {
     try {
-      const pendingPartner = await PendingRequest.findById(req.params.id);
-      if (!pendingPartner) {
-        return res
-          .status(404)
-          .json({ message: "Pending partner request not found" });
+      const partner = await Partner.findById(req.params.id);
+      if (!partner) {
+        return res.status(404).json({ message: "Partner not found" });
       }
 
-      await PendingRequest.findByIdAndDelete(req.params.id);
+      partner.isVerified = false;
+      await partner.save();
+
       res.json({ message: "Partner request rejected successfully" });
     } catch (error) {
-      console.error("❌ Error rejecting partner request:", error);
+      console.error("\u274C Error rejecting partner request:", error);
       res.status(500).json({ message: "Error rejecting partner request" });
     }
   }
 );
+
+
+
+
 
 export default adminRoutes;

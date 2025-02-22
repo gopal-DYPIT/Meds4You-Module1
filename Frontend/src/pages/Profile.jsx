@@ -590,54 +590,88 @@ const Profile = () => {
             {prescriptions.length === 0 ? (
               <p className="text-gray-500 p-4">No prescriptions uploaded.</p>
             ) : (
-              <ul className="divide-y divide-gray-200 p-4">
-                {prescriptions.map((prescription) => {
-                  // Check if the file is an image
-                  const isImage = prescription.fileUrl?.match(
-                    /\.(jpeg|jpg|png|gif)$/
-                  );
-                  const isPdf = prescription.fileUrl?.endsWith(".pdf");
+              <div className="space-y-4">
+                {/* Table for laptops and larger screens */}
+                <div className="hidden lg:block">
+                  <table className="min-w-full table-auto border-collapse">
+                    <thead className="bg-gray-100">
+                      <tr>
+                        <th className="px-4 py-2 text-left">Sr. No.</th>
+                        <th className="px-4 py-2 text-left">
+                          Prescription Link
+                        </th>
+                        <th className="px-4 py-2 text-left">Date</th>
+                        <th className="px-4 py-2 text-left">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {prescriptions.map((prescription, index) => {
+                        return (
+                          <tr key={prescription._id} className="border-b">
+                            <td className="px-4 py-2">{index + 1}</td>
+                            <td className="px-4 py-2">
+                              <a
+                                href={prescription.fileUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline"
+                              >
+                                View Prescription
+                              </a>
+                            </td>
+                            <td className="px-4 py-2">
+                              {prescription.uploadedAt
+                                ? new Date(
+                                    prescription.uploadedAt
+                                  ).toLocaleDateString()
+                                : "N/A"}
+                            </td>
+                            <td className="px-4 py-2">
+                              {prescription.status || "Pending"}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
 
-                  return (
-                    <li
-                      key={prescription._id}
-                      className="py-4 border border-gray-200 rounded-lg p-4 sm:p-6 shadow-sm flex items-center space-x-4"
-                    >
-                      {/* Thumbnail Preview */}
-                      {isImage ? (
-                        <img
-                          src={prescription.fileUrl}
-                          alt="Prescription"
-                          className="w-16 h-16 object-cover rounded-lg border border-gray-300"
-                        />
-                      ) : isPdf ? (
-                        <div className="w-16 h-16 flex items-center justify-center bg-red-500 text-white rounded-lg border">
-                          <FileText className="w-8 h-8" />
+                {/* Card view for mobile */}
+                <div className="lg:hidden">
+                  {prescriptions.map((prescription) => {
+                    return (
+                      <div
+                        key={prescription._id}
+                        className="flex flex-col sm:flex-row items-start p-4 border border-gray-200 rounded-lg shadow-sm space-y-4 sm:space-y-0 sm:space-x-4"
+                      >
+                        <div className="flex flex-col sm:flex-row sm:space-x-4">
+                          <p className="font-medium text-gray-900">
+                            <strong>Uploaded:</strong>{" "}
+                            {prescription.uploadedAt
+                              ? new Date(
+                                  prescription.uploadedAt
+                                ).toLocaleDateString()
+                              : "N/A"}
+                          </p>
+                          <p className="text-gray-700">
+                            <strong>Status:</strong>{" "}
+                            {prescription.status || "Pending"}
+                          </p>
                         </div>
-                      ) : (
-                        <div className="w-16 h-16 flex items-center justify-center bg-gray-200 text-gray-500 rounded-lg border">
-                          ❓ Unknown
-                        </div>
-                      )}
 
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          <strong>Uploaded:</strong>{" "}
-                          {prescription.uploadedAt
-                            ? new Date(
-                                prescription.uploadedAt
-                              ).toLocaleDateString()
-                            : "N/A"}
-                        </p>
-                        <p className="text-gray-700">
-                          <strong>Status:</strong>{" "}
-                          {prescription.status || "Pending"}
-                        </p>
+                        <a
+                          href={prescription.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline mt-2 sm:mt-0"
+                        >
+                          View Prescription
+                        </a>
                       </div>
-                    </li>
-                  );
-                })}
-              </ul>
+                    );
+                  })}
+                </div>
+              </div>
             )}
           </div>
         )}

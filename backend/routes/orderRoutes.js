@@ -225,6 +225,13 @@ router.get("/latest", authorizeRoles("user"), async (req, res) => {
     const latestOrder = await Order.findOne({ userId })
       .sort({ createdAt: -1 })
       .populate("userId", "name phoneNumber addresses")
+      .populate(
+        "items.productId",
+        "drugName price imageUrl manufacturer alternateMedicines"
+      ) // Populating item product details
+      .select(
+        "prescriptionUrl items totalAmount paymentStatus orderStatus createdAt"
+      ) // Selecting prescriptionUrl from the order directly
       .exec();
 
     if (!latestOrder) {

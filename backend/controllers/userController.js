@@ -92,9 +92,7 @@ const login = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res
-        .status(400)
-        .json({ message: "Please fill all required fields!" });
+      return res.status(400).json({ message: "Please fill all required fields!" });
     }
 
     const user = await User.findOne({ email });
@@ -110,6 +108,13 @@ const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid Password!" });
     }
 
+    // Allow admins to log in without checking isApproved
+    if (user.role !== "admin" && !user.isApproved) {
+      return res.status(403).json({
+        message: "Your account is pending approval. Please wait for verification.",
+      });
+    }
+
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
@@ -122,11 +127,11 @@ const login = async (req, res) => {
       role: user.role,
     });
   } catch (err) {
-    return res
-      .status(500)
-      .json({ message: "Internal Server Error!", message: err.message });
+    return res.status(500).json({ message: "Internal Server Error!", error: err.message });
   }
 };
+
+
 const getReferredUsers = async (req, res) => {
   try {
       const { referralCode } = req.params;
